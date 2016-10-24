@@ -20,7 +20,7 @@ typedef struct list_node_t{
     struct list_node_t *nextListNode;
 }list_node;
 
-typedef list_node* Buffer;
+//typedef list_node* Buffer;
 
 /*
  index index_in;
@@ -35,7 +35,7 @@ typedef list_node* Buffer;
 
  * */
 
-Buffer createBuffer();
-list_node* allocNewNode(Buffer *b);
-list_node* getListNode(Buffer*);
-int destroyBuffer(Buffer*);
+list_node* createBuffer();
+list_node* allocNewNode(list_node *b);
+list_node* getListNode(list_node*);
+int destroyBuffer(list_node*);
