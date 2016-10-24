@@ -8,13 +8,9 @@
 
 extern uint32_t index_size;
 
-//typedef list_node** NodeIndex;
-typedef struct NodeIndex_t{
-  list_node *first;
-}NodeIndex;
+typedef list_node** NodeIndex;
 
-typedef NodeIndex* Index;
-Index createNodeIndex();
-int insertNode(Index*, uint32_t, uint32_t*, Buffer*);
+NodeIndex createNodeIndex();
+int insertNode(NodeIndex*, uint32_t, uint32_t*, Buffer*);
 list_node* getListHead(NodeIndex*, uint32_t);
 int destroyNodeIndex(NodeIndex*);

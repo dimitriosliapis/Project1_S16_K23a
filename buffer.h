@@ -16,6 +16,7 @@ extern uint32_t buffer_size;
 typedef struct list_node_t{
     uint32_t neighbor[N]; //the ids of the neighbor nodes
     //uint32_t edgeProperty[N]; //property for each edge
+    char empty;
     struct list_node_t *nextListNode;
 }list_node;
 

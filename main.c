@@ -9,7 +9,7 @@ int main() {
     int err = 1;
     int neigh[] = {2,3,4,5,6,7,8,9};
     Buffer buffer_in = NULL, buffer_out = NULL;
-    Index index_in = NULL, index_out = NULL;
+    NodeIndex index_in = NULL, index_out = NULL;
 
     buffer_in = createBuffer();
     index_in = createNodeIndex();
