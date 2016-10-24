@@ -29,6 +29,15 @@ int reallocNodeIndex(list_node **index, int id) {
     return OK_SUCCESS;
 }
 
+int checkIfExists(list_node *index[], uint32_t id){
+    if(index[id] != NULL) return ALR_EXISTS;
+    return 0;
+}
+
+int addEdge(list_node *index[], uint32_t id, uint32_t neighbor){
+
+    return OK_SUCCESS;
+}
 int insertNode(list_node *index[], uint32_t id, uint32_t *neighbors, list_node *buffer){
 
     int i = 0;
@@ -36,7 +45,6 @@ int insertNode(list_node *index[], uint32_t id, uint32_t *neighbors, list_node *
 
     if(index == NULL) return IND_EMPTY;
 
-    if(index[id] != NULL) return ALR_EXISTS;
 
     index[id] = allocNewNode(buffer);//tuxaia seira sto buffer etsi
 

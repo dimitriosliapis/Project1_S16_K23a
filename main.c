@@ -14,6 +14,7 @@ int main() {
     buffer_in = createBuffer();
     index_in = createNodeIndex();
 
+    err = insertNode(index_in, 0, neigh, buffer_in);
     err = insertNode(index_in, 1, neigh, buffer_in);
 
     if(err < 0) printf("%d\n",err);

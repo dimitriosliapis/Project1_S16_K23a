@@ -5,6 +5,7 @@
 #define BUFF_SIZE 32
 #define N 8
 #define LIST_SIZE 16;
+#define DEFAULT 16777216
 
 #define OK_SUCCESS 0;
 #define PTR_NOT_NULL -1
