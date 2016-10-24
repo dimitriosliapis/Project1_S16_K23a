@@ -21,24 +21,6 @@ list_node* createBuffer(){
     }
     return tmp;
 }
-/*
-int reallocBuffer(list_node *b){
-
-    int pos = 0, n = 0;
-    void *tmp = NULL;
-
-    buffer_size *= 2;
-
-    tmp = realloc(b,buffer_size * sizeof(list_node));
-    if(tmp == NULL) return ERROR;
-
-    for(pos = buffer_size/2; pos < buffer_size; pos++){
-        for(n = 0; n < N; n++){
-            b[pos].neighbor[n] = 0;
-        }
-    }
-    return OK_SUCCESS;
-}*/
 
 int reallocBuffer(list_node *buffer){
 
