@@ -40,3 +40,4 @@ list_node* createBuffer();
 list_node* allocNewNode(list_node *b);
 list_node* getListNode(list_node*);
 int destroyBuffer(list_node*);
+int reallocBuffer(list_node*);

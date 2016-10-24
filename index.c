@@ -31,11 +31,36 @@ int reallocNodeIndex(list_node **index, int id) {
 
 int checkIfExists(list_node *index[], uint32_t id){
     if(index[id] != NULL) return ALR_EXISTS;
-    return 0;
+    return NOT_EXIST;
 }
 
-int addEdge(list_node *index[], uint32_t id, uint32_t neighbor){
+int addEdge(list_node *index[], uint32_t id, uint32_t neighbor, list_node *buffer){
 
+    int i = 0;
+    list_node *current = NULL;
+
+
+    while(i < N){
+        if(current->neighbor[i] == neighbor) return ALR_CONNECTED;
+        if(current->neighbor[i] == DEFAULT){
+            current->neighbor[i] = neighbor;
+            break;
+        }
+        i++;
+        if(i == N){
+            if(current->nextListNode == NULL) {
+                current->nextListNode = allocNewNode(buffer); //elegxos gia NULL realloc
+                if(current->nextListNode == NULL){
+                    reallocBuffer(buffer);
+                    current->nextListNode = allocNewNode(buffer);
+                    //current->nextListNode = &buffer[buffer_size/2];
+                }
+            }
+            else
+                current = current->nextListNode;
+            i = 0;
+        }
+    }
     return OK_SUCCESS;
 }
 int insertNode(list_node *index[], uint32_t id, uint32_t *neighbors, list_node *buffer){

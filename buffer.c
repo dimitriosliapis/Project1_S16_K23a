@@ -66,12 +66,10 @@ list_node* allocNewNode(list_node *buffer){
     int err = 0;
     uint32_t pos = 0;
 
-    //if(*b == NULL) *b = malloc(sizeof(list_node) * BUFF_SIZE);
-    //if(*b == NULL) *b = malloc(sizeof(list_node) * buffer_size); //return error
+
     if(buffer == NULL) return NULL; //return error
 
     while(pos < buffer_size){
-       // if(buffer[pos].neighbor[0] == 0) return (buffer + pos*sizeof(list_node)); //den paizei na doylevei
         if(buffer[pos].empty == 'y') return &(buffer[pos]); //den paizei na doylevei
         pos++;
     }

@@ -5,6 +5,8 @@
 #define IND_EMPTY -1
 #define ALLOC_FAIL -2
 #define ALR_EXISTS -23
+#define NOT_EXIST -24
+#define ALR_CONNECTED -25
 
 extern uint32_t index_size;
 
