@@ -29,6 +29,12 @@ int reallocNodeIndex(list_node **index, int id) {
     return OK_SUCCESS;
 }
 
+list_node* getListHead(list_node *index[], uint32_t id){
+
+    if(index == NULL) return NULL;
+    return index[id];
+}
+
 int checkIfExists(list_node *index[], uint32_t id){
     if(index[id] != NULL) return ALR_EXISTS;
     return NOT_EXIST;
@@ -39,6 +45,7 @@ int addEdge(list_node *index[], uint32_t id, uint32_t neighbor, list_node *buffe
     int i = 0;
     list_node *current = NULL;
 
+    current = getListHead(index,id);
 
     while(i < N){
         if(current->neighbor[i] == neighbor) return ALR_CONNECTED;
@@ -77,6 +84,18 @@ int insertNode(list_node *index[], uint32_t id, uint32_t neighbor, list_node *bu
         //free neighbors?
     }
 
+
+    return OK_SUCCESS;
+}
+
+int destroyNodeIndex(list_node *index[]){
+
+    int i = 0;
+
+    for(i = 0; i < index_size; i++){
+        index[i] = NULL;
+    }
+    free(index);
 
     return OK_SUCCESS;
 }
