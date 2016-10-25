@@ -43,20 +43,26 @@ int reallocBuffer(list_node *buffer){
 }
 
 
-list_node* allocNewNode(list_node *buffer){
+unsigned long allocNewNode(list_node *buffer){
 
     int err = 0;
+    unsigned long offset = 0;
     uint32_t pos = 0;
+    list_node *tmp;
 
 
     if(buffer == NULL) return NULL; //return error
 
     while(pos < buffer_size){
-        if(buffer[pos].empty == 'y') return &(buffer[pos]); //den paizei na doylevei
+        if(buffer[pos].empty == 'y'){
+            tmp = &buffer[pos];
+            offset = buffer - tmp;
+            return offset;
+        } //den paizei na doylevei
         pos++;
     }
 
-    return NULL;
+    return 0;
 
 }
 

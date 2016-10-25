@@ -10,10 +10,12 @@
 
 extern uint32_t index_size;
 
-//typedef list_node** NodeIndex;
 
-list_node** createNodeIndex();
-int insertNode(list_node*[], uint32_t, uint32_t, list_node*);
-list_node* getListHead(list_node*[], uint32_t);
-int destroyNodeIndex(list_node*[]);
-int reallocNodeIndex(list_node**, int);
+unsigned long* createNodeIndex();
+int insertNode(unsigned long*, uint32_t, uint32_t, list_node*);
+unsigned long getListHead(unsigned long*, uint32_t);
+int destroyNodeIndex(unsigned long*);
+int reallocNodeIndex(unsigned long*, int);
+int checkIfExists(unsigned long*, uint32_t);
+int addEdge(unsigned long*, uint32_t, uint32_t, list_node*);
+
