@@ -57,7 +57,7 @@ ptrdiff_t allocNewNode(list_node *buffer){
         if(buffer[pos].empty == 'y'){
             tmp = &buffer[pos];
             offset = tmp - buffer;
-            return (offset*sizeof(list_node));
+            return (offset);
         } //den paizei na doylevei
         pos++;
     }

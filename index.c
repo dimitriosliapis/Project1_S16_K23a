@@ -44,11 +44,10 @@ int checkIfExists(ptrdiff_t *index, uint32_t id){
 int addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node *buffer){
 
     int i = 0;
-    list_node *current = NULL;
     ptrdiff_t offset = 0;
 
     offset = getListHead(index,id);
-    current = buffer + offset;
+    list_node *current = buffer + offset;
 
     while(i < N){
         if(current->neighbor[i] == neighbor) return ALR_CONNECTED;
