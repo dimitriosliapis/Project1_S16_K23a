@@ -63,23 +63,17 @@ int addEdge(list_node *index[], uint32_t id, uint32_t neighbor, list_node *buffe
     }
     return OK_SUCCESS;
 }
-int insertNode(list_node *index[], uint32_t id, uint32_t *neighbors, list_node *buffer){
-
-    int i = 0;
-
+int insertNode(list_node *index[], uint32_t id, uint32_t neighbor, list_node *buffer){
 
     if(index == NULL) return IND_EMPTY;
-
 
     index[id] = allocNewNode(buffer);//tuxaia seira sto buffer etsi
 
     if(index[id] == NULL) return ALLOC_FAIL;
 
     index[id]->empty = 'n';
-    if(neighbors != NULL){
-        for(i = 0; i < N; i++){
-            index[id]->neighbor[i] = neighbors[i];
-        }
+    if(neighbor != DEFAULT){
+        addEdge(index,id,neighbor,buffer);
         //free neighbors?
     }
 
