@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <wchar.h>
+#include <stddef.h>
 
 
 #define BUFF_SIZE 32
@@ -20,7 +22,7 @@ typedef struct list_node_t{
 
 
 list_node* createBuffer();
-unsigned long allocNewNode(list_node *b);
-unsigned long getListNode(list_node*);
+ptrdiff_t allocNewNode(list_node *b);
+ptrdiff_t getListNode(list_node*);
 int destroyBuffer(list_node*);
 int reallocBuffer(list_node*);

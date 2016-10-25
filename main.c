@@ -7,9 +7,9 @@ uint32_t index_size = IND_SIZE;
 int main() {
 
     int err = 1;
-    uint32_t neigh[] = {2,3,4,5,6,7,8,9};
+    uint32_t neigh = 2;
     list_node *buffer_in = NULL, *buffer_out = NULL;
-    unsigned long *index_in = NULL, *index_out = NULL;
+    ptrdiff_t *index_in = NULL, *index_out = NULL;
 
     buffer_in = createBuffer();
     index_in = createNodeIndex();

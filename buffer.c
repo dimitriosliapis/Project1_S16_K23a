@@ -14,7 +14,7 @@ list_node* createBuffer(){
 
     for(pos = 0; pos < buffer_size; pos++){
         for(n = 0; n < N; n++){
-            tmp[pos].neighbor[n] = 0; //sumvasi ta id
+            tmp[pos].neighbor[n] = DEFAULT; //sumvasi ta id
             tmp[pos].empty = 'y';
             tmp[pos].nextListNode = NULL;
         }
@@ -43,10 +43,10 @@ int reallocBuffer(list_node *buffer){
 }
 
 
-unsigned long allocNewNode(list_node *buffer){
+ptrdiff_t allocNewNode(list_node *buffer){
 
     int err = 0;
-    unsigned long offset = 0;
+    ptrdiff_t offset = 0;
     uint32_t pos = 0;
     list_node *tmp;
 
@@ -56,8 +56,8 @@ unsigned long allocNewNode(list_node *buffer){
     while(pos < buffer_size){
         if(buffer[pos].empty == 'y'){
             tmp = &buffer[pos];
-            offset = buffer - tmp;
-            return offset;
+            offset = tmp - buffer;
+            return (offset*sizeof(list_node));
         } //den paizei na doylevei
         pos++;
     }
