@@ -57,18 +57,17 @@ int addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node *buffer)
         }
         i++;
         if(i == N){
-            if(current->nextListNode == NULL) {
-                offset = allocNewNode(buffer); //elegxos gia NULL realloc
-                current->nextListNode = buffer + offset; //elegxos gia NULL realloc
-                if(current->nextListNode == NULL){
+            if(current->nextListNode == -1) {
+                offset = allocNewNode(buffer);
+                current->nextListNode = offset;
+                if(current->nextListNode == -1){
                     reallocBuffer(buffer);
                     offset = allocNewNode(buffer);
-                    current->nextListNode = buffer + offset;
-                    //current->nextListNode = &buffer[buffer_size/2];
+                    current->nextListNode = offset;
                 }
             }
             else
-                current = current->nextListNode;
+                current = current + current->nextListNode;
             i = 0;
         }
     }

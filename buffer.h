@@ -17,12 +17,12 @@ typedef struct list_node_t{
     uint32_t neighbor[N]; //the ids of the neighbor nodes
     //uint32_t edgeProperty[N]; //property for each edge
     char empty;
-    struct list_node_t *nextListNode;
+    ptrdiff_t nextListNode;
 }list_node;
 
 
 list_node* createBuffer();
-ptrdiff_t allocNewNode(list_node *b);
+ptrdiff_t allocNewNode(list_node*);
 ptrdiff_t getListNode(list_node*);
 int destroyBuffer(list_node*);
 int reallocBuffer(list_node*);

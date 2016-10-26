@@ -16,7 +16,7 @@ list_node* createBuffer(){
         for(n = 0; n < N; n++){
             tmp[pos].neighbor[n] = DEFAULT; //sumvasi ta id
             tmp[pos].empty = 'y';
-            tmp[pos].nextListNode = NULL;
+            tmp[pos].nextListNode = -1;
         }
     }
     return tmp;
@@ -37,7 +37,7 @@ int reallocBuffer(list_node *buffer){
             buffer[pos].neighbor[n] = DEFAULT;
         }
         buffer[pos].empty = 'y';
-        buffer[pos].nextListNode = NULL;
+        buffer[pos].nextListNode = -1;
     }
     return OK_SUCCESS;
 }
