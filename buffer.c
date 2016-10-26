@@ -51,7 +51,7 @@ ptrdiff_t allocNewNode(list_node *buffer){
     list_node *tmp;
 
 
-    if(buffer == NULL) return NULL; //return error
+    if(buffer == NULL) return -1; //return error
 
     while(pos < buffer_size){
         if(buffer[pos].empty == 'y'){
@@ -62,9 +62,10 @@ ptrdiff_t allocNewNode(list_node *buffer){
         pos++;
     }
 
-    return 0;
+    return -1;
 
 }
+
 
 int destroyBuffer(list_node *buffer){
 

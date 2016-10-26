@@ -1,3 +1,5 @@
+#include <string.h>
+#include <stdio.h>
 #include "index.h"
 
 
@@ -83,7 +85,7 @@ int insertNode(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node *buff
     offset = allocNewNode(buffer);
     index[id] = offset;//tuxaia seira sto buffer etsi
 
-    //if(index[id] == NULL) return ALLOC_FAIL;     prepei na mpei elegxos
+    if(index[id] == -1) return ALLOC_FAIL;
 
     new = buffer + index[id];
 
@@ -99,6 +101,47 @@ int insertNode(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node *buff
 
 int destroyNodeIndex(ptrdiff_t *index){
 
+    if(index == NULL) return IND_EMPTY;
     free(index);
     return OK_SUCCESS;
 }
+
+
+char* idToStr(uint32_t id){
+
+    uint32_t rem = 0;
+    char *ret = NULL, c;
+    size_t size = 1; // +1 for NULL terminator
+
+    if(id == 0) return NULL;
+
+    rem = id;
+    while(rem != 0){
+        rem /= 10;
+        size++;
+    }
+
+    ret = malloc(size * sizeof(char));
+    memset(ret,'\0',size);
+
+    sprintf(ret,"%u",id);
+
+    return ret;
+}
+
+
+
+char* append(char *a, char *b){
+
+    int lenA = strlen(a);
+    int lenB = strlen(b);
+    char *ret = malloc((lenA+lenB+3)*sizeof(char));
+
+    memset(ret,'\0', lenA+lenB+1);
+    strncat(ret,a,lenA);
+    strncat(ret,"->",2);
+    strncat(ret,b,lenB);
+
+    return ret;
+}
+

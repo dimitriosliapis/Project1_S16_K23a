@@ -23,6 +23,6 @@ typedef struct list_node_t{
 
 list_node* createBuffer();
 ptrdiff_t allocNewNode(list_node*);
-ptrdiff_t getListNode(list_node*);
+list_node* getListNode(list_node*);
 int destroyBuffer(list_node*);
 int reallocBuffer(list_node*);
