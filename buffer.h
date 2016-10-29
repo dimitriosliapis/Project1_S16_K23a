@@ -3,7 +3,6 @@
 #include <wchar.h>
 #include <stddef.h>
 
-
 #define BUFF_SIZE 32
 #define N 8
 #define DEFAULT 16777216
@@ -13,16 +12,21 @@
 
 extern uint32_t buffer_size;
 
-typedef struct list_node_t{
+
+typedef struct list_node_t {
     uint32_t neighbor[N]; //the ids of the neighbor nodes
     //uint32_t edgeProperty[N]; //property for each edge
     char empty;
     ptrdiff_t nextListNode;
-}list_node;
+} list_node;
 
 
-list_node* createBuffer();
-ptrdiff_t allocNewNode(list_node*);
-list_node* getListNode(list_node*);
-int destroyBuffer(list_node*);
-int reallocBuffer(list_node*);
+list_node *createBuffer();
+
+ptrdiff_t allocNewNode(list_node *);
+
+list_node *getListNode(list_node *);
+
+int destroyBuffer(list_node *);
+
+int reallocBuffer(list_node *);

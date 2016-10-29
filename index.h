@@ -14,15 +14,20 @@
 extern uint32_t index_size;
 
 
-ptrdiff_t* createNodeIndex();
-int insertNode(ptrdiff_t*, uint32_t, uint32_t, list_node*);
-ptrdiff_t getListHead(ptrdiff_t*, uint32_t);
-int destroyNodeIndex(ptrdiff_t*);
-int reallocNodeIndex(ptrdiff_t*, int);
-int checkIfExists(ptrdiff_t*, uint32_t);
-int addEdge(ptrdiff_t*, uint32_t, uint32_t, list_node*);
+ptrdiff_t *createNodeIndex();
 
-char* append(char *, char*);
-char* idToStr(uint32_t);
+int insertNode(ptrdiff_t *, uint32_t, list_node *);
 
+ptrdiff_t getListHead(ptrdiff_t *, uint32_t);
 
+int destroyNodeIndex(ptrdiff_t *);
+
+int reallocNodeIndex(ptrdiff_t *, int);
+
+int lookup(ptrdiff_t *, uint32_t);
+
+int addEdge(ptrdiff_t *, uint32_t, uint32_t, list_node *);
+
+char *append(char *, char *);
+
+char *idToStr(uint32_t);

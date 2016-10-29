@@ -1,25 +1,53 @@
 #include <stdio.h>
 #include "index.h"
+#include "string.h"
 
 uint32_t buffer_size = BUFF_SIZE;
 uint32_t index_size = IND_SIZE;
 
-int main() {
+int main(int argc, char *argv[]) {
 
-    int err = 1;
-    uint32_t neigh = 2;
+    FILE *Graph = NULL;
+    FILE *Queries = NULL;
     list_node *buffer_in = NULL, *buffer_out = NULL;
     ptrdiff_t *index_in = NULL, *index_out = NULL;
+    uint32_t N1, N2;
 
     buffer_in = createBuffer();
     index_in = createNodeIndex();
+    buffer_out = createBuffer();
+    index_out = createNodeIndex();
 
-    err = insertNode(index_in, 0, neigh, buffer_in);
-    err = insertNode(index_in, 1, neigh, buffer_in);
+    if (argc == 3) {
+        Graph = fopen(argv[1], "r");
+        Queries = fopen(argv[2], "r");
+    } else {
+        printf("Datasets missing");
+        return 0;
+    }
 
-    if(err < 0) printf("%d\n",err);
-   /* if(buffer_in == NULL) printf("SKATA\n");
-    printf("%d,%d\n",buffer_in[0].neighbor[0],buffer_in[BUFF_SIZE-1].neighbor[0]);
-    destroyBuffer(&buffer_in);*/
+    char str[64];
+    char *argument;
+    fgets(str, sizeof(str), Graph);
+    argument = strtok(str, " \n");
+
+    while (strcmp(argument, "S") != 0) {
+
+        N1 = atoi(argument);
+        argument = strtok(NULL, " \n");
+        N2 = atoi(argument);
+
+        if (lookup(index_out, N1) == NOT_EXIST)
+            insertNode(index_out, N1, buffer_out);
+        addEdge(index_out, N1, N2, buffer_out);
+
+        if (lookup(index_in, N2) == NOT_EXIST)
+            insertNode(index_in, N2, buffer_in);
+        addEdge(index_in, N2, N1, buffer_in);
+
+        fgets(str, sizeof(str), Graph);
+        argument = strtok(str, " \n");
+    }
+
     return 0;
 }
