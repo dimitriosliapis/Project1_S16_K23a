@@ -28,6 +28,3 @@ int lookup(ptrdiff_t *, uint32_t);
 
 int addEdge(ptrdiff_t *, uint32_t, uint32_t, list_node *);
 
-char *append(char *, char *);
-
-char *idToStr(uint32_t);

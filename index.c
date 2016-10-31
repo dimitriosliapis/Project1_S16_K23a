@@ -103,38 +103,3 @@ int destroyNodeIndex(ptrdiff_t *index) {
     return OK_SUCCESS;
 }
 
-char *idToStr(uint32_t id) {
-
-    uint32_t rem = 0;
-    char *ret = NULL, c;
-    size_t size = 1; // +1 for NULL terminator
-
-    if (id == 0) return NULL;
-
-    rem = id;
-    while (rem != 0) {
-        rem /= 10;
-        size++;
-    }
-
-    ret = malloc(size * sizeof(char));
-    memset(ret, '\0', size);
-
-    sprintf(ret, "%u", id);
-
-    return ret;
-}
-
-char *append(char *a, char *b) {
-
-    int lenA = strlen(a);
-    int lenB = strlen(b);
-    char *ret = malloc((lenA + lenB + 3) * sizeof(char));
-
-    memset(ret, '\0', lenA + lenB + 1);
-    strncat(ret, a, lenA);
-    strncat(ret, "->", 2);
-    strncat(ret, b, lenB);
-
-    return ret;
-}
