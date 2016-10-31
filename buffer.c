@@ -36,8 +36,8 @@ ptrdiff_t allocNewNode(list_node *buffer) {
         pos++;
     }
 
-    buffer = reallocBuffer(buffer);
-    allocNewNode(buffer);
+    reallocBuffer(buffer);
+    return allocNewNode(buffer);
 
 }
 

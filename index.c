@@ -30,7 +30,7 @@ int insertNode(ptrdiff_t *index, uint32_t id, list_node *buffer) {
     offset = allocNewNode(buffer);
 
     if (id >= index_size) {
-        index = reallocNodeIndex(index, id);
+        reallocNodeIndex(index, id);
     }
 
     index[id] = offset;//tuxaia seira sto buffer etsi
