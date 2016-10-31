@@ -49,12 +49,13 @@ ptrdiff_t allocNewNode(list_node *buffer, uint32_t *buffer_size) {
 int reallocBuffer(list_node *buffer, uint32_t *buffer_size) {
 
     int pos = 0, n = 0;
-    void *tmp = NULL;
+    void *new = NULL;
 
     *buffer_size *= 2;
 
-    tmp = realloc(buffer, *buffer_size * sizeof(list_node));
-    if (tmp == NULL) return ERROR;
+    new = realloc(buffer, *buffer_size * sizeof(list_node));
+    if (new == NULL) return ERROR;
+    buffer = new;
 
     for (pos = *buffer_size / 2; pos < *buffer_size; pos++) {
         for (n = 0; n < N; n++) {

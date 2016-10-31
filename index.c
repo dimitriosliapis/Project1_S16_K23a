@@ -31,7 +31,7 @@ int insertNode(ptrdiff_t *index, uint32_t id, list_node *buffer, uint32_t *index
     offset = allocNewNode(buffer, &(*buffer_size));
 
     if (id >= *index_size) {
-        reallocNodeIndex(index, id, &(*index_size));
+        reallocNodeIndex(&index, id, &(*index_size));
     }
 
     index[id] = offset;//tuxaia seira sto buffer etsi
@@ -43,17 +43,19 @@ int insertNode(ptrdiff_t *index, uint32_t id, list_node *buffer, uint32_t *index
     return OK_SUCCESS;
 }
 
-int reallocNodeIndex(ptrdiff_t *index, int id, uint32_t *index_size) {
+int reallocNodeIndex(ptrdiff_t **index, int id, uint32_t *index_size) {
 
     uint32_t realloc_size = *index_size;
     uint32_t a = 0;
+    ptrdiff_t *new = NULL;
 
     while (id >= realloc_size) realloc_size = realloc_size * 2;    //Double size until id fits
-    realloc(index, realloc_size * sizeof(ptrdiff_t));
+    new = realloc(*index, realloc_size * sizeof(ptrdiff_t));
+    *index = new;
 
     for (a = *index_size; a < realloc_size; a++) {    //Initialize new index nodes
         //Connect id index node to buffer -> tha ginei meta stin insertNode
-        index[a] = -1;
+        (*index)[a] = -1;
     }
     *index_size = realloc_size;
     return OK_SUCCESS;

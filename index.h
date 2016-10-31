@@ -20,7 +20,7 @@ ptrdiff_t getListHead(ptrdiff_t *, uint32_t, uint32_t);
 
 int destroyNodeIndex(ptrdiff_t *);
 
-int reallocNodeIndex(ptrdiff_t *, int, uint32_t*);
+int reallocNodeIndex(ptrdiff_t **, int, uint32_t*);
 
 int lookup(ptrdiff_t *, uint32_t, uint32_t);
 

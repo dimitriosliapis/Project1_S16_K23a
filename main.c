@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
         argument = strtok(NULL, " \n");
         N2 = atoi(argument);
 
+
         if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
             insertNode(index_out, N1, buffer_out, &index_size_out, &buffer_size_out);
         if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
