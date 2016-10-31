@@ -1,7 +1,7 @@
 #include "buffer.h"
 
 
-list_node *createBuffer() {
+list_node *createBuffer(uint32_t buffer_size) {
 
     int pos = 0, n = 0;
     list_node *buffer = NULL;
@@ -18,7 +18,7 @@ list_node *createBuffer() {
     return buffer;
 }
 
-ptrdiff_t allocNewNode(list_node *buffer) {
+ptrdiff_t allocNewNode(list_node *buffer, uint32_t *buffer_size) {
 
     int i = 0;
     ptrdiff_t offset = 0;
@@ -27,7 +27,7 @@ ptrdiff_t allocNewNode(list_node *buffer) {
 
     if (buffer == NULL) return -1; //return error
 
-    while (pos < buffer_size) {
+    while (pos < *buffer_size) {
         if (buffer[pos].empty == 'y') {
             tmp = &buffer[pos];
             offset = tmp - buffer;
@@ -41,22 +41,22 @@ ptrdiff_t allocNewNode(list_node *buffer) {
         pos++;
     }
 
-    reallocBuffer(buffer);
-    return allocNewNode(buffer);
+    reallocBuffer(buffer, &(*buffer_size));
+    return allocNewNode(buffer, &(*buffer_size));
 
 }
 
-int reallocBuffer(list_node *buffer) {
+int reallocBuffer(list_node *buffer, uint32_t *buffer_size) {
 
     int pos = 0, n = 0;
     void *tmp = NULL;
 
-    buffer_size *= 2;
+    *buffer_size *= 2;
 
-    tmp = realloc(buffer, buffer_size * sizeof(list_node));
+    tmp = realloc(buffer, *buffer_size * sizeof(list_node));
     if (tmp == NULL) return ERROR;
 
-    for (pos = buffer_size / 2; pos < buffer_size; pos++) {
+    for (pos = *buffer_size / 2; pos < *buffer_size; pos++) {
         for (n = 0; n < N; n++) {
             buffer[pos].neighbor[n] = DEFAULT;
         }

@@ -11,20 +11,18 @@
 
 #define REALLOC_STRING -9
 
-extern uint32_t index_size;
 
+ptrdiff_t *createNodeIndex(uint32_t);
 
-ptrdiff_t *createNodeIndex();
+int insertNode(ptrdiff_t *, uint32_t, list_node *, uint32_t*, uint32_t*);
 
-int insertNode(ptrdiff_t *, uint32_t, list_node *);
-
-ptrdiff_t getListHead(ptrdiff_t *, uint32_t);
+ptrdiff_t getListHead(ptrdiff_t *, uint32_t, uint32_t);
 
 int destroyNodeIndex(ptrdiff_t *);
 
-int reallocNodeIndex(ptrdiff_t *, int);
+int reallocNodeIndex(ptrdiff_t *, int, uint32_t*);
 
-int lookup(ptrdiff_t *, uint32_t);
+int lookup(ptrdiff_t *, uint32_t, uint32_t);
 
-int addEdge(ptrdiff_t *, uint32_t, uint32_t, list_node *);
+int addEdge(ptrdiff_t *, uint32_t, uint32_t, list_node *, uint32_t*, uint32_t);
 

@@ -161,7 +161,7 @@ int BFS(ptrdiff_t *index, list_node *buffer, uint32_t start, uint32_t end){
 
 }
 
-char* bBFS(ptrdiff_t *indexIn, ptrdiff_t *indexOut, list_node *bufferOut, list_node *bufferIn, uint32_t start, uint32_t end){
+char* bBFS(ptrdiff_t *indexIn, ptrdiff_t *indexOut, list_node *bufferOut, list_node *bufferIn, uint32_t start, uint32_t end, uint32_t index_size){
 
     //theloume na kanoume BFS kai ap tis 2 meries kai na sugrinoume ta epomena an sumpiptoun
     uint32_t *outBarrier = NULL, *inBarrier = NULL;
@@ -170,8 +170,8 @@ char* bBFS(ptrdiff_t *indexIn, ptrdiff_t *indexOut, list_node *bufferOut, list_n
 
 
     //olo se mia loopa kai domi gia apofugi kuklwn
-    curStart = bufferOut + getListHead(index,start);
-    curEnd = bufferIn + getListHead(index,end);
+    curStart = bufferOut + getListHead(index,start, index_size);
+    curEnd = bufferIn + getListHead(index,end, index_size);
 
     outBarrier = nextBarrier(curStart);
     inBarrier = nextBarrier(curEnd);

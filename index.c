@@ -1,7 +1,7 @@
 #include "index.h"
 
 
-ptrdiff_t *createNodeIndex() {
+ptrdiff_t *createNodeIndex(uint32_t index_size) {
 
     ptrdiff_t *index = NULL;
     int i = 0;
@@ -14,23 +14,24 @@ ptrdiff_t *createNodeIndex() {
     return index;
 }
 
-int lookup(ptrdiff_t *index, uint32_t id) {
+int lookup(ptrdiff_t *index, uint32_t id, uint32_t index_size) {
 
+    if(id >= index_size) return NOT_EXIST;
     if (index[id] != -1) return ALR_EXISTS;
     return NOT_EXIST;
 }
 
-int insertNode(ptrdiff_t *index, uint32_t id, list_node *buffer) {
+int insertNode(ptrdiff_t *index, uint32_t id, list_node *buffer, uint32_t *index_size, uint32_t *buffer_size) {
 
     ptrdiff_t offset = 0;
     list_node *new = NULL;
 
     if (index == NULL) return IND_EMPTY;
 
-    offset = allocNewNode(buffer);
+    offset = allocNewNode(buffer, &(*buffer_size));
 
-    if (id >= index_size) {
-        reallocNodeIndex(index, id);
+    if (id >= *index_size) {
+        reallocNodeIndex(index, id, &(*index_size));
     }
 
     index[id] = offset;//tuxaia seira sto buffer etsi
@@ -42,28 +43,28 @@ int insertNode(ptrdiff_t *index, uint32_t id, list_node *buffer) {
     return OK_SUCCESS;
 }
 
-int reallocNodeIndex(ptrdiff_t *index, int id) {
+int reallocNodeIndex(ptrdiff_t *index, int id, uint32_t *index_size) {
 
-    uint32_t realloc_size = index_size;
+    uint32_t realloc_size = *index_size;
     uint32_t a = 0;
 
     while (id >= realloc_size) realloc_size = realloc_size * 2;    //Double size until id fits
-    index = realloc(index, realloc_size * sizeof(ptrdiff_t));
+    realloc(index, realloc_size * sizeof(ptrdiff_t));
 
-    for (a = index_size; a < realloc_size; a++) {    //Initialize new index nodes
+    for (a = *index_size; a < realloc_size; a++) {    //Initialize new index nodes
         //Connect id index node to buffer -> tha ginei meta stin insertNode
         index[a] = -1;
     }
-    index_size = realloc_size;
+    *index_size = realloc_size;
     return OK_SUCCESS;
 }
 
-int addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node *buffer) {
+int addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node *buffer, uint32_t *buffer_size, uint32_t index_size) {
 
     int i = 0;
     ptrdiff_t offset = 0;
 
-    offset = getListHead(index, id);
+    offset = getListHead(index, id, index_size);
     list_node *current = buffer + offset;
 
     while (i < N) {
@@ -75,7 +76,7 @@ int addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node *buffer)
         i++;
         if (i == N) {
             if (current->nextListNode == -1) {
-                offset = allocNewNode(buffer);
+                offset = allocNewNode(buffer, &(*buffer_size));
                 current->nextListNode = offset;
                /* if (current->nextListNode == -1) {
                     reallocBuffer(buffer);
@@ -92,9 +93,10 @@ int addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node *buffer)
     return OK_SUCCESS;
 }
 
-ptrdiff_t getListHead(ptrdiff_t *index, uint32_t id) {
+ptrdiff_t getListHead(ptrdiff_t *index, uint32_t id, uint32_t index_size) {
 
-    if (index == NULL) return NULL;
+    if (index == NULL) return -1;
+    if(id >= index_size) return -1;
     return index[id];
 }
 
