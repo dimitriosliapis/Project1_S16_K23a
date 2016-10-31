@@ -25,10 +25,10 @@ typedef struct list_node_t {
 
 list_node *createBuffer(uint32_t);
 
-ptrdiff_t allocNewNode(list_node *, uint32_t*);
+ptrdiff_t allocNewNode(list_node **, uint32_t*);
 
 list_node *getListNode(list_node *);
 
 int destroyBuffer(list_node *);
 
-int reallocBuffer(list_node *, uint32_t*);
+int reallocBuffer(list_node **, uint32_t*);

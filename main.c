@@ -40,11 +40,11 @@ int main(int argc, char *argv[]) {
 
 
         if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
-            insertNode(index_out, N1, buffer_out, &index_size_out, &buffer_size_out);
+            insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out);
         if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
-            insertNode(index_in, N2, buffer_in, &index_size_in, &buffer_size_in);
-        addEdge(index_out, N1, N2, buffer_out,&buffer_size_out, index_size_out);
-        addEdge(index_in, N2, N1, buffer_in, &buffer_size_in,index_size_in);
+            insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in);
+        addEdge(index_out, N1, N2, &buffer_out,&buffer_size_out, index_size_out);
+        addEdge(index_in, N2, N1, &buffer_in, &buffer_size_in,index_size_in);
 
         fgets(str, sizeof(str), Graph);
         argument = strtok(str, " \n");

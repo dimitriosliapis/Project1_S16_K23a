@@ -21,23 +21,23 @@ int lookup(ptrdiff_t *index, uint32_t id, uint32_t index_size) {
     return NOT_EXIST;
 }
 
-int insertNode(ptrdiff_t *index, uint32_t id, list_node *buffer, uint32_t *index_size, uint32_t *buffer_size) {
+int insertNode(ptrdiff_t **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size) {
 
     ptrdiff_t offset = 0;
     list_node *new = NULL;
 
     if (index == NULL) return IND_EMPTY;
 
-    offset = allocNewNode(buffer, &(*buffer_size));
+    offset = allocNewNode(&(*buffer), &(*buffer_size));
 
     if (id >= *index_size) {
-        reallocNodeIndex(&index, id, &(*index_size));
+        reallocNodeIndex(index, id, &(*index_size));
     }
 
-    index[id] = offset;//tuxaia seira sto buffer etsi
-    if (index[id] == -1) return ALLOC_FAIL;
+    (*index)[id] = offset;//tuxaia seira sto buffer etsi
+    if ((*index)[id] == -1) return ALLOC_FAIL;
 
-    new = buffer + index[id];
+    new = *buffer + (*index)[id];
     new->empty = 'n';
 
     return OK_SUCCESS;
@@ -61,13 +61,13 @@ int reallocNodeIndex(ptrdiff_t **index, int id, uint32_t *index_size) {
     return OK_SUCCESS;
 }
 
-int addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node *buffer, uint32_t *buffer_size, uint32_t index_size) {
+int addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, uint32_t index_size) {
 
     int i = 0;
     ptrdiff_t offset = 0;
 
     offset = getListHead(index, id, index_size);
-    list_node *current = buffer + offset;
+    list_node *current = *buffer + offset;
 
     while (i < N) {
         if (current->neighbor[i] == neighbor) return ALR_CONNECTED;
@@ -85,9 +85,9 @@ int addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node *buffer,
                     offset = allocNewNode(buffer);
                     current->nextListNode = offset;
                 }*/
-                current = buffer + current->nextListNode;
+                current = *buffer + current->nextListNode;
             } else
-                current = buffer + current->nextListNode;
+                current = *buffer + current->nextListNode;
                 //current = current + current->nextListNode;
             i = 0;
         }
