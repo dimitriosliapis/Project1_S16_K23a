@@ -20,7 +20,7 @@ list_node *createBuffer() {
 
 ptrdiff_t allocNewNode(list_node *buffer) {
 
-    int err = 0;
+    int i = 0;
     ptrdiff_t offset = 0;
     uint32_t pos = 0;
     list_node *tmp;
@@ -31,6 +31,11 @@ ptrdiff_t allocNewNode(list_node *buffer) {
         if (buffer[pos].empty == 'y') {
             tmp = &buffer[pos];
             offset = tmp - buffer;
+            //
+            buffer[pos].empty = 'n';
+            buffer->nextListNode = -1;
+            for(i = 0; i < N; i++) buffer[pos].neighbor[i] = DEFAULT;
+            //
             return (offset);
         } //den paizei na doylevei
         pos++;

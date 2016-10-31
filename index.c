@@ -77,13 +77,15 @@ int addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node *buffer)
             if (current->nextListNode == -1) {
                 offset = allocNewNode(buffer);
                 current->nextListNode = offset;
-                if (current->nextListNode == -1) {
+               /* if (current->nextListNode == -1) {
                     reallocBuffer(buffer);
                     offset = allocNewNode(buffer);
                     current->nextListNode = offset;
-                }
+                }*/
+                current = buffer + current->nextListNode;
             } else
-                current = current + current->nextListNode;
+                current = buffer + current->nextListNode;
+                //current = current + current->nextListNode;
             i = 0;
         }
     }
