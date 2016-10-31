@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <wchar.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 
 #define BUFF_SIZE 32
 #define N 8
