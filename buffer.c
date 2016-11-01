@@ -10,39 +10,37 @@ list_node *createBuffer(uint32_t buffer_size) {
 
     for (pos = 0; pos < buffer_size; pos++) {
         for (n = 0; n < N; n++) {
-            buffer[pos].neighbor[n] = DEFAULT; //sumvasi ta id
-            buffer[pos].empty = 'y';
-            buffer[pos].nextListNode = -1;
+            buffer[pos].neighbor[n] = DEFAULT;  //sumvasi gia ta id
+            buffer[pos].empty = 'y';            //adeios
+            buffer[pos].nextListNode = -1;      //den exei epomeno
         }
     }
     return buffer;
 }
 
-ptrdiff_t allocNewNode(list_node **buffer, uint32_t *buffer_size) {
+ptrdiff_t allocNewNode(list_node **buffer, uint32_t *buffer_size, ptrdiff_t start) {
 
     int i = 0;
-    ptrdiff_t offset = 0;
-    uint32_t pos = 0;
-    list_node *tmp = NULL;
+    ptrdiff_t pos = start;                      //exei ena starting point gia na min psaxnei ap to 0
 
-    if (*buffer == NULL) return -1; //return error
-
-    while (pos < (*buffer_size)) {
-        if ((*buffer)[pos].empty == 'y') {
-            tmp = &(*buffer)[pos];
-            offset = tmp - (*buffer);
-            //
-            (*buffer)[pos].empty = 'n';
-            (*buffer)->nextListNode = -1;
-            for(i = 0; i < N; i++) (*buffer)[pos].neighbor[i] = DEFAULT;
-            //
-            return (offset);
-        } //den paizei na doylevei
-        pos++;
+    if (*buffer == NULL){
+        return -1; //return error
     }
 
-    reallocBuffer(buffer, &(*buffer_size));
-    return allocNewNode(buffer, &(*buffer_size));
+    while (pos < (*buffer_size)) {              //psaxnei ton prwto keno komvo kai ton epistrefei
+        if ((*buffer)[pos].empty == 'y') {
+
+            (*buffer)[pos].empty = 'n';
+            (*buffer)[pos].nextListNode = -1;
+            for(i = 0; i < N; i++) (*buffer)[pos].neighbor[i] = DEFAULT;
+
+            return (pos);
+        }
+        pos++;
+    }
+    //an den exei allo keno kanei realloc
+    reallocBuffer(&(*buffer), &(*buffer_size));
+    return allocNewNode(&(*buffer), &(*buffer_size), pos);   //ksanakalei ton eauto tis me to kainourgio megethos
 
 }
 

@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#define BUFF_SIZE 32
-#define N 8
+#define BUFF_SIZE 2048
+#define N 256
 #define DEFAULT 16777216
 
 #define OK_SUCCESS 0;
@@ -25,7 +25,7 @@ typedef struct list_node_t {
 
 list_node *createBuffer(uint32_t);
 
-ptrdiff_t allocNewNode(list_node **, uint32_t*);
+ptrdiff_t allocNewNode(list_node **, uint32_t*, ptrdiff_t);
 
 list_node *getListNode(list_node *);
 
