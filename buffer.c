@@ -23,18 +23,18 @@ ptrdiff_t allocNewNode(list_node **buffer, uint32_t *buffer_size) {
     int i = 0;
     ptrdiff_t offset = 0;
     uint32_t pos = 0;
-    list_node *tmp;
+    list_node *tmp = NULL;
 
-    if (buffer == NULL) return -1; //return error
+    if (*buffer == NULL) return -1; //return error
 
-    while (pos < *buffer_size) {
-        if (buffer[pos]->empty == 'y') {
+    while (pos < (*buffer_size)) {
+        if ((*buffer)[pos].empty == 'y') {
             tmp = &(*buffer)[pos];
-            offset = tmp - *buffer;
+            offset = tmp - (*buffer);
             //
-            buffer[pos]->empty = 'n';
+            (*buffer)[pos].empty = 'n';
             (*buffer)->nextListNode = -1;
-            for(i = 0; i < N; i++) buffer[pos]->neighbor[i] = DEFAULT;
+            for(i = 0; i < N; i++) (*buffer)[pos].neighbor[i] = DEFAULT;
             //
             return (offset);
         } //den paizei na doylevei
