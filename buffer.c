@@ -59,10 +59,10 @@ int reallocBuffer(list_node **buffer, uint32_t *buffer_size) {
 
     for (pos = *buffer_size / 2; pos < *buffer_size; pos++) {
         for (n = 0; n < N; n++) {
-            buffer[pos]->neighbor[n] = DEFAULT;
+            (*buffer)[pos].neighbor[n] = DEFAULT;
         }
-        buffer[pos]->empty = 'y';
-        buffer[pos]->nextListNode = -1;
+        (*buffer)[pos].empty = 'y';
+        (*buffer)[pos].nextListNode = -1;
     }
     return OK_SUCCESS;
 }

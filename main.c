@@ -2,7 +2,7 @@
 #include "index.h"
 #include "string.h"
 
-
+uint32_t toID(char*, int*, int*);
 
 int main(int argc, char *argv[]) {
 
@@ -30,14 +30,15 @@ int main(int argc, char *argv[]) {
     char str[64];
     char *argument;
     fgets(str, sizeof(str), Graph);
-    argument = strtok(str, " \n");
+    //argument = strtok(str, " \n");
 
     while (strcmp(argument, "S") != 0) {
 
-        N1 = atoi(argument);
+       /* N1 = toID(argument);
         argument = strtok(NULL, " \n");
-        N2 = atoi(argument);
-
+        N2 = toID(argument);
+*/
+        toID(str, &N1, &N2);
 
         if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
             insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out);
@@ -47,8 +48,30 @@ int main(int argc, char *argv[]) {
         addEdge(index_in, N2, N1, &buffer_in, &buffer_size_in,index_size_in);
 
         fgets(str, sizeof(str), Graph);
-        argument = strtok(str, " \n");
+        //argument = strtok(str, " \n");
     }
 
     return 0;
+}
+
+uint32_t toID(char *str, int *N1, int *N2){
+
+    uint32_t i, j, id;
+
+    if(str == NULL) return 0;
+
+    i = 0;
+    for(j = 0; j < 2; j++) {
+        id = 0;
+        while ((str[i] >= '0') && (str[i] <= '9')) {
+            id = 10 * id + (str[i] - '0');
+            i++;
+        }
+        if(j == 0) *N1 = id;
+        else *N2 = id;
+        i++;
+    }
+
+
+    return id;
 }
