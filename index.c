@@ -18,7 +18,7 @@ int lookup(ptrdiff_t *index, uint32_t id, uint32_t index_size) {
 
     if(id >= index_size) return NOT_EXIST;          //an den to xwraei den uparxei
     if (index[id] != -1) return ALR_EXISTS;
-    return NOT_EXIST;
+    else return NOT_EXIST;
 }
 
 ptrdiff_t insertNode(ptrdiff_t **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size, ptrdiff_t prev) {
@@ -31,9 +31,8 @@ ptrdiff_t insertNode(ptrdiff_t **index, uint32_t id, list_node **buffer, uint32_
     offset = allocNewNode(&(*buffer), &(*buffer_size), prev);         //to offset tou prwtou eleutherou komvou sto buffer
     if (offset == -1) return ALLOC_FAIL;
 
-    if (id >= *index_size) {
+    if (id >= *index_size)
         reallocNodeIndex(index, id, &(*index_size));            //an den ton xwraei to index realloc
-    }
 
     (*index)[id] = offset;                                      //tuxaia seira sto buffer etsi
 
@@ -46,18 +45,18 @@ ptrdiff_t insertNode(ptrdiff_t **index, uint32_t id, list_node **buffer, uint32_
 int reallocNodeIndex(ptrdiff_t **index, int id, uint32_t *index_size) {
 
     uint32_t realloc_size = *index_size;
-    uint32_t a = 0;
+    uint32_t i = 0;
     ptrdiff_t *new = NULL;
 
     while (id >= realloc_size) realloc_size = realloc_size * 2;    //Double size until id fits
     new = realloc(*index, realloc_size * sizeof(ptrdiff_t));
     *index = new;
 
-    for (a = *index_size; a < realloc_size; a++) {    //Initialize new index nodes
-        //Connect id index node to buffer -> tha ginei meta stin insertNode
-        (*index)[a] = -1;
+    for (i = *index_size; i < realloc_size; i++) {    //Initialize new index nodes
+        (*index)[i] = -1;
     }
     *index_size = realloc_size;
+
     return OK_SUCCESS;
 }
 
@@ -71,13 +70,18 @@ ptrdiff_t addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node **
 
 
     while (i < N) {                                                         //psaxnei stous geitones (max N ana komvo)
+
         if (current->neighbor[i] == neighbor) return ALR_CONNECTED;         //gia na dei an uparxei
+
         if (current->neighbor[i] == DEFAULT) {                              //alliws vriskei tin thesi tou 1ou diathesimou
             current->neighbor[i] = neighbor;                                //kai ton vazei ekei
             break;
         }
+
         i++;
+
         if (i == N) {                                                       //an ftasei to N paei ston epomeno komvo
+
             if (current->nextListNode == -1) {                              //an den uparxei ton dimiourgei
                 offset = allocNewNode(&(*buffer), &(*buffer_size), prev);
                 current->nextListNode = offset;
@@ -87,6 +91,7 @@ ptrdiff_t addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node **
             i = 0;
         }
     }
+
     return offset;
 }
 
@@ -103,4 +108,3 @@ int destroyNodeIndex(ptrdiff_t *index) {
     free(index);
     return OK_SUCCESS;
 }
-

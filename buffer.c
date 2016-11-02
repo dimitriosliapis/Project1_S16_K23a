@@ -6,7 +6,6 @@ list_node *createBuffer(uint32_t buffer_size) {
     int pos = 0, n = 0;
     list_node *buffer = NULL;
     buffer = malloc(sizeof(list_node) * buffer_size);
-    //if(tmp == NULL) return ALLOC_FAIL;
 
     for (pos = 0; pos < buffer_size; pos++) {
         for (n = 0; n < N; n++) {
@@ -29,11 +28,7 @@ ptrdiff_t allocNewNode(list_node **buffer, uint32_t *buffer_size, ptrdiff_t star
 
     while (pos < (*buffer_size)) {              //psaxnei ton prwto keno komvo kai ton epistrefei
         if ((*buffer)[pos].empty == 'y') {
-
             (*buffer)[pos].empty = 'n';
-            (*buffer)[pos].nextListNode = -1;
-            for(i = 0; i < N; i++) (*buffer)[pos].neighbor[i] = DEFAULT;
-
             return (pos);
         }
         pos++;

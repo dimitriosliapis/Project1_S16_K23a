@@ -1,11 +1,11 @@
 #include "index.h"
 
+
 #define FOUND 1
 #define NOT_FOUND -1
 #define H_DEFAULT 64
 
 typedef struct hNode_t{
-
     uint32_t id;
     int distance;
     uint32_t parent_id;
@@ -26,5 +26,5 @@ uint32_t q_size;
 Queue *queue;
 hNode hashTable[H_DEFAULT];
 
-char* append(char *, char*);
+char* append(char *, char *);
 char* idToStr(uint32_t);
