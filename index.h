@@ -1,6 +1,6 @@
 #include "buffer.h"
 
-#define IND_SIZE 512
+#define IND_SIZE 100
 #define BDFS_BUFF_SIZE 32
 
 #define IND_EMPTY -1

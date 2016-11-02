@@ -10,9 +10,9 @@ list_node *createBuffer(uint32_t buffer_size) {
     for (pos = 0; pos < buffer_size; pos++) {
         for (n = 0; n < N; n++) {
             buffer[pos].neighbor[n] = DEFAULT;  //sumvasi gia ta id
-            buffer[pos].empty = 'y';            //adeios
-            buffer[pos].nextListNode = -1;      //den exei epomeno
         }
+        buffer[pos].empty = 'y';            //adeios
+        buffer[pos].nextListNode = -1;      //den exei epomeno
     }
     return buffer;
 }
