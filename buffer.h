@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define BUFF_SIZE 2048
+#define BUFF_SIZE 1024
 #define N 256
 #define DEFAULT 16777216
 

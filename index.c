@@ -26,10 +26,10 @@ ptrdiff_t insertNode(ptrdiff_t **index, uint32_t id, list_node **buffer, uint32_
     ptrdiff_t offset = 0;
     list_node *new = NULL;
 
-    if (index == NULL) return IND_EMPTY;
+    if (index == NULL) return 0;
 
     offset = allocNewNode(&(*buffer), &(*buffer_size), prev);         //to offset tou prwtou eleutherou komvou sto buffer
-    if (offset == -1) return ALLOC_FAIL;
+    if (offset == -1) return 0;
 
     if (id >= *index_size)
         reallocNodeIndex(index, id, &(*index_size));            //an den ton xwraei to index realloc
@@ -71,7 +71,7 @@ ptrdiff_t addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node **
 
     while (i < N) {                                                         //psaxnei stous geitones (max N ana komvo)
 
-        if (current->neighbor[i] == neighbor) return ALR_CONNECTED;         //gia na dei an uparxei
+        if (current->neighbor[i] == neighbor) return prev;         //gia na dei an uparxei
 
         if (current->neighbor[i] == DEFAULT) {                              //alliws vriskei tin thesi tou 1ou diathesimou
             current->neighbor[i] = neighbor;                                //kai ton vazei ekei
