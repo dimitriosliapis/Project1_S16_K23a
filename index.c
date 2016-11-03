@@ -1,27 +1,29 @@
 #include "index.h"
 
 
-ptrdiff_t *createNodeIndex(uint32_t index_size) {
+ind *createNodeIndex(uint32_t index_size) {
 
-    ptrdiff_t *index = NULL;
+    ind *index = NULL;
     int i = 0;
 
-    index = malloc(sizeof(ptrdiff_t) * index_size);
+    index = malloc(sizeof(ind) * index_size);
     for (i = 0; i < index_size; i++) {
-        index[i] = -1;
+        index[i].first = -1;
+        index[i].last = -1;
+        index[i].max = 0;
     }
 
     return index;
 }
 
-int lookup(ptrdiff_t *index, uint32_t id, uint32_t index_size) {
+int lookup(ind *index, uint32_t id, uint32_t index_size) {
 
     if(id >= index_size) return NOT_EXIST;          //an den to xwraei den uparxei
-    if (index[id] != -1) return ALR_EXISTS;
+    if (index[id].first != -1) return ALR_EXISTS;
     return NOT_EXIST;
 }
 
-ptrdiff_t insertNode(ptrdiff_t **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size, ptrdiff_t *available) {
+ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size, ptrdiff_t *available) {
 
     ptrdiff_t offset = 0;
 
@@ -34,38 +36,45 @@ ptrdiff_t insertNode(ptrdiff_t **index, uint32_t id, list_node **buffer, uint32_
         reallocNodeIndex(&(*index), id, &(*index_size));            //an den ton xwraei to index realloc
     }
 
-    (*index)[id] = offset;                                      //tuxaia seira sto buffer etsi
+    (*index)[id].first = offset;                                      //tuxaia seira sto buffer etsi
+    (*index)[id].last = offset;                                      //tuxaia seira sto buffer etsi
 
     (*available)++;
 
     return offset;
 }
 
-int reallocNodeIndex(ptrdiff_t **index, int id, uint32_t *index_size) {
+int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
 
     uint32_t realloc_size = *index_size;
     uint32_t i = 0;
-    ptrdiff_t *new = NULL;
+    ind *new = NULL;
 
     while (id >= realloc_size) realloc_size = realloc_size * 2;    //Double size until id fits
-    new = realloc(*index, realloc_size * sizeof(ptrdiff_t));
+    new = realloc(*index, realloc_size * sizeof(ind));
     *index = new;
 
     for (i = *index_size; i < realloc_size; i++) {    //Initialize new index nodes
-        (*index)[i] = -1;
+        (*index)[i].first = -1;
+        (*index)[i].last = -1;
+        (*index)[i].max = DEFAULT;
     }
     *index_size = realloc_size;
     return OK_SUCCESS;
 }
 
-ptrdiff_t addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, uint32_t index_size, ptrdiff_t *available) {
+ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, uint32_t index_size, ptrdiff_t *available) {
 
     int i = 0;
     ptrdiff_t offset = 0, prev = 0;
 
-    offset = getListHead(index, id, index_size);                            //offset 1ou komvou sto buffer gia to id
+    offset = getListHead(*index, id, index_size);                            //offset 1ou komvou sto buffer gia to id
     list_node *current = *buffer + offset;
 
+    if(neighbor > (*index)[id].max){
+        current = *buffer + (*index)[id].last;
+        (*index)[id].max = neighbor;
+    }
 
     while (i < N) {                                                         //psaxnei stous geitones (max N ana komvo)
         if (current->neighbor[i] == neighbor) return ALR_CONNECTED;         //gia na dei an uparxei
@@ -82,6 +91,7 @@ ptrdiff_t addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node **
                 current = *buffer - prev;
                 current->nextListNode = offset;
                 current = *buffer + offset;
+                (*index)[id].last = offset;
             } else
                 current = *buffer + current->nextListNode;                  //an uparxei sunexizei se auton
             i = 0;
@@ -90,14 +100,14 @@ ptrdiff_t addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node **
     return offset;
 }
 
-ptrdiff_t getListHead(ptrdiff_t *index, uint32_t id, uint32_t index_size) {
+ptrdiff_t getListHead(ind *index, uint32_t id, uint32_t index_size) {
 
     if (index == NULL) return -1;
     if(id >= index_size) return -1;
-    return index[id];
+    return index[id].first;
 }
 
-int destroyNodeIndex(ptrdiff_t *index) {
+int destroyNodeIndex(ind *index) {
 
     if (index == NULL) return IND_EMPTY;
     free(index);

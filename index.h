@@ -12,17 +12,23 @@
 #define REALLOC_STRING -9
 
 
-ptrdiff_t *createNodeIndex(uint32_t);
+typedef struct index_t{
+    ptrdiff_t first;
+    ptrdiff_t last;
+    uint32_t max;
+}ind;
 
-ptrdiff_t insertNode(ptrdiff_t**, uint32_t, list_node**, uint32_t*, uint32_t*, ptrdiff_t*);
+ind *createNodeIndex(uint32_t);
 
-ptrdiff_t getListHead(ptrdiff_t*, uint32_t, uint32_t);
+ptrdiff_t insertNode(ind**, uint32_t, list_node**, uint32_t*, uint32_t*, ptrdiff_t*);
 
-int destroyNodeIndex(ptrdiff_t*);
+ptrdiff_t getListHead(ind*, uint32_t, uint32_t);
 
-int reallocNodeIndex(ptrdiff_t**, int, uint32_t*);
+int destroyNodeIndex(ind*);
 
-int lookup(ptrdiff_t*, uint32_t, uint32_t);
+int reallocNodeIndex(ind**, int, uint32_t*);
 
-ptrdiff_t addEdge(ptrdiff_t*, uint32_t, uint32_t, list_node**, uint32_t*, uint32_t, ptrdiff_t*);
+int lookup(ind*, uint32_t, uint32_t);
+
+ptrdiff_t addEdge(ind**, uint32_t, uint32_t, list_node**, uint32_t*, uint32_t, ptrdiff_t*);
 
