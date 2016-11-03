@@ -61,7 +61,7 @@ int reallocNodeIndex(ptrdiff_t **index, int id, uint32_t *index_size) {
 ptrdiff_t addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, uint32_t index_size, ptrdiff_t *available) {
 
     int i = 0;
-    ptrdiff_t offset = 0;
+    ptrdiff_t offset = 0, prev = 0;
 
     offset = getListHead(index, id, index_size);                            //offset 1ou komvou sto buffer gia to id
     list_node *current = *buffer + offset;
@@ -76,8 +76,11 @@ ptrdiff_t addEdge(ptrdiff_t *index, uint32_t id, uint32_t neighbor, list_node **
         i++;
         if (i == N) {                                                       //an ftasei to N paei ston epomeno komvo
             if (current->nextListNode == -1) {                              //an den uparxei ton dimiourgei
+                prev = *buffer - current;
+                printf("prev = %td\n", -prev);
                 offset = allocNewNode(&(*buffer), &(*buffer_size), *available);
                 (*available)++;
+                current = *buffer - prev;
                 current->nextListNode = offset;
                 current = *buffer + offset;
             } else
