@@ -3,7 +3,7 @@
 #include "index.h"
 #include "string.h"
 
-int toID(char *, int *, int *);
+int toID(char *, uint32_t *, uint32_t *);
 
 int main(int argc, char *argv[]) {
 
@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     uint32_t N1, N2;
     uint32_t buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE;
     uint32_t index_size_in = IND_SIZE, index_size_out = IND_SIZE;
-    ptrdiff_t prev_in = 0, prev_out = 0;
+    ptrdiff_t available_in = 0, available_out = 0;
 
     // arguments
     if (argc == 3) {
@@ -43,11 +43,14 @@ int main(int argc, char *argv[]) {
         toID(str, &N1, &N2);
 
         if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
-            prev_out = insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, prev_out);
+            insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out);
+
         if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
-            prev_in = insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, prev_in);
-        prev_out = addEdge(index_out, N1, N2, &buffer_out, &buffer_size_out, index_size_out, prev_out);
-        prev_in = addEdge(index_in, N2, N1, &buffer_in, &buffer_size_in, index_size_in, prev_in);
+            insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
+
+        addEdge(index_out, N1, N2, &buffer_out, &buffer_size_out, index_size_out, &available_out);
+
+        addEdge(index_in, N2, N1, &buffer_in, &buffer_size_in, index_size_in, &available_in);
 
         fgets(str, sizeof(str), Graph);
     }
@@ -60,7 +63,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-int toID(char *str, int *N1, int *N2) {
+int toID(char *str, uint32_t *N1, uint32_t *N2) {
     uint32_t i, j, id;
     if (str == NULL)
         return 0;

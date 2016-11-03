@@ -5,30 +5,27 @@
 #include <stdio.h>
 #include <string.h>
 
-#define BUFF_SIZE 100
-#define N 10
+#define BUFF_SIZE 5
+#define N 2
 #define DEFAULT 16777216
 
 #define OK_SUCCESS 0;
 #define ERROR -1
 
-extern uint32_t buffer_size;
-
 
 typedef struct list_node_t {
     uint32_t neighbor[N]; //the ids of the neighbor nodes
     //uint32_t edgeProperty[N]; //property for each edge
-    char empty;
     ptrdiff_t nextListNode;
 } list_node;
 
 
 list_node *createBuffer(uint32_t);
 
-ptrdiff_t allocNewNode(list_node **, uint32_t*, ptrdiff_t);
+ptrdiff_t allocNewNode(list_node**, uint32_t*, ptrdiff_t);
 
-list_node *getListNode(list_node *);
+list_node *getListNode(list_node*);
 
-int destroyBuffer(list_node *);
+int destroyBuffer(list_node*);
 
-int reallocBuffer(list_node **, uint32_t*);
+int reallocBuffer(list_node**, uint32_t*);

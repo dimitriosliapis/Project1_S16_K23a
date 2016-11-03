@@ -11,31 +11,20 @@ list_node *createBuffer(uint32_t buffer_size) {
         for (n = 0; n < N; n++) {
             buffer[pos].neighbor[n] = DEFAULT;  //sumvasi gia ta id
         }
-        buffer[pos].empty = 'y';            //adeios
         buffer[pos].nextListNode = -1;      //den exei epomeno
     }
     return buffer;
 }
 
-ptrdiff_t allocNewNode(list_node **buffer, uint32_t *buffer_size, ptrdiff_t start) {
+ptrdiff_t allocNewNode(list_node **buffer, uint32_t *buffer_size, ptrdiff_t available) {
 
-    int i = 0;
-    ptrdiff_t pos = start;                      //exei ena starting point gia na min psaxnei ap to 0
-
-    if (*buffer == NULL){
-        return -1; //return error
+    if (*buffer == NULL) return -1; //return error
+    if (available >= (*buffer_size)) {//tsekarei an o epomenos komvos xwraei sto buffer
+        //printf("gia buffer %d buffer_size = %d\n", &(*buffer), *buffer_size);
+        reallocBuffer(&(*buffer), &(*buffer_size));
+        //printf("gia buffer %d buffer_size = %d\n", &(*buffer), *buffer_size);
     }
-
-    while (pos < (*buffer_size)) {              //psaxnei ton prwto keno komvo kai ton epistrefei
-        if ((*buffer)[pos].empty == 'y') {
-            (*buffer)[pos].empty = 'n';
-            return (pos);
-        }
-        pos++;
-    }
-    //an den exei allo keno kanei realloc
-    reallocBuffer(&(*buffer), &(*buffer_size));
-    return allocNewNode(&(*buffer), &(*buffer_size), pos);   //ksanakalei ton eauto tis me to kainourgio megethos
+    return (available);
 
 }
 
@@ -44,17 +33,16 @@ int reallocBuffer(list_node **buffer, uint32_t *buffer_size) {
     int pos = 0, n = 0;
     void *new = NULL;
 
-    *buffer_size *= 2;
+    (*buffer_size) *= 2;
 
-    new = realloc(*buffer, *buffer_size * sizeof(list_node));
+    new = realloc(*buffer, (*buffer_size) * sizeof(list_node));
     if (new == NULL) return ERROR;
     *buffer = new;
 
-    for (pos = *buffer_size / 2; pos < *buffer_size; pos++) {
+    for (pos = (*buffer_size) / 2; pos < *buffer_size; pos++) {
         for (n = 0; n < N; n++) {
             (*buffer)[pos].neighbor[n] = DEFAULT;
         }
-        (*buffer)[pos].empty = 'y';
         (*buffer)[pos].nextListNode = -1;
     }
     return OK_SUCCESS;
