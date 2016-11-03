@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include "index.h"
-#include "string.h"
 
 int toID(char *, uint32_t *, uint32_t *);
 
@@ -38,19 +37,19 @@ int main(int argc, char *argv[]) {
     char *argument;
     fgets(str, sizeof(str), Graph);
 
-    while (strcmp(str, "S") != 0) {
+    while (str[0] != 'S') {
 
         toID(str, &N1, &N2);
 
         if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
             insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out);
 
-//        if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
-//            insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
+        if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
+            insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
 
         addEdge(index_out, N1, N2, &buffer_out, &buffer_size_out, index_size_out, &available_out);
 
-//        addEdge(index_in, N2, N1, &buffer_in, &buffer_size_in, index_size_in, &available_in);
+        addEdge(index_in, N2, N1, &buffer_in, &buffer_size_in, index_size_in, &available_in);
 
         fgets(str, sizeof(str), Graph);
     }
