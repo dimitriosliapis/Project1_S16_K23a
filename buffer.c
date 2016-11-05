@@ -20,9 +20,7 @@ ptrdiff_t allocNewNode(list_node **buffer, uint32_t *buffer_size, ptrdiff_t avai
 
     if (*buffer == NULL) return -1; //return error
     if (available >= (*buffer_size)) {//tsekarei an o epomenos komvos xwraei sto buffer
-        //printf("gia buffer %d buffer_size = %d\n", &(*buffer), *buffer_size);
         reallocBuffer(&(*buffer), &(*buffer_size));
-        //printf("gia buffer %d buffer_size = %d\n", &(*buffer), *buffer_size);
     }
     return (available);
 

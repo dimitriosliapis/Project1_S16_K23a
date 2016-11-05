@@ -1,187 +1,240 @@
 #include "search.h"
 
-char* idToStr(uint32_t id){
 
-    uint32_t rem = 0;
-    char *ret = NULL, c;
-    size_t size = 1; // +1 for NULL terminator
+Queue *createQueue() {
 
-    if(id == 0) return NULL;
-
-    rem = id;
-    while(rem != 0){
-        rem /= 10;
-        size++;
+    Queue *queue = NULL;
+    queue = malloc(sizeof(Queue));
+    if (queue == NULL)
+        return NULL;
+    else {
+        queue->first = NULL;
+        queue->last = NULL;
+        return queue;
     }
-
-    ret = malloc(size * sizeof(char));
-    memset(ret,'\0',size);
-
-    sprintf(ret,"%u",id);
-
-    return ret;
 }
 
+int isEmpty(Queue *queue) {
 
-
-char* append(char *a, char *b){
-
-    int lenA = strlen(a);
-    int lenB = strlen(b);
-    char *ret = malloc((lenA+lenB+3)*sizeof(char));
-
-    memset(ret,'\0', lenA+lenB+1);
-    strncat(ret,a,lenA);
-    strncat(ret,"->",2);
-    strncat(ret,b,lenB);
-
-    return ret;
+    return (queue->first == NULL);
 }
 
-uint32_t *nextBarrier(list_node *current){
-    return current->neighbor;
+int push(Queue *queue, uint32_t id, ind *index, int steps) {
+
+    q_Node *new = NULL;
+    if (queue == NULL)
+        return -1;
+    new = malloc(sizeof(q_Node));
+    new->id = id;
+    new->next = NULL;
+    new->steps = steps;
+
+    if (queue->first == NULL)
+        queue->first = new;
+    else
+        queue->last->next = new;
+    queue->last = new;
+    index[id].inFrontier = 1;
+    return 0;
 }
 
-int isIn(uint32_t id, uint32_t *ar){
+uint32_t pop(Queue *queue, ind *index, int *steps) {
 
-    int i = 0;
+    q_Node *out = NULL;
+    uint32_t id = 0;
 
-    for(i = 0; i < N; i++){
-        if(ar[i] == id) return FOUND;
+    if (isEmpty(queue)) return DEFAULT;
+
+    out = queue->first;
+    queue->first = out->next;
+    id = out->id;
+    *steps = out->steps;
+
+    free(out);
+    index[id].inFrontier = 0;
+    return id;
+}
+
+/* ----------DEN XRHSΙMOPOIOYNTAI---------- */
+
+int search(Queue *queue, uint32_t id) {
+
+    q_Node *curr = NULL;
+    curr = queue->first;
+    while (curr != NULL) {
+        if (curr->id == id)
+            return FOUND;
+        curr = curr->next;
     }
-
     return NOT_FOUND;
 }
 
 uint32_t hash(uint32_t x) {
+
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = (x >> 16) ^ x;
     return x;
 }
 
-void resetHash(){
+void resetHash(hNode *hashTable) {
 
     int i = 0;
-
-    for(i = 0; i < H_DEFAULT; i++){
+    for (i = 0; i < H_DEFAULT; i++) {
 
         hashTable[i].id = DEFAULT;
+        hashTable[i].steps = 0;
         hashTable[i].next = NULL;
-        hashTable[i].distance = -1;
-        hashTable[i].parent_id = DEFAULT;
     }
 }
 
-void addToHash(uint32_t id){
+int isIn(hNode *hashTable, uint32_t id) {
+
+    int pos = 0;
+    hNode *tmp = NULL;
+
+    pos = hash(id) % H_DEFAULT;
+    tmp = hashTable[pos].next;
+
+    while (tmp->next != NULL) {
+        if (hashTable[pos].id == id)
+            return FOUND;
+        tmp = tmp->next;
+    }
+    return NOT_FOUND;
+}
+
+void addToHash(hNode *hashTable, uint32_t id, uint32_t steps) {
 
     int pos = 0;
     hNode *new = NULL, *tmp = NULL;
 
-    pos = hash(id)%H_DEFAULT;
+    pos = hash(id) % H_DEFAULT;
 
-    if(hashTable[pos].id == DEFAULT){
+    if (hashTable[pos].id == DEFAULT) {
         hashTable[pos].id = id;
+        hashTable[pos].steps = steps;
         return;
     }
-    //ELEGXOS AN UPARXEI hashtable[pos].id == id
 
     new = malloc(sizeof(hNode));
 
     new->id = id;
-    new->parent_id = DEFAULT;
-    new->distance = -1;
+    new->steps = steps;
     new->next = NULL;
 
     tmp = hashTable[pos].next;
 
-    while(tmp->next != NULL){
+    while (tmp->next != NULL) {
         tmp = tmp->next;
     }
 
     tmp->next = new;
-
-    /////////////////////
 }
 
-int createQueue(){
+/* ---------------------------------------- */
 
-    int i = 0;
+int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end) {
 
-    if (queue == NULL){
-        queue = malloc(sizeof(Queue));
-        queue->first = NULL;
-        queue->last = NULL;
-    }
-    return OK_SUCCESS;
-}
+    Queue *frontierF = NULL, *frontierB = NULL;
+    list_node *neighborsF = NULL, *neighborsB = NULL;
+    uint32_t nodeF = DEFAULT, nodeB = DEFAULT, successor = DEFAULT;
+    int i = 0, steps = 0;
+    ptrdiff_t offset = 0;
 
-int isEmptyQueue(){
+    if (start == end)
+        return 0;
 
-    if(queue == NULL) return 1;
-    return 0;
-}
+    frontierF = createQueue();
 
-void enQueue(uint32_t id){
+    frontierB = createQueue();
 
-    q_Node *new = NULL;
+    push(frontierF, start, index_out, steps);
+    index_out[start].visited = 1;
+    index_out[start].steps = steps;
 
-    if(isEmptyQueue()){
-        createQueue();
-    }
-    new = malloc(sizeof(q_Node));
-    new->id = id;
-    new->next = NULL;
+    push(frontierB, end, index_in, steps);
+    index_in[end].visited = 1;
+    index_in[end].steps = steps;
 
-    if(queue->first == NULL){
-        queue->first = new;
-    }
-    queue->last = new;
-}
+    while (!isEmpty(frontierF) || !isEmpty(frontierB)) {
 
-uint32_t deQueue(){
+        if (!isEmpty(frontierF)) {
 
-    q_Node *out = NULL;
-    uint32_t id = 0;
+            nodeF = pop(frontierF, index_out, &steps);
+            steps++;
+            index_out[nodeF].visited = 1;
 
-    if(isEmptyQueue()) return DEFAULT;
+            offset = getListHead(index_out, nodeF);
+            if (offset != -1) {
 
-    out = queue->first;
+                neighborsF = buffer_out + offset;
+                while (i < N) {
+                    successor = neighborsF->neighbor[i];
+                    if (successor != DEFAULT) {
+                        if (index_out[successor].visited == 0 && index_out[successor].inFrontier == 0) {
+                            if (index_in[nodeF].visited == 1 || index_in[successor].inFrontier == 1)    // goal
+                                return index_in[successor].steps + steps;
+                            else {
+                                push(frontierF, successor, index_out, steps);
+                                //index_out[successor].visited = 1;
+                                index_out[successor].steps = steps;
+                            }
+                        }
+                    } else
+                        break;
+                    i++;
+                    if (i == N && neighborsF->nextListNode != -1) {
+                        neighborsF = buffer_out + neighborsF->nextListNode;
+                        i = 0;
+                    }
+                }
+            } else
+                continue;
 
-    queue->first = out->next;
-    id = out->id;
+            i = 0;
+        }
 
-    free(out);
-    return id;
+        if (!isEmpty(frontierB)) {
 
-}
+            nodeB = pop(frontierB, index_in, &steps);
+            steps++;
+            index_in[nodeB].visited = 1;
 
-int BFS(ptrdiff_t *index, list_node *buffer, uint32_t start, uint32_t end){
+            if (index_out[nodeB].visited == 1) {
+                return index_in[nodeB].steps + index_out[nodeB].steps;
+            }
 
+            offset = getListHead(index_in, nodeB);
+            if (offset != -1) {
 
-}
+                neighborsB = buffer_in + offset;
+                while (i < N) {
+                    successor = neighborsB->neighbor[i];
+                    if (successor != DEFAULT) {
+                        if (index_in[successor].visited == 0 && index_in[successor].inFrontier == 0) {
+                            if (index_out[successor].visited == 1 || index_out[successor].inFrontier == 1)  // goal
+                                return index_out[successor].steps + steps;
+                            else {
+                                push(frontierB, successor, index_in, steps);
+                                //index_in[successor].visited = 1;
+                                index_in[successor].steps = steps;
+                            }
+                        }
+                    } else
+                        break;
+                    i++;
+                    if (i == N && neighborsB->nextListNode != -1) {
+                        neighborsB = buffer_in + neighborsB->nextListNode;
+                        i = 0;
+                    }
+                }
+            } else
+                continue;
 
-char* bBFS(ptrdiff_t *indexIn, ptrdiff_t *indexOut, list_node *bufferOut, list_node *bufferIn, uint32_t start, uint32_t end, uint32_t index_size){
-
-    //theloume na kanoume BFS kai ap tis 2 meries kai na sugrinoume ta epomena an sumpiptoun
-    uint32_t *outBarrier = NULL, *inBarrier = NULL;
-    list_node *curStart = NULL,*curEnd = NULL;
-    int i = 0, in = 0;
-
-
-    //olo se mia loopa kai domi gia apofugi kuklwn
-    curStart = bufferOut + getListHead(index,start, index_size);
-    curEnd = bufferIn + getListHead(index,end, index_size);
-
-    outBarrier = nextBarrier(curStart);
-    inBarrier = nextBarrier(curEnd);
-
-
-    for(i = 0; i < N; i++){
-        in = isIn(outBarrier[i],inBarrier);
-        if(in == FOUND){
-            break;
+            i = 0;
         }
     }
 
+    return -1;
 }

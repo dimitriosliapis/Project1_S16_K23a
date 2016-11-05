@@ -19,7 +19,6 @@ typedef struct list_node_t {
     ptrdiff_t nextListNode;
 } list_node;
 
-
 list_node *createBuffer(uint32_t);
 
 ptrdiff_t allocNewNode(list_node**, uint32_t*, ptrdiff_t);

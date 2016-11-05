@@ -16,13 +16,16 @@ typedef struct index_t{
     ptrdiff_t first;
     ptrdiff_t last;
     uint32_t max;
+    int visited;
+    int inFrontier;
+    int steps;
 }ind;
 
 ind *createNodeIndex(uint32_t);
 
 ptrdiff_t insertNode(ind**, uint32_t, list_node**, uint32_t*, uint32_t*, ptrdiff_t*);
 
-ptrdiff_t getListHead(ind*, uint32_t, uint32_t);
+ptrdiff_t getListHead(ind*, uint32_t);
 
 int destroyNodeIndex(ind*);
 

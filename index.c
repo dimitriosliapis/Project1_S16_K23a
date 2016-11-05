@@ -11,6 +11,9 @@ ind *createNodeIndex(uint32_t index_size) {
         index[i].first = -1;
         index[i].last = -1;
         index[i].max = 0;
+        index[i].visited = 0;
+        index[i].inFrontier = 0;
+        index[i].steps = 0;
     }
 
     return index;
@@ -18,18 +21,20 @@ ind *createNodeIndex(uint32_t index_size) {
 
 int lookup(ind *index, uint32_t id, uint32_t index_size) {
 
-    if(id >= index_size) return NOT_EXIST;          //an den to xwraei den uparxei
+    if (id >= index_size) return NOT_EXIST;          //an den to xwraei den uparxei
     if (index[id].first != -1) return ALR_EXISTS;
     return NOT_EXIST;
 }
 
-ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size, ptrdiff_t *available) {
+ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size,
+                     ptrdiff_t *available) {
 
     ptrdiff_t offset = 0;
 
     if (index == NULL) return IND_EMPTY;
 
-    offset = allocNewNode(&(*buffer), &(*buffer_size), *available);         //to offset tou prwtou eleutherou komvou sto buffer
+    offset = allocNewNode(&(*buffer), &(*buffer_size),
+                          *available);         //to offset tou prwtou eleutherou komvou sto buffer
     if (offset == -1) return ALLOC_FAIL;
 
     if (id >= *index_size) {
@@ -58,27 +63,33 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
         (*index)[i].first = -1;
         (*index)[i].last = -1;
         (*index)[i].max = DEFAULT;
+        (*index)[i].visited = 0;
+        (*index)[i].inFrontier = 0;
+        (*index)[i].steps = 0;
     }
     *index_size = realloc_size;
     return OK_SUCCESS;
 }
 
-ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, uint32_t index_size, ptrdiff_t *available) {
+ptrdiff_t
+addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, uint32_t index_size,
+        ptrdiff_t *available) {
 
     int i = 0;
     ptrdiff_t offset = 0, prev = 0;
 
-    offset = getListHead(*index, id, index_size);                            //offset 1ou komvou sto buffer gia to id
+    offset = getListHead(*index, id);                            //offset 1ou komvou sto buffer gia to id
     list_node *current = *buffer + offset;
 
-    if(neighbor > (*index)[id].max){
+    if (neighbor > (*index)[id].max) {
         current = *buffer + (*index)[id].last;
         (*index)[id].max = neighbor;
     }
 
     while (i < N) {                                                         //psaxnei stous geitones (max N ana komvo)
         if (current->neighbor[i] == neighbor) return ALR_CONNECTED;         //gia na dei an uparxei
-        if (current->neighbor[i] == DEFAULT) {                              //alliws vriskei tin thesi tou 1ou diathesimou
+        if (current->neighbor[i] ==
+            DEFAULT) {                              //alliws vriskei tin thesi tou 1ou diathesimou
             current->neighbor[i] = neighbor;                                //kai ton vazei ekei
             break;
         }
@@ -100,10 +111,9 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
     return offset;
 }
 
-ptrdiff_t getListHead(ind *index, uint32_t id, uint32_t index_size) {
+ptrdiff_t getListHead(ind *index, uint32_t id) {
 
     if (index == NULL) return -1;
-    if(id >= index_size) return -1;
     return index[id].first;
 }
 
