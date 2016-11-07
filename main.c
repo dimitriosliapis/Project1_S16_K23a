@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     uint32_t buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE;
     uint32_t index_size_in = IND_SIZE, index_size_out = IND_SIZE;
     ptrdiff_t available_in = 0, available_out = 0;
-    Queue *frontierF = NULL, *frontierB = NULL;
+    int i = 0;
 
     // arguments
     if (argc == 3) {
@@ -57,8 +57,7 @@ int main(int argc, char *argv[]) {
 
     fgets(str, sizeof(str), Queries);
 
-    frontierF = createQueue();
-    frontierB = createQueue();
+    int debug = 0;
 
     while (!feof(Queries)) {
 
@@ -78,18 +77,27 @@ int main(int argc, char *argv[]) {
 
         } else if (str[0] == 'Q') {
 
+            debug++;
+
             toID(str, &N1, &N2);
+
+            if (debug == 2184)
+                printf("\n");
 
             if (lookup(index_out, N1, index_size_out) == ALR_EXISTS &&
                 lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
-                printf("%d\n", bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB));
-                for (int i = 0; i < index_size_out; i++) {
-                    index_out[i].visited = 0;
-                    index_out[i].steps = 0;
+                printf("%d\n", bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2));
+                for (i = 0; i < index_size_out; i++) {
+                    if (index_out[i].visited == 1) {
+                        index_out[i].visited = 0;
+                        index_out[i].steps = 0;
+                    }
                 }
-                for (int i = 0; i < index_size_in; i++) {
-                    index_in[i].visited = 0;
-                    index_in[i].steps = 0;
+                for (i = 0; i < index_size_in; i++) {
+                    if (index_in[i].visited == 1) {
+                        index_in[i].visited = 0;
+                        index_in[i].steps = 0;
+                    }
                 }
             } else
                 printf("-1\n");
