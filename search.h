@@ -41,4 +41,4 @@ void addToHash(hNode *, uint32_t, uint32_t);
 
 void resetHash(hNode *);
 
-int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, Queue *, Queue *);
+int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t);
