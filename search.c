@@ -47,6 +47,9 @@ uint32_t pop(Queue *queue) {
     queue->first = out->next;
     id = out->id;
 
+    if (queue->first == NULL)
+        queue->last = NULL;
+
     free(out);
     return id;
 }
@@ -167,11 +170,14 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
     while (!isEmpty(frontierF) || !isEmpty(frontierB)) {
 
-        if (!isEmpty(frontierF)) {
+        while (!isEmpty(frontierF)) {
 
             node = pop(frontierF);
-//            if (index_in[nodeF].visited == 1)    // goal
-//                return index_in[nodeF].steps + steps;
+//            if (index_in[node].visited == 1) {   // goal
+//                empty(frontierF);
+//                empty(frontierB);
+//                return index_in[node].steps + steps;
+//            }
             steps = index_out[node].steps;
 
             offset = getListHead(index_out, node);
@@ -182,6 +188,9 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
                     successor = neighbors->neighbor[i];
                     if (successor != DEFAULT) {
+
+                        if (node == 16963 && successor == 7331)
+                            //printf("visited apo ton allo: %d\n", index_in[successor].visited);
 
                         if (index_out[successor].visited == 0) {
                             index_out[successor].visited = 1;
@@ -209,11 +218,14 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
             }
         }
 
-        if (!isEmpty(frontierB)) {
+        while (!isEmpty(frontierB)) {
 
             node = pop(frontierB);
-//            if (index_out[nodeB].visited == 1)  // goal
-//                return index_out[nodeB].steps + steps;
+//            if (index_out[node].visited == 1) {  // goal
+//                empty(frontierB);
+//                empty(frontierF);
+//                return index_out[node].steps + steps;
+//            }
             steps = index_in[node].steps;
 
             offset = getListHead(index_in, node);

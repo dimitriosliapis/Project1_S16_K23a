@@ -57,8 +57,6 @@ int main(int argc, char *argv[]) {
 
     fgets(str, sizeof(str), Queries);
 
-    int debug = 0;
-
     while (!feof(Queries)) {
 
         if (str[0] == 'A') {
@@ -77,12 +75,7 @@ int main(int argc, char *argv[]) {
 
         } else if (str[0] == 'Q') {
 
-            debug++;
-
             toID(str, &N1, &N2);
-
-            if (debug == 2184)
-                printf("\n");
 
             if (lookup(index_out, N1, index_size_out) == ALR_EXISTS &&
                 lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
