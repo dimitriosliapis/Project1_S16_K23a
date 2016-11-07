@@ -151,7 +151,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
     Queue *frontierF = NULL, *frontierB = NULL;
     list_node *neighbors = NULL;
     uint32_t node = DEFAULT, successor = DEFAULT;
-    int i = 0, steps = 0;
+    int i = 0, j = 0, counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, steps = 0;
     ptrdiff_t offset = 0;
 
     if (start == end)
@@ -163,21 +163,18 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
     index_out[start].visited = 1;
     index_out[start].steps = steps;
     push(frontierF, start);
+    counterF++;
 
     index_in[end].visited = 1;
     index_in[end].steps = steps;
     push(frontierB, end);
+    counterB++;
 
     while (!isEmpty(frontierF) || !isEmpty(frontierB)) {
 
-        while (!isEmpty(frontierF)) {
+        while (counterF != 0) {
 
             node = pop(frontierF);
-//            if (index_in[node].visited == 1) {   // goal
-//                empty(frontierF);
-//                empty(frontierB);
-//                return index_in[node].steps + steps;
-//            }
             steps = index_out[node].steps;
 
             offset = getListHead(index_out, node);
@@ -189,9 +186,6 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     successor = neighbors->neighbor[i];
                     if (successor != DEFAULT) {
 
-                        if (node == 16963 && successor == 7331)
-                            //printf("visited apo ton allo: %d\n", index_in[successor].visited);
-
                         if (index_out[successor].visited == 0) {
                             index_out[successor].visited = 1;
                             index_out[successor].steps = steps + 1;
@@ -202,6 +196,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                                 return index_in[successor].steps + index_out[successor].steps;
                             } else {
                                 push(frontierF, successor);
+                                counterFS++;
                             }
                         }
                     } else
@@ -216,16 +211,16 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
                 i = 0;
             }
+
+            counterF--;
         }
 
-        while (!isEmpty(frontierB)) {
+        counterF = counterFS;
+        counterFS = 0;
+
+        while (counterB != 0) {
 
             node = pop(frontierB);
-//            if (index_out[node].visited == 1) {  // goal
-//                empty(frontierB);
-//                empty(frontierF);
-//                return index_out[node].steps + steps;
-//            }
             steps = index_in[node].steps;
 
             offset = getListHead(index_in, node);
@@ -247,6 +242,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                                 return index_out[successor].steps + index_in[successor].steps;
                             } else {
                                 push(frontierB, successor);
+                                counterBS++;
                             }
                         }
                     } else
@@ -261,7 +257,12 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
                 i = 0;
             }
+
+            counterB--;
         }
+
+        counterB = counterBS;
+        counterBS = 0;
     }
 
     free(frontierF);
