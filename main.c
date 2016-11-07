@@ -107,7 +107,7 @@ int toID(char *str, uint32_t *N1, uint32_t *N2) {
     uint32_t i, j, id;
     if (str == NULL)
         return 0;
-    if ((str[0] < '0') && (str[0] > '9'))
+    if ((str[0] < '0') || (str[0] > '9'))
         i = 2;
     else
         i = 0;
