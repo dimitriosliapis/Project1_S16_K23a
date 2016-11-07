@@ -187,7 +187,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
         counterBS = 0;
     }
 
-    free(frontierF);
-    free(frontierB);
+    empty(frontierF);
+    empty(frontierB);
     return -1;
 }
