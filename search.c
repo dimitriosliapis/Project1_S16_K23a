@@ -60,6 +60,9 @@ void empty(Queue *queue) {
         curr = curr->next;
         free(prev);
     }
+
+    queue->first = NULL;
+    queue->last = NULL;
 }
 
 /* ----------DEN XRHSΙMOPOIOYNTAI---------- */

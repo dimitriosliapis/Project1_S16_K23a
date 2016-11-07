@@ -29,6 +29,8 @@ int push(Queue *, uint32_t);
 
 uint32_t pop(Queue *);
 
+void empty(Queue *);
+
 int search(Queue *, uint32_t);
 
 uint32_t hash(uint32_t);
