@@ -67,84 +67,6 @@ void empty(Queue *queue) {
     free(queue);
 }
 
-/* ----------DEN XRHSΙMOPOIOYNTAI---------- */
-
-int search(Queue *queue, uint32_t id) {
-
-    q_Node *curr = NULL;
-    curr = queue->first;
-    while (curr != NULL) {
-        if (curr->id == id)
-            return FOUND;
-        curr = curr->next;
-    }
-    return NOT_FOUND;
-}
-
-uint32_t hash(uint32_t x) {
-
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = (x >> 16) ^ x;
-    return x;
-}
-
-void resetHash(hNode *hashTable) {
-
-    int i = 0;
-    for (i = 0; i < H_DEFAULT; i++) {
-
-        hashTable[i].id = DEFAULT;
-        hashTable[i].steps = 0;
-        hashTable[i].next = NULL;
-    }
-}
-
-int isIn(hNode *hashTable, uint32_t id) {
-
-    int pos = 0;
-    hNode *tmp = NULL;
-
-    pos = hash(id) % H_DEFAULT;
-    tmp = hashTable[pos].next;
-
-    while (tmp->next != NULL) {
-        if (hashTable[pos].id == id)
-            return FOUND;
-        tmp = tmp->next;
-    }
-    return NOT_FOUND;
-}
-
-void addToHash(hNode *hashTable, uint32_t id, uint32_t steps) {
-
-    int pos = 0;
-    hNode *new = NULL, *tmp = NULL;
-
-    pos = hash(id) % H_DEFAULT;
-
-    if (hashTable[pos].id == DEFAULT) {
-        hashTable[pos].id = id;
-        hashTable[pos].steps = steps;
-        return;
-    }
-
-    new = malloc(sizeof(hNode));
-
-    new->id = id;
-    new->steps = steps;
-    new->next = NULL;
-
-    tmp = hashTable[pos].next;
-
-    while (tmp->next != NULL) {
-        tmp = tmp->next;
-    }
-
-    tmp->next = new;
-}
-
-/* ---------------------------------------- */
 
 int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end) {
 
@@ -170,7 +92,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
     push(frontierB, end);
     counterB++;
 
-    while (!isEmpty(frontierF) || !isEmpty(frontierB)) {
+    while (!isEmpty(frontierF) && !isEmpty(frontierB)) {
 
         while (counterF != 0) {
 
