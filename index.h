@@ -17,7 +17,6 @@ typedef struct index_t{
     ptrdiff_t last;
     uint32_t max;
     int visited;
-    int inFrontier;
     int steps;
 }ind;
 

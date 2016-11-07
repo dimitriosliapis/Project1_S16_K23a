@@ -81,11 +81,11 @@ int main(int argc, char *argv[]) {
                 printf("%d\n", bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2));
                 for (int i = 0; i < index_size_out; i++) {
                     index_out[i].visited = 0;
-                    index_out[i].inFrontier = 0;
+                    index_out[i].steps = 0;
                 }
                 for (int i = 0; i < index_size_in; i++) {
                     index_in[i].visited = 0;
-                    index_in[i].inFrontier = 0;
+                    index_in[i].steps = 0;
                 }
             } else
                 printf("-1\n");
@@ -107,7 +107,7 @@ int toID(char *str, uint32_t *N1, uint32_t *N2) {
     uint32_t i, j, id;
     if (str == NULL)
         return 0;
-    if ((str[0] > '0') && (str[0] > '9'))
+    if ((str[0] < '0') && (str[0] > '9'))
         i = 2;
     else
         i = 0;

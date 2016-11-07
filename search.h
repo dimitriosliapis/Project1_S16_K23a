@@ -26,9 +26,9 @@ Queue *createQueue();
 
 int isEmpty(Queue *);
 
-int push(Queue *, uint32_t, ind *, int);
+int push(Queue *, uint32_t, int);
 
-uint32_t pop(Queue *, ind *, int *);
+uint32_t pop(Queue *, int *);
 
 int search(Queue *, uint32_t);
 

@@ -12,7 +12,6 @@ ind *createNodeIndex(uint32_t index_size) {
         index[i].last = -1;
         index[i].max = 0;
         index[i].visited = 0;
-        index[i].inFrontier = 0;
         index[i].steps = 0;
     }
 
@@ -64,7 +63,6 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
         (*index)[i].last = -1;
         (*index)[i].max = DEFAULT;
         (*index)[i].visited = 0;
-        (*index)[i].inFrontier = 0;
         (*index)[i].steps = 0;
     }
     *index_size = realloc_size;
@@ -88,8 +86,7 @@ addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_
 
     while (i < N) {                                                         //psaxnei stous geitones (max N ana komvo)
         if (current->neighbor[i] == neighbor) return ALR_CONNECTED;         //gia na dei an uparxei
-        if (current->neighbor[i] ==
-            DEFAULT) {                              //alliws vriskei tin thesi tou 1ou diathesimou
+        if (current->neighbor[i] == DEFAULT) {                              //alliws vriskei tin thesi tou 1ou diathesimou
             current->neighbor[i] = neighbor;                                //kai ton vazei ekei
             break;
         }
