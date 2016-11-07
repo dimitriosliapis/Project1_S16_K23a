@@ -204,10 +204,6 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 //                return index_out[nodeB].steps + steps;
             steps++;
 
-            if (index_out[nodeB].visited == 1) {
-                return index_in[nodeB].steps + index_out[nodeB].steps;
-            }
-
             offset = getListHead(index_in, nodeB);
             if (offset != -1) {
 
