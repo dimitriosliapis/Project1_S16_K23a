@@ -19,7 +19,7 @@ int isEmpty(Queue *queue) {
     return (queue->first == NULL);
 }
 
-int push(Queue *queue, uint32_t id, int steps) {
+int push(Queue *queue, uint32_t id) {
 
     q_Node *new = NULL;
     if (queue == NULL)
@@ -27,7 +27,6 @@ int push(Queue *queue, uint32_t id, int steps) {
     new = malloc(sizeof(q_Node));
     new->id = id;
     new->next = NULL;
-    new->steps = steps;
 
     if (queue->first == NULL)
         queue->first = new;
@@ -37,7 +36,7 @@ int push(Queue *queue, uint32_t id, int steps) {
     return 0;
 }
 
-uint32_t pop(Queue *queue, int *steps) {
+uint32_t pop(Queue *queue) {
 
     q_Node *out = NULL;
     uint32_t id = 0;
@@ -47,10 +46,20 @@ uint32_t pop(Queue *queue, int *steps) {
     out = queue->first;
     queue->first = out->next;
     id = out->id;
-    *steps = out->steps;
 
     free(out);
     return id;
+}
+
+void empty(Queue *queue) {
+
+    q_Node *curr = queue->first, *prev = NULL;
+
+    while (curr != NULL) {
+        prev = curr;
+        curr = curr->next;
+        free(prev);
+    }
 }
 
 /* ----------DEN XRHSΙMOPOIOYNTAI---------- */
@@ -132,9 +141,8 @@ void addToHash(hNode *hashTable, uint32_t id, uint32_t steps) {
 
 /* ---------------------------------------- */
 
-int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end) {
+int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end, Queue *frontierF, Queue *frontierB) {
 
-    Queue *frontierF = NULL, *frontierB = NULL;
     list_node *neighborsF = NULL, *neighborsB = NULL;
     uint32_t nodeF = DEFAULT, nodeB = DEFAULT, successor = DEFAULT;
     int i = 0, steps = 0;
@@ -143,25 +151,22 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
     if (start == end)
         return 0;
 
-    frontierF = createQueue();
-
-    frontierB = createQueue();
-
     index_out[start].visited = 1;
-    push(frontierF, start, steps);
+    push(frontierF, start);
     index_out[start].steps = steps;
 
     index_in[end].visited = 1;
-    push(frontierB, end, steps);
+    push(frontierB, end);
     index_in[end].steps = steps;
 
     while (!isEmpty(frontierF) || !isEmpty(frontierB)) {
 
         if (!isEmpty(frontierF)) {
 
-            nodeF = pop(frontierF, &steps);
+            nodeF = pop(frontierF);
 //            if (index_in[nodeF].visited == 1)    // goal
 //                return index_in[nodeF].steps + steps;
+            steps = index_out[nodeF].steps;
             steps++;
 
             offset = getListHead(index_out, nodeF);
@@ -176,10 +181,12 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                         if (index_out[successor].visited == 0) {
                             index_out[successor].visited = 1;
 
-                            if (index_in[successor].visited == 1)    // goal
+                            if (index_in[successor].visited == 1) {   // goal
+                                empty(frontierF);
+                                empty(frontierB);
                                 return index_in[successor].steps + steps;
-                            else {
-                                push(frontierF, successor, steps);
+                            } else {
+                                push(frontierF, successor);
                                 index_out[successor].steps = steps;
                             }
                         }
@@ -199,9 +206,10 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
         if (!isEmpty(frontierB)) {
 
-            nodeB = pop(frontierB, &steps);
+            nodeB = pop(frontierB);
 //            if (index_out[nodeB].visited == 1)  // goal
 //                return index_out[nodeB].steps + steps;
+            steps = index_in[nodeB].steps;
             steps++;
 
             offset = getListHead(index_in, nodeB);
@@ -216,10 +224,12 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                         if (index_in[successor].visited == 0) {
                             index_in[successor].visited = 1;
 
-                            if (index_out[successor].visited == 1)  // goal
+                            if (index_out[successor].visited == 1) {   // goal
+                                empty(frontierB);
+                                empty(frontierF);
                                 return index_out[successor].steps + steps;
-                            else {
-                                push(frontierB, successor, steps);
+                            } else {
+                                push(frontierB, successor);
                                 index_in[successor].steps = steps;
                             }
                         }

@@ -13,7 +13,6 @@ typedef struct hNode_t {
 
 typedef struct qNode_t {
     uint32_t id;
-    int steps;
     struct qNode_t *next;
 } q_Node;
 
@@ -26,9 +25,9 @@ Queue *createQueue();
 
 int isEmpty(Queue *);
 
-int push(Queue *, uint32_t, int);
+int push(Queue *, uint32_t);
 
-uint32_t pop(Queue *, int *);
+uint32_t pop(Queue *);
 
 int search(Queue *, uint32_t);
 
@@ -40,4 +39,4 @@ void addToHash(hNode *, uint32_t, uint32_t);
 
 void resetHash(hNode *);
 
-int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t);
+int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, Queue *, Queue *);

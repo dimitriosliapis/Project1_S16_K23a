@@ -14,6 +14,7 @@ int main(int argc, char *argv[]) {
     uint32_t buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE;
     uint32_t index_size_in = IND_SIZE, index_size_out = IND_SIZE;
     ptrdiff_t available_in = 0, available_out = 0;
+    Queue *frontierF = NULL, *frontierB = NULL;
 
     // arguments
     if (argc == 3) {
@@ -56,6 +57,9 @@ int main(int argc, char *argv[]) {
 
     fgets(str, sizeof(str), Queries);
 
+    frontierF = createQueue();
+    frontierB = createQueue();
+
     while (!feof(Queries)) {
 
         if (str[0] == 'A') {
@@ -78,7 +82,7 @@ int main(int argc, char *argv[]) {
 
             if (lookup(index_out, N1, index_size_out) == ALR_EXISTS &&
                 lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
-                printf("%d\n", bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2));
+                printf("%d\n", bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB));
                 for (int i = 0; i < index_size_out; i++) {
                     index_out[i].visited = 0;
                     index_out[i].steps = 0;
