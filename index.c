@@ -10,8 +10,6 @@ ind *createNodeIndex(uint32_t index_size) {
         index[i].first = -1;
         index[i].last = -1;
         index[i].max = 0;
-        index[i].visited = 0;
-        index[i].steps = 0;
     }
 
     return index;
