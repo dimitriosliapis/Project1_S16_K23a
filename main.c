@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     uint32_t buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE;
     uint32_t index_size_in = IND_SIZE, index_size_out = IND_SIZE;
     ptrdiff_t available_in = 0, available_out = 0;
-    int i = 0, steps = 0;
+    int i = 0, steps = 0, counter = 0;
 
     // orismata
     if (argc == 3) {
@@ -81,20 +81,6 @@ int main(int argc, char *argv[]) {
 
                 steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2);
                 printf("%d\n", steps);
-
-                // ksemarkarisma visited kai arxikopoihsh steps
-                for (i = 0; i < index_size_out; i++) {
-                    if (index_out[i].visited == 1) {
-                        index_out[i].visited = 0;
-                        index_out[i].steps = 0;
-                    }
-                }
-                for (i = 0; i < index_size_in; i++) {
-                    if (index_in[i].visited == 1) {
-                        index_in[i].visited = 0;
-                        index_in[i].steps = 0;
-                    }
-                }
             } else
                 printf("-1\n");
         }

@@ -59,8 +59,6 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
         (*index)[i].first = -1;
         (*index)[i].last = -1;
         (*index)[i].max = DEFAULT;
-        (*index)[i].visited = 0;
-        (*index)[i].steps = 0;
     }
     *index_size = realloc_size;
     return OK_SUCCESS;

@@ -1,5 +1,74 @@
 #include "search.h"
 
+ht_Node **createHashtable() {
+
+    int i = 0;
+    ht_Node **hashTable = NULL;
+    hashTable = malloc(sizeof(ht_Node) * HT_SIZE);
+    if (hashTable == NULL)
+        return NULL;
+    else {
+        for (i = 0; i < HT_SIZE; i++)
+            hashTable[i] = NULL;
+        return hashTable;
+    }
+}
+
+int search(ht_Node **hashTable, uint32_t id) {
+
+    int offset = id % HT_SIZE;
+    ht_Node *bucket = hashTable[offset];
+
+    while (bucket != NULL) {
+
+        if (bucket->id == id)
+            return FOUND;
+        bucket = bucket->next;
+    }
+
+    return NOT_FOUND;
+}
+
+void insert(ht_Node **hashTable, uint32_t id) {
+
+    int offset = id % HT_SIZE;
+    ht_Node *bucket = hashTable[offset];
+
+    if (bucket == NULL) { // this bucket doesn't exist yet - create it
+        ht_Node *htEntry = (ht_Node *) malloc(sizeof(ht_Node));
+        htEntry->id = id;
+        htEntry->next = NULL;
+        hashTable[offset] = htEntry;
+        return;
+    }
+    while (bucket->next != NULL) { // walk the list
+        bucket = bucket->next;
+    }
+    ht_Node *htEntry = (ht_Node *) malloc(sizeof(ht_Node));
+    htEntry->id = id;
+    htEntry->next = NULL;
+    bucket->next = htEntry;
+
+}
+
+void delete(ht_Node **hashTable) {
+
+    int i = 0;
+    ht_Node *bucket = NULL;
+    ht_Node *prev = NULL;
+
+    for (i = 0; i < HT_SIZE; i++) {
+        bucket = hashTable[i];
+        while (bucket != NULL) {
+            prev = bucket;
+            bucket = bucket->next;
+            free(prev);
+        }
+    }
+
+    free(hashTable);
+}
+
 Queue *createQueue() {
 
     Queue *queue = NULL;
@@ -70,9 +139,10 @@ void empty(Queue *queue) {
 int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end) {
 
     Queue *frontierF = NULL, *frontierB = NULL;
+    ht_Node **exploredF = NULL, **exploredB = NULL;
     list_node *neighbors = NULL;
     uint32_t node = DEFAULT, successor = DEFAULT;
-    int i = 0, j = 0, counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, steps = 0;
+    int i = 0, j = 0, counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, stepsF = 0, stepsB = 0;
     ptrdiff_t offset = 0;
 
     if (start == end)   // an o komvos ekkinhshs einai o komvos stoxos tote steps=0
@@ -81,22 +151,23 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
 
-    index_out[start].visited = 1;
-    index_out[start].steps = steps;
+    exploredF = createHashtable();  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
+    exploredB = createHashtable();  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh
+
+    insert(exploredF, start);
     push(frontierF, start);
     counterF++;
 
-    index_in[end].visited = 1;
-    index_in[end].steps = steps;
+    insert(exploredB, end);
     push(frontierB, end);
     counterB++;
 
     while (!isEmpty(frontierF) && !isEmpty(frontierB)) {    // oso ta 2 synora den einai adeia
 
+        stepsF++;
         while (counterF != 0) { // epanalhpsh gia tous komvous poy mphkan sto synoro sto prohgoumeno vathos
 
             node = pop(frontierF);  // pop
-            steps = index_out[node].steps;
 
             offset = getListHead(index_out, node);
             if (offset != -1) {     // mporei na mhn exei geitones
@@ -107,14 +178,15 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     successor = neighbors->neighbor[i];
                     if (successor != DEFAULT) {
 
-                        if (index_out[successor].visited == 0) {    // an den ton exei episkeftei
-                            index_out[successor].visited = 1;   // ton markarisma
-                            index_out[successor].steps = steps + 1;
+                        if (search(exploredF, successor) == NOT_FOUND) {
+                            insert(exploredF, successor);
 
-                            if (index_in[successor].visited == 1) {   // an ton exei episkeftei o allos bfs GOAL!
+                            if (search(exploredB, successor) == FOUND) {
                                 empty(frontierF);
                                 empty(frontierB);
-                                return index_in[successor].steps + index_out[successor].steps;
+                                delete(exploredF);
+                                delete(exploredB);
+                                return stepsB + stepsF;
                             } else {    // alliws eisagwgh sto synoro
                                 push(frontierF, successor);
                                 counterFS++;
@@ -139,10 +211,10 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
         counterF = counterFS;
         counterFS = 0;
 
+        stepsB++;
         while (counterB != 0) { // epanalhpsh gia tous komvous poy mphkan sto synoro sto prohgoumeno vathos
 
-            node = pop(frontierB);
-            steps = index_in[node].steps;
+            node = pop(frontierB);  // pop
 
             offset = getListHead(index_in, node);
             if (offset != -1) { // mporei na mhn exei geitones
@@ -153,14 +225,15 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     successor = neighbors->neighbor[i];
                     if (successor != DEFAULT) {
 
-                        if (index_in[successor].visited == 0) { // an den ton exei episkeftei
-                            index_in[successor].visited = 1;    // ton markarisma
-                            index_in[successor].steps = steps + 1;
+                        if (search(exploredB, successor) == NOT_FOUND) {
+                            insert(exploredB, successor);
 
-                            if (index_out[successor].visited == 1) {    // an ton exei episkeftei o allos bfs GOAL!
+                            if (search(exploredF, successor) == FOUND) {
                                 empty(frontierB);
                                 empty(frontierF);
-                                return index_out[successor].steps + index_in[successor].steps;
+                                delete(exploredB);
+                                delete(exploredF);
+                                return stepsF + stepsB;
                             } else {    // alliws eisagwgh sto synoro
                                 push(frontierB, successor);
                                 counterBS++;
@@ -188,5 +261,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
     empty(frontierF);
     empty(frontierB);
+    delete(exploredF);
+    delete(exploredB);
     return -1;  // an den vrethei monopati epistrefei -1
 }
