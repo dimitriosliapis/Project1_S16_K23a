@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <sys/time.h>
 #include "search.h"
 
@@ -14,9 +13,9 @@ int main(int argc, char *argv[]) {
     uint32_t buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE;
     uint32_t index_size_in = IND_SIZE, index_size_out = IND_SIZE;
     ptrdiff_t available_in = 0, available_out = 0;
-    int i = 0;
+    int i = 0, steps = 0;
 
-    // arguments
+    // orismata
     if (argc == 3) {
         Graph = fopen(argv[1], "r");
         Queries = fopen(argv[2], "r");
@@ -25,7 +24,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    // create pairs of indexes and buffers
+    // zeugh indexes kai buffers
     buffer_in = createBuffer(buffer_size_in);
     index_in = createNodeIndex(index_size_in);
     buffer_out = createBuffer(buffer_size_out);
@@ -47,9 +46,9 @@ int main(int argc, char *argv[]) {
         if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
             insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
 
-        addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, index_size_out, &available_out);
+        addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out);
 
-        addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, index_size_in, &available_in);
+        addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in);
 
         fgets(str, sizeof(str), Graph);
     }
@@ -69,9 +68,9 @@ int main(int argc, char *argv[]) {
             if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
                 insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
 
-            addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, index_size_out, &available_out);
+            addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out);
 
-            addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, index_size_in, &available_in);
+            addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in);
 
         } else if (str[0] == 'Q') {
 
@@ -79,7 +78,11 @@ int main(int argc, char *argv[]) {
 
             if (lookup(index_out, N1, index_size_out) == ALR_EXISTS &&
                 lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
-                printf("%d\n", bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2));
+
+                steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2);
+                printf("%d\n", steps);
+
+                // ksemarkarisma visited kai arxikopoihsh steps
                 for (i = 0; i < index_size_out; i++) {
                     if (index_out[i].visited == 1) {
                         index_out[i].visited = 0;

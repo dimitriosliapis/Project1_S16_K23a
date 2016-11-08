@@ -1,16 +1,5 @@
 #include "index.h"
 
-#define FOUND 1
-#define NOT_FOUND -1
-#define H_DEFAULT 64
-
-
-typedef struct hNode_t {
-    uint32_t id;
-    uint32_t steps;
-    struct hNode *next;
-} hNode;
-
 typedef struct qNode_t {
     uint32_t id;
     struct qNode_t *next;
@@ -30,15 +19,5 @@ int push(Queue *, uint32_t);
 uint32_t pop(Queue *);
 
 void empty(Queue *);
-
-int search(Queue *, uint32_t);
-
-uint32_t hash(uint32_t);
-
-int isIn(hNode *, uint32_t);
-
-void addToHash(hNode *, uint32_t, uint32_t);
-
-void resetHash(hNode *);
 
 int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t);
