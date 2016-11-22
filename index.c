@@ -94,10 +94,10 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
         i++;
         if (i == N) {   // an ftasei to N paei ston epomeno komvo
             if (current->nextListNode == -1) {  // an den uparxei ton dimiourgei
-                prev = *buffer - current;
+                prev = current - *buffer;
                 offset = allocNewNode(&(*buffer), &(*buffer_size), *available);
                 (*available)++;
-                current = *buffer - prev;
+                current = *buffer + prev;
                 current->nextListNode = offset;
                 current = *buffer + offset;
                 (*index)[id].last = offset;
