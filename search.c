@@ -85,11 +85,11 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
     exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
     exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh
 
-    insert(exploredF, start, HT_BIG);
+    insert(&exploredF, start, HT_BIG);
     push(frontierF, start);
     counterF++;
 
-    insert(exploredB, end, HT_BIG);
+    insert(&exploredB, end, HT_BIG);
     push(frontierB, end);
     counterB++;
 
@@ -110,7 +110,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     if (successor != DEFAULT) {
 
                         if (search(exploredF, successor, HT_BIG) == NOT_FOUND) {
-                            insert(exploredF, successor, HT_BIG);
+                            insert(&exploredF, successor, HT_BIG);
 
                             if (search(exploredB, successor, HT_BIG) == FOUND) {
                                 empty(frontierF);
@@ -127,7 +127,8 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                         break;
 
                     i++;
-                    if (i == N && neighbors->nextListNode != -1) {  // an exei ki allous geitones se epomeno listnode synexizei
+                    if (i == N &&
+                        neighbors->nextListNode != -1) {  // an exei ki allous geitones se epomeno listnode synexizei
                         neighbors = buffer_out + neighbors->nextListNode;
                         i = 0;
                     }
@@ -157,7 +158,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     if (successor != DEFAULT) {
 
                         if (search(exploredB, successor, HT_BIG) == NOT_FOUND) {
-                            insert(exploredB, successor, HT_BIG);
+                            insert(&exploredB, successor, HT_BIG);
 
                             if (search(exploredF, successor, HT_BIG) == FOUND) {
                                 empty(frontierB);
@@ -174,7 +175,8 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                         break;
 
                     i++;
-                    if (i == N && neighbors->nextListNode != -1) {  // an exei ki allous geitones se epomeno listnode synexizei
+                    if (i == N &&
+                        neighbors->nextListNode != -1) {  // an exei ki allous geitones se epomeno listnode synexizei
                         neighbors = buffer_in + neighbors->nextListNode;
                         i = 0;
                     }

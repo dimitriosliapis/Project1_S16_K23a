@@ -83,7 +83,7 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
     if (search((*index)[id].neighbors, neighbor, HT_SMALL) == FOUND)
         return ALR_CONNECTED;
     else
-        insert((*index)[id].neighbors, neighbor, HT_SMALL);
+        insert(&(*index)[id].neighbors, neighbor, HT_SMALL);
 
     while (i < N) { // psaxnei stous geitones (max N ana komvo)
 //        if (current->neighbor[i] == neighbor) return ALR_CONNECTED; // gia na dei an uparxei
