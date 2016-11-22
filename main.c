@@ -96,8 +96,8 @@ int main(int argc, char *argv[]) {
 
     destroyBuffer(buffer_in);
     destroyBuffer(buffer_out);
-    destroyNodeIndex(index_in);
-    destroyNodeIndex(index_out);
+    destroyNodeIndex(index_in, index_size_in);
+    destroyNodeIndex(index_out, index_size_out);
 
     return 0;
 }
