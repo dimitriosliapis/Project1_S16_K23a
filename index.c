@@ -70,18 +70,22 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
     ptrdiff_t offset = 0, prev = 0;
 
     offset = getListHead(*index, id);   // offset 1ou komvou sto buffer gia to id
-    list_node *current = *buffer + index[id]->last;
-
-    if (index[id]->neighbors == NULL)
-        index[id]->neighbors = createHashtable();
+    list_node *current = *buffer + (*index)[id].last;
 
 //    if (neighbor > (*index)[id].max) {
 //        current = *buffer + (*index)[id].last;
 //        (*index)[id].max = neighbor;
 //    }
 
+    if ((*index)[id].neighbors == NULL)
+        (*index)[id].neighbors = createHashtable();
+
+    if (search((*index)[id].neighbors, neighbor) == FOUND)
+        return ALR_CONNECTED;
+    else
+        insert((*index)[id].neighbors, neighbor);
+
     while (i < N) { // psaxnei stous geitones (max N ana komvo)
-        if (search(index[id]->neighbors, neighbor) == FOUND) return ALR_CONNECTED;
 //        if (current->neighbor[i] == neighbor) return ALR_CONNECTED; // gia na dei an uparxei
         if (current->neighbor[i] == DEFAULT) {  // alliws vriskei tin thesi tou 1ou diathesimou
             current->neighbor[i] = neighbor;    // kai ton vazei ekei
