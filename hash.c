@@ -28,7 +28,7 @@ ht_Node *createHashtable(uint32_t size) {
 int search(ht_Node *hashTable, uint32_t id, uint32_t size) {
 
     int i = 0;
-    int offset = hash(id) % size;
+    int offset = id % size;
     uint32_t *bucket = NULL;
 
     if (hashTable == NULL)
@@ -51,7 +51,7 @@ int search(ht_Node *hashTable, uint32_t id, uint32_t size) {
 void insert(ht_Node *hashTable, uint32_t id, uint32_t size) {
 
     int i = 0;
-    int offset = hash(id) % size;
+    int offset = id % size;
     int prev_size = hashTable[offset].size;
 
     if (hashTable[offset].bucket == NULL) {    // this bucket doesn't exist yet - create it and insert id
@@ -92,8 +92,11 @@ void reinitialize(ht_Node *hashTable, uint32_t size) {
 
     for (i = 0; i < size; i++) {
         if (hashTable[i].bucket != NULL) {
-            for (j = 0; j < hashTable[i].size; j++)
+            for (j = 0; j < hashTable[i].size; j++) {
+                if (hashTable[i].bucket[j] == DEFAULT)
+                    break;
                 hashTable[i].bucket[j] = DEFAULT;
+            }
         }
     }
 }
@@ -101,14 +104,12 @@ void reinitialize(ht_Node *hashTable, uint32_t size) {
 void delete(ht_Node *hashTable, uint32_t size) {
 
     int i = 0;
-    uint32_t *bucket = NULL;
 
     if (hashTable == NULL)
         return;
 
     for (i = 0; i < size; i++) {
-        bucket = hashTable[i].bucket;
-        free(bucket);
+        free(hashTable[i].bucket);
     }
 
     free(hashTable);

@@ -1,7 +1,7 @@
 #include <stdint.h>
 
-#define HT_BIG 10007
-#define HT_SMALL 101
+#define HT_BIG 25013
+#define HT_SMALL 97
 #define HT_N 7
 
 #define DEFAULT 16777216

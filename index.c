@@ -9,7 +9,6 @@ ind *createNodeIndex(uint32_t index_size) {
     for (i = 0; i < index_size; i++) {
         index[i].first = -1;
         index[i].last = -1;
-        index[i].max = 0;
         index[i].neighbors = NULL;
     }
 
@@ -57,7 +56,6 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
     for (i = *index_size; i < realloc_size; i++) {  // arxikopoihsh twn newn index nodes
         (*index)[i].first = -1;
         (*index)[i].last = -1;
-        (*index)[i].max = DEFAULT;
         (*index)[i].neighbors = NULL;
     }
     *index_size = realloc_size;
@@ -71,11 +69,6 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
 
     offset = getListHead(*index, id);   // offset 1ou komvou sto buffer gia to id
     list_node *current = *buffer + (*index)[id].last;
-
-//    if (neighbor > (*index)[id].max) {
-//        current = *buffer + (*index)[id].last;
-//        (*index)[id].max = neighbor;
-//    }
 
     if ((*index)[id].neighbors == NULL)
         (*index)[id].neighbors = createHashtable(HT_SMALL);
