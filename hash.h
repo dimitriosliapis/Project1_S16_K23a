@@ -1,6 +1,7 @@
 #include <stdint.h>
 
-#define HT_SIZE 100003
+#define HT_BIG 100003
+#define HT_SMALL 10007
 
 #define FOUND 1
 #define NOT_FOUND -1
@@ -12,10 +13,10 @@ typedef struct htNode_t {
 
 unsigned int hash(uint32_t x);
 
-ht_Node **createHashtable();
+ht_Node **createHashtable(uint32_t);
 
-int search(ht_Node **hashTable, uint32_t id);
+int search(ht_Node**, uint32_t, uint32_t);
 
-void insert(ht_Node **hashTable, uint32_t id);
+void insert(ht_Node**, uint32_t, uint32_t);
 
-void delete(ht_Node **hashTable);
+void delete(ht_Node**, uint32_t);

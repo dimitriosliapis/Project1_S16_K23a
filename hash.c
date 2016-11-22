@@ -9,23 +9,23 @@ unsigned int hash(uint32_t x) {
     return x;
 }
 
-ht_Node **createHashtable() {
+ht_Node **createHashtable(uint32_t size) {
 
     int i = 0;
     ht_Node **hashTable = NULL;
-    hashTable = malloc(sizeof(ht_Node) * HT_SIZE);
+    hashTable = malloc(sizeof(ht_Node) * size);
     if (hashTable == NULL)
         return NULL;
     else {
-        for (i = 0; i < HT_SIZE; i++)
+        for (i = 0; i < size; i++)
             hashTable[i] = NULL;
         return hashTable;
     }
 }
 
-int search(ht_Node **hashTable, uint32_t id) {
+int search(ht_Node **hashTable, uint32_t id, uint32_t size) {
 
-    int offset = id % HT_SIZE;
+    int offset = hash(id) % size;
     ht_Node *bucket = NULL;
 
     if (hashTable == NULL)
@@ -42,9 +42,9 @@ int search(ht_Node **hashTable, uint32_t id) {
     return NOT_FOUND;
 }
 
-void insert(ht_Node **hashTable, uint32_t id) {
+void insert(ht_Node **hashTable, uint32_t id, uint32_t size) {
 
-    int offset = id % HT_SIZE;
+    int offset = hash(id) % size;
     ht_Node *bucket = hashTable[offset];
 
     if (bucket == NULL) { // this bucket doesn't exist yet - create it
@@ -64,7 +64,7 @@ void insert(ht_Node **hashTable, uint32_t id) {
 
 }
 
-void delete(ht_Node **hashTable) {
+void delete(ht_Node **hashTable,uint32_t size) {
 
     int i = 0;
     ht_Node *bucket = NULL;
@@ -73,7 +73,7 @@ void delete(ht_Node **hashTable) {
     if (hashTable == NULL)
         return;
 
-    for (i = 0; i < HT_SIZE; i++) {
+    for (i = 0; i < size; i++) {
         bucket = hashTable[i];
         while (bucket != NULL) {
             prev = bucket;

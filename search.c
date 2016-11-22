@@ -82,14 +82,14 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
 
-    exploredF = createHashtable();  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
-    exploredB = createHashtable();  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh
+    exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
+    exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh
 
-    insert(exploredF, start);
+    insert(exploredF, start, HT_BIG);
     push(frontierF, start);
     counterF++;
 
-    insert(exploredB, end);
+    insert(exploredB, end, HT_BIG);
     push(frontierB, end);
     counterB++;
 
@@ -109,14 +109,14 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     successor = neighbors->neighbor[i];
                     if (successor != DEFAULT) {
 
-                        if (search(exploredF, successor) == NOT_FOUND) {
-                            insert(exploredF, successor);
+                        if (search(exploredF, successor, HT_BIG) == NOT_FOUND) {
+                            insert(exploredF, successor, HT_BIG);
 
-                            if (search(exploredB, successor) == FOUND) {
+                            if (search(exploredB, successor, HT_BIG) == FOUND) {
                                 empty(frontierF);
                                 empty(frontierB);
-                                delete(exploredF);
-                                delete(exploredB);
+                                delete(exploredF, HT_BIG);
+                                delete(exploredB, HT_BIG);
                                 return stepsB + stepsF;
                             } else {    // alliws eisagwgh sto synoro
                                 push(frontierF, successor);
@@ -156,14 +156,14 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     successor = neighbors->neighbor[i];
                     if (successor != DEFAULT) {
 
-                        if (search(exploredB, successor) == NOT_FOUND) {
-                            insert(exploredB, successor);
+                        if (search(exploredB, successor, HT_BIG) == NOT_FOUND) {
+                            insert(exploredB, successor, HT_BIG);
 
-                            if (search(exploredF, successor) == FOUND) {
+                            if (search(exploredF, successor, HT_BIG) == FOUND) {
                                 empty(frontierB);
                                 empty(frontierF);
-                                delete(exploredB);
-                                delete(exploredF);
+                                delete(exploredB, HT_BIG);
+                                delete(exploredF, HT_BIG);
                                 return stepsF + stepsB;
                             } else {    // alliws eisagwgh sto synoro
                                 push(frontierB, successor);
@@ -192,7 +192,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
     empty(frontierF);
     empty(frontierB);
-    delete(exploredF);
-    delete(exploredB);
+    delete(exploredF, HT_BIG);
+    delete(exploredB, HT_BIG);
     return -1;  // an den vrethei monopati epistrefei -1
 }
