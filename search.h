@@ -1,3 +1,5 @@
+#include "index.h"
+#include "buffer.h"
 #include "hash.h"
 
 typedef struct qNode_t {

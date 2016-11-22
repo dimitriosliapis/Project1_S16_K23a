@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "hash.h"
 
 unsigned int hash(uint32_t x) {
@@ -64,6 +65,9 @@ void delete(ht_Node **hashTable) {
     int i = 0;
     ht_Node *bucket = NULL;
     ht_Node *prev = NULL;
+
+    if (hashTable == NULL)
+        return;
 
     for (i = 0; i < HT_SIZE; i++) {
         bucket = hashTable[i];

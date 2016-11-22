@@ -1,4 +1,5 @@
 #include "buffer.h"
+#include "hash.h"
 
 #define IND_SIZE 2048
 
@@ -12,6 +13,7 @@ typedef struct index_t{
     ptrdiff_t first;
     ptrdiff_t last;
     uint32_t max;
+    ht_Node **neighbors;
 }ind;
 
 ind *createNodeIndex(uint32_t);
@@ -26,4 +28,4 @@ ptrdiff_t addEdge(ind**, uint32_t, uint32_t, list_node**, uint32_t*, ptrdiff_t*)
 
 ptrdiff_t getListHead(ind*, uint32_t);
 
-int destroyNodeIndex(ind*);
+int destroyNodeIndex(ind*, uint32_t index_size);

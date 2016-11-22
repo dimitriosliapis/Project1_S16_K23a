@@ -1,5 +1,6 @@
-#include "index.h"
-#define HT_SIZE 131072
+#include <stdint.h>
+
+#define HT_SIZE 100003
 
 #define FOUND 1
 #define NOT_FOUND -1
