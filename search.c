@@ -53,6 +53,20 @@ uint32_t pop(Queue *queue) {
     return id;
 }
 
+void restartQueue(Queue *queue) {
+
+    q_Node *curr = queue->first, *prev = NULL;
+
+    while (curr != NULL) {
+        prev = curr;
+        curr = curr->next;
+        free(prev);
+    }
+
+    queue->first = NULL;
+    queue->last = NULL;
+}
+
 void empty(Queue *queue) {
 
     q_Node *curr = queue->first, *prev = NULL;
@@ -67,10 +81,8 @@ void empty(Queue *queue) {
 }
 
 
-int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end) {
+int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end, Queue *frontierF, Queue *frontierB, ht_Node *exploredF, ht_Node *exploredB) {
 
-    Queue *frontierF = NULL, *frontierB = NULL;
-    ht_Node *exploredF = NULL, *exploredB = NULL;
     list_node *neighbors = NULL;
     uint32_t node = DEFAULT, successor = DEFAULT;
     int i = 0, j = 0, counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, stepsF = 0, stepsB = 0;
@@ -79,17 +91,11 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
     if (start == end)   // an o komvos ekkinhshs einai o komvos stoxos tote steps=0
         return 0;
 
-    frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
-    frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
-
-    exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
-    exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh
-
-    insert(&exploredF, start, HT_BIG);
+    insert(exploredF, start, HT_BIG);
     push(frontierF, start);
     counterF++;
 
-    insert(&exploredB, end, HT_BIG);
+    insert(exploredB, end, HT_BIG);
     push(frontierB, end);
     counterB++;
 
@@ -110,13 +116,13 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     if (successor != DEFAULT) {
 
                         if (search(exploredF, successor, HT_BIG) == NOT_FOUND) {
-                            insert(&exploredF, successor, HT_BIG);
+                            insert(exploredF, successor, HT_BIG);
 
                             if (search(exploredB, successor, HT_BIG) == FOUND) {
-                                empty(frontierF);
-                                empty(frontierB);
-                                delete(exploredF, HT_BIG);
-                                delete(exploredB, HT_BIG);
+                                restartQueue(frontierF);
+                                restartQueue(frontierB);
+                                reinitialize(exploredF, HT_BIG);
+                                reinitialize(exploredB, HT_BIG);
                                 return stepsB + stepsF;
                             } else {    // alliws eisagwgh sto synoro
                                 push(frontierF, successor);
@@ -158,13 +164,13 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     if (successor != DEFAULT) {
 
                         if (search(exploredB, successor, HT_BIG) == NOT_FOUND) {
-                            insert(&exploredB, successor, HT_BIG);
+                            insert(exploredB, successor, HT_BIG);
 
                             if (search(exploredF, successor, HT_BIG) == FOUND) {
-                                empty(frontierB);
-                                empty(frontierF);
-                                delete(exploredB, HT_BIG);
-                                delete(exploredF, HT_BIG);
+                                restartQueue(frontierB);
+                                restartQueue(frontierF);
+                                reinitialize(exploredB, HT_BIG);
+                                reinitialize(exploredF, HT_BIG);
                                 return stepsF + stepsB;
                             } else {    // alliws eisagwgh sto synoro
                                 push(frontierB, successor);
@@ -192,9 +198,9 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
         counterBS = 0;
     }
 
-    empty(frontierF);
-    empty(frontierB);
-    delete(exploredF, HT_BIG);
-    delete(exploredB, HT_BIG);
+    restartQueue(frontierF);
+    restartQueue(frontierB);
+    reinitialize(exploredF, HT_BIG);
+    reinitialize(exploredB, HT_BIG);
     return -1;  // an den vrethei monopati epistrefei -1
 }

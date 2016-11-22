@@ -5,15 +5,14 @@ int toID(char *, uint32_t *, uint32_t *);
 
 int main(int argc, char *argv[]) {
 
-    FILE *Graph = NULL;
-    FILE *Queries = NULL;
+    FILE *Graph = NULL, *Queries = NULL;
     list_node *buffer_in = NULL, *buffer_out = NULL;
     ind *index_in = NULL, *index_out = NULL;
-    uint32_t N1, N2;
-    uint32_t buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE;
-    uint32_t index_size_in = IND_SIZE, index_size_out = IND_SIZE;
+    uint32_t N1, N2, buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
     ptrdiff_t available_in = 0, available_out = 0;
-    int i = 0, steps = 0, counter = 0;
+    Queue *frontierF = NULL, *frontierB = NULL;
+    ht_Node *exploredF = NULL, *exploredB = NULL;
+    int steps = 0;
 
     // orismata
     if (argc == 3) {
@@ -54,6 +53,12 @@ int main(int argc, char *argv[]) {
     }
     fclose(Graph);
 
+    frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
+    frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
+
+    exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
+    exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh
+
     fgets(str, sizeof(str), Queries);
 
     while (!feof(Queries)) {
@@ -79,7 +84,7 @@ int main(int argc, char *argv[]) {
             if (lookup(index_out, N1, index_size_out) == ALR_EXISTS &&
                 lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
 
-                steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2);
+                steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB);
                 printf("%d\n", steps);
             } else
                 printf("-1\n");
@@ -94,6 +99,10 @@ int main(int argc, char *argv[]) {
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
 
+    empty(frontierF);
+    empty(frontierB);
+    delete(exploredF, HT_BIG);
+    delete(exploredB, HT_BIG);
     destroyBuffer(buffer_in);
     destroyBuffer(buffer_out);
     destroyNodeIndex(index_in, index_size_in);

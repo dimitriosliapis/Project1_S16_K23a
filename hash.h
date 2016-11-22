@@ -1,8 +1,8 @@
 #include <stdint.h>
 
-#define HT_BIG 100003
-#define HT_SMALL 257
-#define HT_N 47
+#define HT_BIG 10007
+#define HT_SMALL 101
+#define HT_N 7
 
 #define DEFAULT 16777216
 
@@ -20,6 +20,8 @@ ht_Node *createHashtable(uint32_t);
 
 int search(ht_Node *, uint32_t, uint32_t);
 
-void insert(ht_Node **, uint32_t, uint32_t);
+void insert(ht_Node *, uint32_t, uint32_t);
+
+void reinitialize(ht_Node *hashTable, uint32_t size);
 
 void delete(ht_Node *, uint32_t);
