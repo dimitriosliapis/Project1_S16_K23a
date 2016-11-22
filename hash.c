@@ -26,8 +26,12 @@ ht_Node **createHashtable() {
 int search(ht_Node **hashTable, uint32_t id) {
 
     int offset = id % HT_SIZE;
-    ht_Node *bucket = hashTable[offset];
+    ht_Node *bucket = NULL;
 
+    if (hashTable == NULL)
+        return NOT_FOUND;
+
+    bucket = hashTable[offset];
     while (bucket != NULL) {
 
         if (bucket->id == id)
