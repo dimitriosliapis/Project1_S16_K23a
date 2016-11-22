@@ -9,48 +9,72 @@ unsigned int hash(uint32_t x) {
     return x;
 }
 
-ht_Node **createHashtable(uint32_t size) {
+ht_Node *createHashtable(uint32_t size) {
 
-    int i = 0;
-    ht_Node **hashTable = NULL;
+    int i = 0, j = 0;
+    ht_Node *hashTable = NULL;
     hashTable = malloc(sizeof(ht_Node) * size);
     if (hashTable == NULL)
         return NULL;
     else {
-        for (i = 0; i < size; i++)
-            hashTable[i] = NULL;
+        for(i = 0; i < size; i++){
+            hashTable[i].ids = malloc(HT_N * sizeof(uint32_t));
+            for(j = 0; j < HT_N; j++){
+                hashTable[i].ids[j] = DEFAULT;
+            }
+        }
+        hashTable[i].size = HT_N;
         return hashTable;
     }
 }
 
-int search(ht_Node **hashTable, uint32_t id, uint32_t size) {
+int search(ht_Node *hashTable, uint32_t id, uint32_t size) {
 
     int offset = hash(id) % size;
-    ht_Node *bucket = NULL;
+    int i = 0;
+    uint32_t *bucket = NULL;
 
     if (hashTable == NULL)
         return NOT_FOUND;
 
-    bucket = hashTable[offset];
-    while (bucket != NULL) {
+    bucket = hashTable[offset].ids;
+    i = 0;
+    while (i < hashTable[offset].size) {
 
-        if (bucket->id == id)
+        if (bucket[i] == id)/*while (bucket != NULL) {
+            prev = bucket;
+            bucket = bucket->next;
+            free(prev);
+        }*/
             return FOUND;
-        bucket = bucket->next;
+        i++;
     }
 
     return NOT_FOUND;
 }
 
-void insert(ht_Node **hashTable, uint32_t id, uint32_t size) {
+void insert(ht_Node *hashTable, uint32_t id, uint32_t size) {
 
     int offset = hash(id) % size;
-    ht_Node *bucket = hashTable[offset];
+    unsigned int s = hashTable[offset].size;
+    int i = 0;
 
-    if (bucket == NULL) { // this bucket doesn't exist yet - create it
+    if(hashTable[offset].ids[s-1] != DEFAULT){
+        s *= 2;
+        hashTable[offset].ids = realloc(hashTable[offset].ids,s * sizeof(uint32_t));
+        hashTable[offset].ids[hashTable[offset].size] = id;
+        hashTable[offset].size = s;
+        return;
+    }
+
+    for(i = 0; i < hashTable[offset].size; i++){
+        if(hashTable[offset].ids[i] == DEFAULT) hashTable[offset].ids[i] = id;
+    }
+
+    /*if (bucket == NULL) { // this bucket doesn't exist yet - create it
         ht_Node *htEntry = (ht_Node *) malloc(sizeof(ht_Node));
-        htEntry->id = id;
-        htEntry->next = NULL;
+        htEntry->ids[0] = id;
+        //htEntry->next = NULL;
         hashTable[offset] = htEntry;
         return;
     }
@@ -60,26 +84,26 @@ void insert(ht_Node **hashTable, uint32_t id, uint32_t size) {
     ht_Node *htEntry = (ht_Node *) malloc(sizeof(ht_Node));
     htEntry->id = id;
     htEntry->next = NULL;
-    bucket->next = htEntry;
+    bucket->next = htEntry;*/
 
 }
 
-void delete(ht_Node **hashTable,uint32_t size) {
+void delete(ht_Node *hashTable,uint32_t size) {
 
     int i = 0;
-    ht_Node *bucket = NULL;
-    ht_Node *prev = NULL;
+    uint32_t *bucket = NULL;
 
     if (hashTable == NULL)
         return;
 
     for (i = 0; i < size; i++) {
-        bucket = hashTable[i];
-        while (bucket != NULL) {
+        bucket = hashTable[i].ids;
+        free(bucket);
+        /*while (bucket != NULL) {
             prev = bucket;
             bucket = bucket->next;
             free(prev);
-        }
+        }*/
     }
 
     free(hashTable);

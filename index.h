@@ -13,7 +13,7 @@ typedef struct index_t{
     ptrdiff_t first;
     ptrdiff_t last;
     uint32_t max;
-    ht_Node **neighbors;
+    ht_Node *neighbors;
 }ind;
 
 ind *createNodeIndex(uint32_t);

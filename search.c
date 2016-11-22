@@ -70,7 +70,7 @@ void empty(Queue *queue) {
 int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end) {
 
     Queue *frontierF = NULL, *frontierB = NULL;
-    ht_Node **exploredF = NULL, **exploredB = NULL;
+    ht_Node *exploredF = NULL, *exploredB = NULL;
     list_node *neighbors = NULL;
     uint32_t node = DEFAULT, successor = DEFAULT;
     int i = 0, j = 0, counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, stepsF = 0, stepsB = 0;
