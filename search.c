@@ -1,5 +1,4 @@
 #include "search.h"
-#include "hash.h"
 
 Queue *createQueue() {
 

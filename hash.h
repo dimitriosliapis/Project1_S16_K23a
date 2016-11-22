@@ -1,3 +1,4 @@
+#include "index.h"
 #define HT_SIZE 131072
 
 #define FOUND 1

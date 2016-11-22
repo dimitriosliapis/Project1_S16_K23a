@@ -1,4 +1,4 @@
-#include "index.h"
+#include "hash.h"
 
 typedef struct qNode_t {
     uint32_t id;
