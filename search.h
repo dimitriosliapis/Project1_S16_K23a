@@ -14,9 +14,9 @@ Queue *createQueue();
 
 int isEmpty(Queue *);
 
-int push(Queue *, uint32_t);
+int enq(Queue *, uint32_t);
 
-uint32_t pop(Queue *);
+uint32_t deq(Queue *);
 
 void restartQueue(Queue *);
 

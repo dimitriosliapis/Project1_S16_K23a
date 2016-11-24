@@ -18,7 +18,7 @@ int isEmpty(Queue *queue) {
     return (queue->first == NULL);
 }
 
-int push(Queue *queue, uint32_t id) {
+int enq(Queue *queue, uint32_t id) {
 
     q_Node *new = NULL;
     if (queue == NULL)
@@ -35,7 +35,7 @@ int push(Queue *queue, uint32_t id) {
     return 0;
 }
 
-uint32_t pop(Queue *queue) {
+uint32_t deq(Queue *queue) {
 
     q_Node *out = NULL;
     uint32_t id = 0;
@@ -92,11 +92,11 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
         return 0;
 
     insert(exploredF, start, HT_BIG);
-    push(frontierF, start);
+    enq(frontierF, start);
     counterF++;
 
     insert(exploredB, end, HT_BIG);
-    push(frontierB, end);
+    enq(frontierB, end);
     counterB++;
 
     while (!isEmpty(frontierF) && !isEmpty(frontierB)) {    // oso ta 2 synora den einai adeia
@@ -104,7 +104,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
         stepsF++;
         while (counterF != 0) { // epanalhpsh gia tous komvous poy mphkan sto synoro sto prohgoumeno vathos
 
-            node = pop(frontierF);  // pop
+            node = deq(frontierF);  // deq
 
             offset = getListHead(index_out, node);
             if (offset != -1) {     // mporei na mhn exei geitones
@@ -125,7 +125,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                                 reinitialize(exploredB, HT_BIG);
                                 return stepsB + stepsF;
                             } else {    // alliws eisagwgh sto synoro
-                                push(frontierF, successor);
+                                enq(frontierF, successor);
                                 counterFS++;
                             }
                         }
@@ -152,7 +152,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
         stepsB++;
         while (counterB != 0) { // epanalhpsh gia tous komvous poy mphkan sto synoro sto prohgoumeno vathos
 
-            node = pop(frontierB);  // pop
+            node = deq(frontierB);  // deq
 
             offset = getListHead(index_in, node);
             if (offset != -1) { // mporei na mhn exei geitones
@@ -173,7 +173,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                                 reinitialize(exploredF, HT_BIG);
                                 return stepsF + stepsB;
                             } else {    // alliws eisagwgh sto synoro
-                                push(frontierB, successor);
+                                enq(frontierB, successor);
                                 counterBS++;
                             }
                         }
