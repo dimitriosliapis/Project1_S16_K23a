@@ -200,3 +200,4 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
     reinitialize(exploredB, HT_BIG);
     return -1;  // an den vrethei monopati epistrefei -1
 }
+
