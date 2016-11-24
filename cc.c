@@ -84,6 +84,7 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
             cc_index[v] = cc_counter;
 
             offset = getListHead(index_in, v);
+            if(offset < 0) continue;
             neighbors = buffer_in + offset;
 
             while (i < N) {
@@ -114,6 +115,7 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
             cc_index[v] = cc_counter;
 
             offset = getListHead(index_out, v);
+            if(offset < 0) continue;
             neighbors = buffer_out + offset;
 
             while (i < N) {
