@@ -1,13 +1,13 @@
 #include "index.h"
 
-typedef struct qNode_t {
-    uint32_t id;
-    struct qNode_t *next;
-} q_Node;
+#define QUEUE_SIZE 64
 
 typedef struct queue_t {
-    q_Node *first;
-    q_Node *last;
+    int size;
+    uint32_t * ids;
+    int first;
+    int last;
+    int count;
 } Queue;
 
 Queue *createQueue();

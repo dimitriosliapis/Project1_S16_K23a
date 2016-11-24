@@ -4,79 +4,66 @@ Queue *createQueue() {
 
     Queue *queue = NULL;
     queue = malloc(sizeof(Queue));
+
     if (queue == NULL)
         return NULL;
     else {
-        queue->first = NULL;
-        queue->last = NULL;
+        queue->size = QUEUE_SIZE;
+        queue->ids = malloc(QUEUE_SIZE * sizeof(uint32_t));
+        queue->first = 0;
+        queue->last = -1;
+        queue->count = 0;
         return queue;
     }
 }
 
 int isEmpty(Queue *queue) {
 
-    return (queue->first == NULL);
+    return (queue->count == 0);
 }
 
 int enq(Queue *queue, uint32_t id) {
 
-    q_Node *new = NULL;
-    if (queue == NULL)
-        return -1;
-    new = malloc(sizeof(q_Node));
-    new->id = id;
-    new->next = NULL;
+    if (queue->count >= queue->size) {
+        queue->ids = realloc(queue->ids, queue->size * 2 * sizeof(uint32_t));
+        queue->size *= 2;
+    }
 
-    if (queue->first == NULL)
-        queue->first = new;
-    else
-        queue->last->next = new;
-    queue->last = new;
+    queue->last = (queue->last + 1) % queue->size;
+    queue->ids[queue->last] = id;
+    queue->count++;
+
     return 0;
 }
 
 uint32_t deq(Queue *queue) {
 
-    q_Node *out = NULL;
-    uint32_t id = 0;
+    uint32_t id = DEFAULT;
 
-    if (isEmpty(queue)) return DEFAULT;
+    if (queue->count == 0)
+        return DEFAULT;
 
-    out = queue->first;
-    queue->first = out->next;
-    id = out->id;
-
-    if (queue->first == NULL)
-        queue->last = NULL;
-
-    free(out);
+    id = queue->ids[queue->first];
+    queue->first = (queue->first + 1) % queue->size;
+    queue->count--;
     return id;
+
 }
 
 void restartQueue(Queue *queue) {
 
-    q_Node *curr = queue->first, *prev = NULL;
+    int i = 0;
 
-    while (curr != NULL) {
-        prev = curr;
-        curr = curr->next;
-        free(prev);
-    }
-
-    queue->first = NULL;
-    queue->last = NULL;
+    for (i = 0; i < queue->size; i++)
+        queue->ids[i] = DEFAULT;
+    queue->first = 0;
+    queue->last = -1;
+    queue->count = 0;
 }
 
 void empty(Queue *queue) {
 
-    q_Node *curr = queue->first, *prev = NULL;
-
-    while (curr != NULL) {
-        prev = curr;
-        curr = curr->next;
-        free(prev);
-    }
-
+    free(queue->ids);
     free(queue);
 }
 
@@ -85,7 +72,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
     list_node *neighbors = NULL;
     uint32_t node = DEFAULT, successor = DEFAULT;
-    int i = 0, j = 0, counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, stepsF = 0, stepsB = 0;
+    int i = 0, counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, stepsF = 0, stepsB = 0;
     ptrdiff_t offset = 0;
 
     if (start == end)   // an o komvos ekkinhshs einai o komvos stoxos tote steps=0
