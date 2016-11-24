@@ -11,7 +11,7 @@ Queue *createQueue() {
     else {
         queue->size = QUEUE_SIZE;
         queue->entries = malloc(QUEUE_SIZE * sizeof(qEntry));
-        for (int i = 0; i < queue->size; i++) {
+        for (i = 0; i < queue->size; i++) {
             queue->entries[i].id = DEFAULT;
             queue->entries[i].steps = -1;
         }
