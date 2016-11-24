@@ -67,6 +67,7 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
 
     cc_counter = 0;
     for (cur = 0; cur < size_in; cur++) {
+        if(lookup(index_in, cur, size_in) == NOT_EXIST) continue;
         if (search(explored, cur, HT_BIG) == FOUND) continue; // visited
         insert(explored, cur, HT_BIG);
         push(&stack, cur);
@@ -98,6 +99,7 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
     }
 
     for (cur = 0; cur < size_out; cur++) {
+        if(lookup(index_out, cur, size_out) == NOT_EXIST) continue;
         if (search(explored, cur, HT_BIG) == FOUND) continue; // visited
         insert(explored, cur, HT_BIG);
         push(&stack, cur);
