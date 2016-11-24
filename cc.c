@@ -65,32 +65,43 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
 
     stack.last = NULL;
 
+/*    1  procedure DFS-iterative(G,v):
+    2      let S be a stack
+    3      S.push(v)
+    4      while S is not empty
+    5          v = S.pop()
+    6          if v is not labeled as discovered:
+    7              label v as discovered
+    8              for all edges from v to w in G.adjacentEdges(v) do
+        9                  S.push(w)*/
+
+
     cc_counter = 0;
     for (cur = 0; cur < size_in; cur++) {
         if(lookup(index_in, cur, size_in) == NOT_EXIST) continue;
         if (search(explored, cur, HT_BIG) == FOUND) continue; // visited
-        insert(explored, cur, HT_BIG);
+        //insert(explored, cur, HT_BIG);
         push(&stack, cur);
         while (!stackIsEmpty(&stack)) {
             v = pop(&stack);
             cc_index[v] = cc_counter;
 
-            offset = getListHead(index_in, v);
-            if(offset < 0) continue;
-            neighbors = buffer_in + offset;
+            if (search(explored, v, HT_BIG) == NOT_FOUND) {
+                insert(explored, v, HT_BIG);
 
-            while (i < N) {
+                offset = getListHead(index_in, v);
+                if(offset < 0) continue;
+                neighbors = buffer_in + offset;
 
-                if (neighbors->neighbor[i] == DEFAULT) break;
-                if (search(explored, neighbors->neighbor[i], HT_BIG) == NOT_FOUND) {
-                    insert(explored, neighbors->neighbor[i], HT_BIG);
+                i = 0;
+                while (i < N) {
+                    if (neighbors->neighbor[i] == DEFAULT) break;
                     push(&stack, neighbors->neighbor[i]);
-                }
-
-                i++;
-                if (i == N && neighbors->nextListNode != -1) {
-                    neighbors = buffer_in + neighbors->nextListNode;
-                    i = 0;
+                    i++;
+                    if (i == N && neighbors->nextListNode != -1) {
+                        neighbors = buffer_in + neighbors->nextListNode;
+                        i = 0;
+                    }
                 }
             }
 
@@ -99,30 +110,30 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
     }
 
     for (cur = 0; cur < size_out; cur++) {
-        if(lookup(index_out, cur, size_out) == NOT_EXIST) continue;
+        if(lookup(index_in, cur, size_out) == NOT_EXIST) continue;
         if (search(explored, cur, HT_BIG) == FOUND) continue; // visited
-        insert(explored, cur, HT_BIG);
+        //insert(explored, cur, HT_BIG);
         push(&stack, cur);
         while (!stackIsEmpty(&stack)) {
             v = pop(&stack);
             cc_index[v] = cc_counter;
 
-            offset = getListHead(index_out, v);
-            if(offset < 0) continue;
-            neighbors = buffer_out + offset;
+            if (search(explored, v, HT_BIG) == NOT_FOUND) {
+                insert(explored, v, HT_BIG);
 
-            while (i < N) {
+                offset = getListHead(index_out, v);
+                if(offset < 0) continue;
+                neighbors = buffer_out + offset;
 
-                if (neighbors->neighbor[i] == DEFAULT) break;
-                if (search(explored, neighbors->neighbor[i], HT_BIG) == NOT_FOUND) {
-                    insert(explored, neighbors->neighbor[i], HT_BIG);
+                i = 0;
+                while (i < N) {
+                    if (neighbors->neighbor[i] == DEFAULT) break;
                     push(&stack, neighbors->neighbor[i]);
-                }
-
-                i++;
-                if (i == N && neighbors->nextListNode != -1) {
-                    neighbors = buffer_out + neighbors->nextListNode;
-                    i = 0;
+                    i++;
+                    if (i == N && neighbors->nextListNode != -1) {
+                        neighbors = buffer_out + neighbors->nextListNode;
+                        i = 0;
+                    }
                 }
             }
 
