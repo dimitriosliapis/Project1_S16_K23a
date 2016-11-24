@@ -58,21 +58,12 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
     uint32_t cur = 0;
     uint32_t v = 0;
     list_node *neighbors;
-    uint32_t cc_size;
     uint32_t cc_counter = 0;
     ind *cur_ind = NULL;
     ptrdiff_t offset;
     int i = 0;
 
     stack.last = NULL;
-
-    if (size_in > size_out) {
-        cc_size = size_in;
-    }
-    else {
-        cc_size = size_out;
-    }
-
 
     cc_counter = 0;
     for (cur = 0; cur < size_in; cur++) {
