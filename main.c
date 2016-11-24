@@ -1,5 +1,5 @@
 #include <sys/time.h>
-#include "search.h"
+#include "cc.h"
 
 int toID(char *, uint32_t *, uint32_t *);
 
@@ -13,6 +13,10 @@ int main(int argc, char *argv[]) {
     Queue *frontierF = NULL, *frontierB = NULL;
     ht_Node *exploredF = NULL, *exploredB = NULL;
     int steps = 0;
+
+
+    uint32_t *cc_index = NULL;
+    uint32_t cc_size = 0;
 
     // orismata
     if (argc == 3) {
@@ -52,6 +56,15 @@ int main(int argc, char *argv[]) {
         fgets(str, sizeof(str), Graph);
     }
     fclose(Graph);
+
+    if(index_size_in > index_size_out) cc_size = index_size_in;
+    else cc_size = index_size_out;
+
+    cc_index = malloc(sizeof(uint32_t) * cc_size);
+
+    printf("%ld\n",createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out));
+
+    return 0;
 
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh

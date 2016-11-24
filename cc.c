@@ -24,7 +24,7 @@ uint32_t pop(Stack *stack) {
     return id;
 }
 
-int isEmpty(Stack *stack) {
+int stackIsEmpty(Stack *stack) {
     if (stack == NULL) return 1;
     if (stack->last == NULL) return 1;
     return 0;
@@ -54,18 +54,17 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
              uint32_t size_out) {
 
     ht_Node *explored = createHashtable(HT_BIG);
-    Stack *stack = malloc(sizeof(stack));
+    Stack stack;
     uint32_t cur = 0;
     uint32_t v = 0;
     list_node *neighbors;
     uint32_t cc_size;
-    uint32_t cc_counter_in = 0;
-    uint32_t cc_counter_out = 0;
+    uint32_t cc_counter = 0;
     ind *cur_ind = NULL;
     ptrdiff_t offset;
     int i = 0;
 
-    stack->last = NULL;
+    stack.last = NULL;
 
     if (size_in > size_out) {
         cc_size = size_in;
@@ -75,14 +74,14 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
     }
 
 
-    cc_counter_in = 0;
+    cc_counter = 0;
     for (cur = 0; cur < size_in; cur++) {
         if (search(explored, cur, HT_BIG) == FOUND) continue; // visited
         insert(explored, cur, HT_BIG);
-        push(stack, cur);
-        while (!isEmpty(stack)) {
-            v = pop(stack);
-            cc_index[v] = cc_counter_in;
+        push(&stack, cur);
+        while (!stackIsEmpty(&stack)) {
+            v = pop(&stack);
+            cc_index[v] = cc_counter;
 
             offset = getListHead(index_in, v);
             neighbors = buffer_in + offset;
@@ -92,7 +91,7 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
                 if (neighbors->neighbor[i] == DEFAULT) break;
                 if (search(explored, neighbors->neighbor[i], HT_BIG) == NOT_FOUND) {
                     insert(explored, neighbors->neighbor[i], HT_BIG);
-                    push(stack, neighbors->neighbor[i]);
+                    push(&stack, neighbors->neighbor[i]);
                 }
 
                 i++;
@@ -103,17 +102,16 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
             }
 
         }
-        cc_counter_in++;
+        cc_counter++;
     }
 
-    cc_counter_out = 0;
     for (cur = 0; cur < size_out; cur++) {
         if (search(explored, cur, HT_BIG) == FOUND) continue; // visited
         insert(explored, cur, HT_BIG);
-        push(stack, cur);
-        while (!isEmpty(stack)) {
-            v = pop(stack);
-            cc_index[v] = cc_counter_out;
+        push(&stack, cur);
+        while (!stackIsEmpty(&stack)) {
+            v = pop(&stack);
+            cc_index[v] = cc_counter;
 
             offset = getListHead(index_out, v);
             neighbors = buffer_out + offset;
@@ -123,7 +121,7 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
                 if (neighbors->neighbor[i] == DEFAULT) break;
                 if (search(explored, neighbors->neighbor[i], HT_BIG) == NOT_FOUND) {
                     insert(explored, neighbors->neighbor[i], HT_BIG);
-                    push(stack, neighbors->neighbor[i]);
+                    push(&stack, neighbors->neighbor[i]);
                 }
 
                 i++;
@@ -134,11 +132,9 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
             }
 
         }
-        cc_counter_out++;
+        cc_counter++;
     }
 
-    if(cc_counter_in > cc_counter_out) return cc_counter_in;
-
-    return cc_counter_out;
+    return cc_counter;
 
 }

@@ -1,4 +1,4 @@
-#include "index.h"
+#include "search.h"
 
 #define CC_SIZE 4096
 
@@ -15,7 +15,7 @@ typedef struct stack_t{
 
 void push(Stack*, uint32_t);
 uint32_t pop(Stack*);
-int isEmpty(Stack*);
+int stackIsEmpty(Stack*);
 void deleteStack(Stack*, sNode*);
 
 
