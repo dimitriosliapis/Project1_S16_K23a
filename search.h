@@ -2,9 +2,14 @@
 
 #define QUEUE_SIZE 64
 
+typedef struct qEntry_t {
+    uint32_t id;
+    int steps;
+} qEntry;
+
 typedef struct queue_t {
     int size;
-    uint32_t * ids;
+    qEntry * entries;
     int first;
     int last;
     int count;
@@ -14,9 +19,11 @@ Queue *createQueue();
 
 int isEmpty(Queue *);
 
-int enq(Queue *, uint32_t);
+int enq(Queue *, uint32_t, int);
 
-uint32_t deq(Queue *);
+uint32_t deq(Queue *, int *);
+
+int nsteps(Queue *queue, uint32_t id);
 
 void restartQueue(Queue *);
 

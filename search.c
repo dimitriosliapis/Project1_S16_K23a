@@ -2,6 +2,7 @@
 
 Queue *createQueue() {
 
+    int i = 0;
     Queue *queue = NULL;
     queue = malloc(sizeof(Queue));
 
@@ -9,7 +10,11 @@ Queue *createQueue() {
         return NULL;
     else {
         queue->size = QUEUE_SIZE;
-        queue->ids = malloc(QUEUE_SIZE * sizeof(uint32_t));
+        queue->entries = malloc(QUEUE_SIZE * sizeof(qEntry));
+        for (int i = 0; i < queue->size; i++) {
+            queue->entries[i].id = DEFAULT;
+            queue->entries[i].steps = -1;
+        }
         queue->first = 0;
         queue->last = -1;
         queue->count = 0;
@@ -22,40 +27,56 @@ int isEmpty(Queue *queue) {
     return (queue->count == 0);
 }
 
-int enq(Queue *queue, uint32_t id) {
+int enq(Queue *queue, uint32_t id, int steps) {
 
     if (queue->count >= queue->size) {
-        queue->ids = realloc(queue->ids, queue->size * 2 * sizeof(uint32_t));
+        queue->entries = realloc(queue->entries, queue->size * 2 * sizeof(qEntry));
         queue->size *= 2;
     }
 
     queue->last = (queue->last + 1) % queue->size;
-    queue->ids[queue->last] = id;
+    queue->entries[queue->last].id = id;
+    queue->entries[queue->last].steps = steps;
     queue->count++;
 
     return 0;
 }
 
-uint32_t deq(Queue *queue) {
+uint32_t deq(Queue *queue, int *steps) {
 
     uint32_t id = DEFAULT;
 
     if (queue->count == 0)
         return DEFAULT;
 
-    id = queue->ids[queue->first];
+    id = queue->entries[queue->first].id;
+    *steps = queue->entries[queue->first].steps;
     queue->first = (queue->first + 1) % queue->size;
     queue->count--;
     return id;
 
 }
 
+int nsteps(Queue *queue, uint32_t id) {
+
+    int i = 0;
+
+    for (i = 0; i < queue->size; i++) {
+        if (queue->entries[i].id == id)
+            return queue->entries[i].steps;
+    }
+    return -1;
+}
+
 void restartQueue(Queue *queue) {
 
     int i = 0;
 
-    for (i = 0; i < queue->size; i++)
-        queue->ids[i] = DEFAULT;
+    for (i = 0; i < queue->size; i++) {
+        queue->entries[i].id = DEFAULT;
+        queue->entries[i].steps = -1;
+    }
+
     queue->first = 0;
     queue->last = -1;
     queue->count = 0;
@@ -63,7 +84,7 @@ void restartQueue(Queue *queue) {
 
 void empty(Queue *queue) {
 
-    free(queue->ids);
+    free(queue->entries);
     free(queue);
 }
 
@@ -72,26 +93,24 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
     list_node *neighbors = NULL;
     uint32_t node = DEFAULT, successor = DEFAULT;
-    int i = 0, counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, stepsF = 0, stepsB = 0;
+    int i = 0, steps = 0, path = 0;
     ptrdiff_t offset = 0;
 
     if (start == end)   // an o komvos ekkinhshs einai o komvos stoxos tote steps=0
         return 0;
 
     insert(exploredF, start, HT_BIG);
-    enq(frontierF, start);
-    counterF++;
+    enq(frontierF, start, steps);
 
     insert(exploredB, end, HT_BIG);
-    enq(frontierB, end);
-    counterB++;
+    enq(frontierB, end, steps);
 
     while (!isEmpty(frontierF) && !isEmpty(frontierB)) {    // oso ta 2 synora den einai adeia
 
-        stepsF++;
-        while (counterF != 0) { // epanalhpsh gia tous komvous poy mphkan sto synoro sto prohgoumeno vathos
+        if (!isEmpty(frontierF)) {
 
-            node = deq(frontierF);  // deq
+            node = deq(frontierF, &steps);  // dequeue
+            steps++;
 
             offset = getListHead(index_out, node);
             if (offset != -1) {     // mporei na mhn exei geitones
@@ -106,14 +125,14 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                             insert(exploredF, successor, HT_BIG);
 
                             if (search(exploredB, successor, HT_BIG) == FOUND) {
+                                path = nsteps(frontierB, successor) + steps;
                                 restartQueue(frontierF);
                                 restartQueue(frontierB);
                                 reinitialize(exploredF, HT_BIG);
                                 reinitialize(exploredB, HT_BIG);
-                                return stepsB + stepsF;
+                                return path;
                             } else {    // alliws eisagwgh sto synoro
-                                enq(frontierF, successor);
-                                counterFS++;
+                                enq(frontierF, successor, steps);
                             }
                         }
                     } else
@@ -129,17 +148,12 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
                 i = 0;
             }
-
-            counterF--;
         }
 
-        counterF = counterFS;
-        counterFS = 0;
+        if (!isEmpty(frontierB)) {
 
-        stepsB++;
-        while (counterB != 0) { // epanalhpsh gia tous komvous poy mphkan sto synoro sto prohgoumeno vathos
-
-            node = deq(frontierB);  // deq
+            node = deq(frontierB, &steps);  // dequeue
+            steps++;
 
             offset = getListHead(index_in, node);
             if (offset != -1) { // mporei na mhn exei geitones
@@ -154,14 +168,14 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                             insert(exploredB, successor, HT_BIG);
 
                             if (search(exploredF, successor, HT_BIG) == FOUND) {
+                                path = nsteps(frontierF, successor) + steps;
                                 restartQueue(frontierB);
                                 restartQueue(frontierF);
                                 reinitialize(exploredB, HT_BIG);
                                 reinitialize(exploredF, HT_BIG);
-                                return stepsF + stepsB;
+                                return path;
                             } else {    // alliws eisagwgh sto synoro
-                                enq(frontierB, successor);
-                                counterBS++;
+                                enq(frontierB, successor, steps);
                             }
                         }
                     } else
@@ -177,12 +191,7 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
                 i = 0;
             }
-
-            counterB--;
         }
-
-        counterB = counterBS;
-        counterBS = 0;
     }
 
     restartQueue(frontierF);
