@@ -62,10 +62,6 @@ int main(int argc, char *argv[]) {
 
     cc_index = malloc(sizeof(uint32_t) * cc_size);
 
-    //cc_size = createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out);
-
-    //
-
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
 
