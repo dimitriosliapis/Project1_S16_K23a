@@ -137,7 +137,7 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
     return cc_counter;
 }
 
-int updateIndex(uint32_t *cc_index, uint32_t **updateIndex, int update_node_size, int update_index_size, uint32_t N1, uint32_t N2) {
+int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int update_node_size, int update_index_size, uint32_t N1, uint32_t N2) {
     int cc1 = cc_index[N1];
     int cc2 = cc_index[N2];
     int i = 0, realloc_size = 0, realloc_update_index_size = 0;
@@ -149,59 +149,116 @@ int updateIndex(uint32_t *cc_index, uint32_t **updateIndex, int update_node_size
                 updateIndex[N1] = malloc(update_node_size * sizeof(uint32_t));
                 updateIndex[N1][0] = N2;
                 i = 1;
-                while(i < update_node_size) {
+                while (i < update_node_size) {
                     updateIndex[N1][i] = DEFAULT;
                     i++;
                 }
-            }
-            else {
+                printf("eftiaksa to %d\n", N1);
+            } else {
                 temp = updateIndex[N1];
                 while (temp[i] != DEFAULT && i < update_node_size) i++;
                 if (i < update_node_size) temp[i] = N2;
                 else if (i == update_node_size) {
-                    realloc_size = 2*update_node_size;
+                    realloc_size = 2 * update_node_size;
                     uint32_t *new = NULL;
                     new = realloc(updateIndex[N1], realloc_size * sizeof(uint32_t));
                     updateIndex[N1] = new;
                     updateIndex[N1][i] = N2;
 
-                    for(i = update_node_size ; i < realloc_size ; i++) updateIndex[N1][i] = DEFAULT;
+                    for (i = update_node_size; i < realloc_size; i++) updateIndex[N1][i] = DEFAULT;
                     update_node_size = realloc_size;
-                    return update_node_size;
+                    //return update_node_size;
                 }
             }
             //gia to N2
-            if(updateIndex[N2] == NULL) {
-                updateIndex[N2] = malloc(update_node_size*sizeof(uint32_t));
+            if (updateIndex[N2] == NULL) {
+                updateIndex[N2] = malloc(update_node_size * sizeof(uint32_t));
                 updateIndex[N2][0] = N1;
-                i = 1
-                while(i < update_node_size) {
+                i = 1;
+                while (i < update_node_size) {
                     updateIndex[N2][i] = DEFAULT;
                     i++;
                 }
-            }
-            else {
+                printf("eftiaksa to %d\n", N2);
+                return update_node_size;
+            } else {
                 i = 1;
                 temp = updateIndex[N2];
-                while(temp[i] != DEFAULT && i < update_node_size) i++;
-                if(i < update_node_size) updateIndex[N2][i] = N1;
-                else if(i == update_node_size) {
-                    realloc_size = 2*update_node_size;
+                while (temp[i] != DEFAULT && i < update_node_size) i++;
+                if (i < update_node_size) updateIndex[N2][i] = N1;
+                else if (i == update_node_size) {
+                    realloc_size = 2 * update_node_size;
                     uint32_t *new2 = NULL;
                     new2 = realloc(updateIndex[N2], realloc_size * sizeof(uint32_t));
                     updateIndex[N2] = new2;
                     updateIndex[N2][i] = N1;
 
-                    for(i = update_node_size ; i < realloc_size ; i++) updateIndex[N2][i] = DEFAULT;
+                    for (i = update_node_size; i < realloc_size; i++) updateIndex[N2][i] = DEFAULT;
                     update_node_size = realloc_size;
                     return update_node_size;
                 }
             }
         }
     }
-    else if(N1 > N2) realloc_update_index_size = N1;
-    else realloc_update_index_size = N2;
-    updateIndex = realloc(updateIndex, realloc_update_index_size * sizeof(uint32_t*));
-    for(i = update_index_size ; i < realloc_update_index_size ; i++) updateIndex[i] = NULL;
-    // na ftiaksw to update index me tous komvous n1 n2
+    else {
+        //ama to index den xwraei
+        if (N1 > N2) realloc_update_index_size = N1;
+        else realloc_update_index_size = N2;
+        updateIndex = realloc(updateIndex, realloc_update_index_size * sizeof(uint32_t *));
+        for (i = update_index_size; i < realloc_update_index_size; i++) updateIndex[i] = NULL;
+
+        //gia to N1
+        if (updateIndex[N1] == NULL) {
+            updateIndex[N1] = malloc(update_node_size * sizeof(uint32_t));
+            updateIndex[N1][0] = N2;
+            i = 1;
+            while (i < update_node_size) {
+                updateIndex[N1][i] = DEFAULT;
+                i++;
+            }
+            printf("eftiaksa to %d\n", N1);
+        } else {
+            temp = updateIndex[N1];
+            while (temp[i] != DEFAULT && i < update_node_size) i++;
+            if (i < update_node_size) temp[i] = N2;
+            else if (i == update_node_size) {
+                realloc_size = 2 * update_node_size;
+                uint32_t *new = NULL;
+                new = realloc(updateIndex[N1], realloc_size * sizeof(uint32_t));
+                updateIndex[N1] = new;
+                updateIndex[N1][i] = N2;
+
+                for (i = update_node_size; i < realloc_size; i++) updateIndex[N1][i] = DEFAULT;
+                update_node_size = realloc_size;
+                //return update_node_size;
+            }
+        }
+
+        //gia to N2
+        if (updateIndex[N2] == NULL) {
+            updateIndex[N2] = malloc(update_node_size * sizeof(uint32_t));
+            updateIndex[N2][0] = N1;
+            i = 1;
+            while (i < update_node_size) {
+                updateIndex[N2][i] = DEFAULT;
+                i++;
+            }
+        } else {
+            i = 1;
+            temp = updateIndex[N2];
+            while (temp[i] != DEFAULT && i < update_node_size) i++;
+            if (i < update_node_size) updateIndex[N2][i] = N1;
+            else if (i == update_node_size) {
+                realloc_size = 2 * update_node_size;
+                uint32_t *new2 = NULL;
+                new2 = realloc(updateIndex[N2], realloc_size * sizeof(uint32_t));
+                updateIndex[N2] = new2;
+                updateIndex[N2][i] = N1;
+
+                for (i = update_node_size; i < realloc_size; i++) updateIndex[N2][i] = DEFAULT;
+                update_node_size = realloc_size;
+                return update_node_size;
+            }
+        }
+    }
 }
