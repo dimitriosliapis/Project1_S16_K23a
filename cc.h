@@ -20,10 +20,9 @@ void deleteStack(Stack*, sNode*);
 
 
 typedef struct CC_t{
-    uint32_t *ids; //CCIndex
-     /*
+    uint32_t *ids; //CCInde
     UpdateIndex* updateIndex;
-    uint32_t metricVal;*/
+    //uint32_t metricVal;*/
 }CC;
 
 
