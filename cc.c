@@ -172,6 +172,7 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int update_nod
                     update_node_size = realloc_size;
                 }
             }
+
             //gia to N2
             if (updateIndex[N2] == NULL) {
                 updateIndex[N2] = malloc(update_node_size * sizeof(uint32_t));

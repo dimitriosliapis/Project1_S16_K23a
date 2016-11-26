@@ -73,6 +73,7 @@ int main(int argc, char *argv[]) {
         updateIndex[a] = NULL;
         a++;
     }
+
     printf("%d\n", CreateUpdateIndex(cc_index, &updateIndex, update_node_size, &update_index_size, 1, 67));
 
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
