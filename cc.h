@@ -26,4 +26,4 @@ typedef struct CC_t{
 }CC;
 
 uint32_t createCCIndex(uint32_t *, ind*, ind*, list_node*, list_node*, uint32_t, uint32_t);
-int CreateUpdateIndex(uint32_t *, uint32_t **, int, int*, uint32_t, uint32_t);
+int CreateUpdateIndex(uint32_t *, uint32_t **, int*, int*, uint32_t, uint32_t);

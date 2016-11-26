@@ -114,19 +114,20 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
     return cc_counter;
 }
 
-int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int update_node_size, int *update_index_size, uint32_t N1, uint32_t N2) {
+int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int *init_update_node_size, int *update_index_size, uint32_t N1, uint32_t N2) {
 
     uint32_t cc1 = cc_index[N1];
     uint32_t cc2 = cc_index[N2];
     int i = 0, realloc_size = 0, realloc_update_index_size = *update_index_size;
+    int update_node_size = *init_update_node_size;
     uint32_t *temp = NULL;
 
-    if(N1 < *update_index_size && N2 < *update_index_size) {
+    if(cc1 < *update_index_size && cc2 < *update_index_size) {
         if (cc1 != cc2) {
             //gia to N1
             if (updateIndex[cc1] == NULL) {
                 updateIndex[cc1] = malloc(update_node_size * sizeof(uint32_t));
-                temp = updateIndex[N1];
+                temp = updateIndex[cc1];
                 temp[0] = cc2;
                 i = 1;
                 while (i < update_node_size) {
@@ -137,8 +138,7 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int update_nod
             } else {
                 temp = updateIndex[cc1];
                 i = 0;
-                while (temp[i] != DEFAULT || i < update_node_size) i++;
-                printf("twra pairnaw?\n");
+                while (temp[i] != DEFAULT && i < update_node_size) i++;
                 if (i < update_node_size) temp[i] = cc2;
                 else if (i == update_node_size) {
                     realloc_size = 2 * update_node_size;
@@ -165,7 +165,7 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int update_nod
                 return update_node_size;
             } else {
                 i = 1;
-                temp = updateIndex[N2];
+                temp = updateIndex[cc2];
                 while (temp[i] != DEFAULT && i < update_node_size) i++;
                 if (i < update_node_size) temp[i] = cc1;
                 else if (i == update_node_size) {
@@ -230,7 +230,7 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int update_nod
             i = 1;
             temp = updateIndex[cc2];
             while (temp[i] != DEFAULT && i < update_node_size) i++;
-            if (i < update_node_size) updateIndex[cc2][i] = cc1;
+            if (i < update_node_size) temp[i] = cc1;
             else if (i == update_node_size) {
                 realloc_size = 2 * update_node_size;
                 uint32_t *new2 = NULL;
