@@ -134,7 +134,6 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int *init_upda
                     temp[i] = DEFAULT;
                     i++;
                 }
-                printf("eftiaksa to %d\n", cc1);
             } else {
                 temp = updateIndex[cc1];
                 i = 0;
@@ -161,13 +160,15 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int *init_upda
                     temp[i] = DEFAULT;
                     i++;
                 }
-                printf("eftiaksa to %d\n", cc2);
                 return update_node_size;
             } else {
                 i = 1;
                 temp = updateIndex[cc2];
                 while (temp[i] != DEFAULT && i < update_node_size) i++;
-                if (i < update_node_size) temp[i] = cc1;
+                if (i < update_node_size) {
+                    temp[i] = cc1;
+                    return update_node_size;
+                }
                 else if (i == update_node_size) {
                     realloc_size = 2 * update_node_size;
                     uint32_t *new2 = NULL;
@@ -198,7 +199,6 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int *init_upda
                 temp[i] = DEFAULT;
                 i++;
             }
-            printf("eftiaksa to %d\n", cc1);
         } else {
             temp = updateIndex[cc1];
             while (temp[i] != DEFAULT && i < update_node_size) i++;
@@ -224,13 +224,15 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int *init_upda
                 temp[i] = DEFAULT;
                 i++;
             }
-            printf("eftiaksa to %d\n", cc2);
             return update_node_size;
         } else {
             i = 1;
             temp = updateIndex[cc2];
             while (temp[i] != DEFAULT && i < update_node_size) i++;
-            if (i < update_node_size) temp[i] = cc1;
+            if (i < update_node_size) {
+                temp[i] = cc1;
+                return update_node_size;
+            }
             else if (i == update_node_size) {
                 realloc_size = 2 * update_node_size;
                 uint32_t *new2 = NULL;
