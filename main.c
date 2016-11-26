@@ -19,8 +19,8 @@ int main(int argc, char *argv[]) {
     uint32_t cc_size = 0;
 
     uint32_t **updateIndex = NULL;
-    int update_node_size = 32;
-    int update_index_size = 64;
+    uint32_t update_node_size = 32;
+    uint32_t update_index_size = 64;
 
     // orismata
     if (argc == 3) {
