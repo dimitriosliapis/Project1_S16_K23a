@@ -276,4 +276,7 @@ int SearchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, ui
         }
         return NOT_FOUND;
     }
+    else{
+        return FOUND;
+    }
 }
