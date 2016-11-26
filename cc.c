@@ -114,12 +114,12 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
     return cc_counter;
 }
 
-int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int *init_update_node_size, int *update_index_size, uint32_t N1, uint32_t N2) {
+int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, uint32_t *init_update_node_size, uint32_t *update_index_size, uint32_t N1, uint32_t N2) {
 
     uint32_t cc1 = cc_index[N1];
     uint32_t cc2 = cc_index[N2];
-    int i = 0, realloc_size = 0, realloc_update_index_size = *update_index_size;
-    int update_node_size = *init_update_node_size;
+    uint32_t i = 0, realloc_size = 0, realloc_update_index_size = *update_index_size;
+    uint32_t update_node_size = *init_update_node_size;
     uint32_t *temp = NULL;
 
     if(cc1 < *update_index_size && cc2 < *update_index_size) {
@@ -253,7 +253,7 @@ int SearchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, ui
     uint32_t cc2 = cc_index[N2];
     uint32_t v = 0;
     uint32_t *temp = NULL;
-    int i = 0;
+    uint32_t i = 0;
     Stack stack;
     stack.last = NULL;
 
@@ -280,3 +280,5 @@ int SearchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, ui
         return FOUND;
     }
 }
+
+
