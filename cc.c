@@ -114,7 +114,7 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
     return cc_counter;
 }
 
-int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, uint32_t *init_update_node_size, uint32_t *update_index_size, uint32_t N1, uint32_t N2) {
+int refreshUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, uint32_t *init_update_node_size, uint32_t *update_index_size, uint32_t N1, uint32_t N2) {
 
     uint32_t cc1 = cc_index[N1];
     uint32_t cc2 = cc_index[N2];
@@ -247,8 +247,9 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, uint32_t *init
     }
 }
 
-int SearchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, uint32_t N2, ht_Node *hashtable) {
+int searchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, uint32_t N2) {
 
+    ht_Node *explored = createHashtable(HT_BIG);
     uint32_t cc1 = cc_index[N1];
     uint32_t cc2 = cc_index[N2];
     uint32_t v = 0;
@@ -256,23 +257,27 @@ int SearchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, ui
     uint32_t i = 0;
     Stack stack;
     stack.last = NULL;
+    uint32_t update_node_size = 0;
 
     if(cc1 != cc2) {
         push(&stack, cc1);
         while(!stackIsEmpty(&stack)) {
             v = pop(&stack);
             if(v != cc2) {
-                if (search(hashtable, v, HT_BIG) == NOT_FOUND) {
-                    insert(hashtable, v, HT_BIG);
+                if (search(explored, v, HT_BIG) == NOT_FOUND) {
+                    insert(explored, v, HT_BIG);
 
                     temp = updateIndex[v];
-                    while(temp[i] != DEFAULT) {
+                    if(temp == NULL) continue;
+                    i = 0;
+                    update_node_size = sizeof(updateIndex[v])/sizeof(uint32_t);
+                    while(temp[i] != DEFAULT && i < update_node_size) {
                         push(&stack, temp[i]);
                         i++;
                     }
                 }
             }
-            else if(v == cc2) return FOUND;
+            else return FOUND;
         }
         return NOT_FOUND;
     }
@@ -281,4 +286,105 @@ int SearchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, ui
     }
 }
 
+uint32_t findCCMax(uint32_t *cc_index, uint32_t cc_index_size){
 
+    uint32_t i = 0;
+    uint32_t max = 0;
+
+    for(i = 0; i < cc_index_size; i++){
+        if(cc_index[i] > max) max = cc_index[i];
+    }
+
+    return max;
+}
+
+
+int updateCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in,
+                  uint32_t size_out, uint32_t **updateIndex, uint32_t *cc_index_size, uint32_t update_index_size) {
+
+    ht_Node *explored = createHashtable(HT_BIG);
+    ht_Node *explored_new = createHashtable(HT_BIG);
+    uint32_t v = 0;
+    uint32_t v_new = 0;
+    uint32_t i = 0, j = 0;
+    Stack stack, stack_new;
+    uint32_t parent_cc = 0;
+    uint32_t new_size = *cc_index_size;
+    uint32_t max = findCCMax(cc_index, *cc_index_size);
+    ptrdiff_t offset_in, offset_out;
+    list_node *neighbors_in, *neighbors_out;
+
+    stack.last = NULL;
+    stack_new.last = NULL;
+
+    for(i = 0; i < *cc_index_size; i++ ) {
+
+        parent_cc = cc_index[i];
+////////////////////////////////////////////////////////////////////////
+        if(parent_cc == DEFAULT){
+            if((lookup(index_in, parent_cc, size_in) == NOT_EXIST) && (lookup(index_out, parent_cc, size_out) == NOT_EXIST)) continue;
+            if (search(explored_new, parent_cc, HT_BIG) == FOUND) continue; // visited
+            push(&stack_new, parent_cc);
+            while (!stackIsEmpty(&stack_new)) {
+                v_new = pop(&stack_new);
+
+
+                if (search(explored_new, v_new, HT_BIG) == NOT_FOUND) {
+                    cc_index[v_new] = i;
+                    insert(explored_new, v_new, HT_BIG);
+                    insert(explored, i, HT_BIG);//gia na min to tsekarei pali apo katw
+
+                    offset_in = getListHead(index_in, v_new);
+                    offset_out = getListHead(index_out, v_new);
+                    neighbors_in = buffer_in + offset_in;
+                    neighbors_out = buffer_out + offset_out;
+
+                    if(offset_in >= 0) {
+                        i = 0;
+                        while (i < N) {
+                            if (neighbors_in->neighbor[i] == DEFAULT) break;
+                            push(&stack_new, neighbors_in->neighbor[i]);
+                            i++;
+                            if (i == N && neighbors_in->nextListNode != -1) {
+                                neighbors_in = buffer_in + neighbors_in->nextListNode;
+                                i = 0;
+                            }
+                        }
+                    }
+                    if(offset_out >= 0) {
+                        i = 0;
+                        while (i < N) {
+                            if (neighbors_out->neighbor[i] == DEFAULT) break;
+                            push(&stack_new, neighbors_out->neighbor[i]);
+                            i++;
+                            if (i == N && neighbors_out->nextListNode != -1) {
+                                neighbors_out = buffer_out + neighbors_out->nextListNode;
+                                i = 0;
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+/////////////////////////////////////////////////////////////////////////
+        else {
+            if (search(explored, parent_cc, HT_BIG) == FOUND) continue;
+
+            push(&stack, parent_cc);
+
+            while (!stackIsEmpty(&stack)) {
+
+                v = pop(&stack);
+                cc_index[v] = parent_cc;
+
+                insert(explored, v, HT_BIG);
+
+                for (j = 0; j < (sizeof(updateIndex[v]) / sizeof(uint32_t)); j++) {
+                    push(&stack, updateIndex[v][j]);
+                }
+
+            }
+        }
+    }
+}
