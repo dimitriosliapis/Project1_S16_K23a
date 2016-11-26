@@ -122,7 +122,7 @@ int refreshUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, uint32_t *ini
     uint32_t update_node_size = *init_update_node_size;
     uint32_t *temp = NULL;
 
-    if(cc1 < *update_index_size && cc2 < *update_index_size) {
+    /*if(cc1 < *update_index_size && cc2 < *update_index_size) {*/
         if (cc1 != cc2) {
             //gia to N1
             if (updateIndex[cc1] == NULL) {
@@ -150,6 +150,7 @@ int refreshUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, uint32_t *ini
                 }
             }
 
+            update_node_size = *init_update_node_size;
             //gia to N2
             if (updateIndex[cc2] == NULL) {
                 updateIndex[cc2] = malloc(update_node_size * sizeof(uint32_t));
@@ -181,8 +182,8 @@ int refreshUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, uint32_t *ini
                 }
             }
         }
-    }
-    else {
+    /*}*/
+    /*else {
         //ama to index den xwraei
         while((realloc_update_index_size < cc1) || (realloc_update_index_size < cc2)) realloc_update_index_size = realloc_update_index_size * 2;
         updateIndex = realloc(updateIndex, realloc_update_index_size * sizeof(uint32_t *));
@@ -244,7 +245,7 @@ int refreshUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, uint32_t *ini
                 return update_node_size;
             }
         }
-    }
+    }*/
 }
 
 int searchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, uint32_t N2) {
