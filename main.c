@@ -18,6 +18,10 @@ int main(int argc, char *argv[]) {
     uint32_t *cc_index = NULL;
     uint32_t cc_size = 0;
 
+    uint32_t **updateIndex = NULL;
+    int update_node_size = 32;
+    int update_index_size = 64;
+
     // orismata
     if (argc == 3) {
         Graph = fopen(argv[1], "r");
@@ -61,6 +65,16 @@ int main(int argc, char *argv[]) {
     else cc_size = index_size_out;
 
     cc_index = malloc(sizeof(uint32_t) * cc_size);
+    printf("%d\n",createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out));
+
+    updateIndex = malloc(update_index_size * sizeof(uint32_t*));
+    int a = 0;
+    while(a < update_index_size) {
+        updateIndex[a] = NULL;
+        a++;
+    }
+
+    printf("%d\n", CreateUpdateIndex(cc_index, updateIndex, update_node_size, &update_index_size, 1, 67));
 
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
@@ -103,9 +117,9 @@ int main(int argc, char *argv[]) {
     }
     fclose(Queries);
 
-    printf("%ld\n",createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out));
+    printf("%d\n",createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out));
 
-
+    printf("%d\n", CreateUpdateIndex(cc_index, updateIndex, update_node_size, &update_index_size, 1, 67));
 
     gettimeofday(&tv2, NULL);
     printf("Total time = %f seconds\n",
