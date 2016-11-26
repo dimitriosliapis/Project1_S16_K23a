@@ -45,7 +45,7 @@ void deleteStack(Stack *stack, sNode *current) {
 }
 
 uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in,
-             uint32_t size_out) {
+                       uint32_t size_out) {
 
     ht_Node *explored = createHashtable(HT_BIG);
     Stack stack;
@@ -138,10 +138,12 @@ uint32_t createCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_n
 }
 
 int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int update_node_size, int *update_index_size, uint32_t N1, uint32_t N2) {
-    int cc1 = cc_index[N1];
-    int cc2 = cc_index[N2];
+
+    uint32_t cc1 = cc_index[N1];
+    uint32_t cc2 = cc_index[N2];
     int i = 0, realloc_size = 0, realloc_update_index_size = *update_index_size;
     uint32_t *temp = NULL;
+
     if(N1 < *update_index_size && N2 < *update_index_size) {
         if (cc1 != cc2) {
             //gia to N1

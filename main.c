@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     uint32_t *cc_index = NULL;
     uint32_t cc_size = 0;
 
-    uint32_t *updateIndex = NULL;
+    uint32_t **updateIndex = NULL;
     int update_node_size = 32;
     int update_index_size = 64;
 
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
         a++;
     }
 
-    printf("%d\n", CreateUpdateIndex(cc_index, &updateIndex, update_node_size, &update_index_size, 1, 67));
+    printf("%d\n", CreateUpdateIndex(cc_index, updateIndex, update_node_size, &update_index_size, 1, 67));
 
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 
     printf("%d\n",createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out));
 
-    printf("%d\n", CreateUpdateIndex(cc_index, &updateIndex, update_node_size, &update_index_size, 1, 67));
+    printf("%d\n", CreateUpdateIndex(cc_index, updateIndex, update_node_size, &update_index_size, 1, 67));
 
     gettimeofday(&tv2, NULL);
     printf("Total time = %f seconds\n",
