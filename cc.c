@@ -144,7 +144,7 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int *init_upda
                     uint32_t *new = NULL;
                     new = realloc(updateIndex[cc1], realloc_size * sizeof(uint32_t));
                     new[i] = cc2;
-                    for (i = update_node_size; i < realloc_size; i++) new[i] = DEFAULT;
+                    for (i = update_node_size + 1; i < realloc_size; i++) new[i] = DEFAULT;
                     updateIndex[cc1] = new;
                     update_node_size = realloc_size;
                 }
@@ -174,7 +174,7 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int *init_upda
                     uint32_t *new2 = NULL;
                     new2 = realloc(updateIndex[cc2], realloc_size * sizeof(uint32_t));
                     new2[i] = cc1;
-                    for (i = update_node_size; i < realloc_size; i++) new2[i] = DEFAULT;
+                    for (i = update_node_size + 1; i < realloc_size; i++) new2[i] = DEFAULT;
                     updateIndex[cc2] = new2;
                     update_node_size = realloc_size;
                     return update_node_size;
@@ -186,7 +186,7 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int *init_upda
         //ama to index den xwraei
         while((realloc_update_index_size < cc1) || (realloc_update_index_size < cc2)) realloc_update_index_size = realloc_update_index_size * 2;
         updateIndex = realloc(updateIndex, realloc_update_index_size * sizeof(uint32_t *));
-        for (i = *update_index_size; i < realloc_update_index_size; i++) updateIndex[i] = NULL;
+        for (i = *update_index_size + 1; i < realloc_update_index_size; i++) updateIndex[i] = NULL;
         *update_index_size = realloc_update_index_size;
 
         //gia to N1
@@ -208,7 +208,7 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int *init_upda
                 uint32_t *new = NULL;
                 new = realloc(updateIndex[cc1], realloc_size * sizeof(uint32_t));
                 new[i] = cc2;
-                for (i = update_node_size; i < realloc_size; i++) new[i] = DEFAULT;
+                for (i = update_node_size + 1; i < realloc_size; i++) new[i] = DEFAULT;
                 updateIndex[cc1] = new;
                 update_node_size = realloc_size;
             }
@@ -238,11 +238,23 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, int *init_upda
                 uint32_t *new2 = NULL;
                 new2 = realloc(updateIndex[cc2], realloc_size * sizeof(uint32_t));
                 new2[i] = cc1;
-                for (i = update_node_size; i < realloc_size; i++) new2[i] = DEFAULT;
+                for (i = update_node_size + 1; i < realloc_size; i++) new2[i] = DEFAULT;
                 updateIndex[cc2] = new2;
                 update_node_size = realloc_size;
                 return update_node_size;
             }
         }
     }
+}
+
+int SearchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, uint32_t N2, ht_Node *hashtable) {
+
+    uint32_t cc1 = cc_index[N1];
+    uint32_t cc2 = cc_index[N2];
+
+    if(cc1 != cc2) {
+
+
+    }
+
 }
