@@ -251,10 +251,29 @@ int SearchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, ui
 
     uint32_t cc1 = cc_index[N1];
     uint32_t cc2 = cc_index[N2];
+    uint32_t v = 0;
+    uint32_t *temp = NULL;
+    int i = 0;
+    Stack stack;
+    stack.last = NULL;
 
     if(cc1 != cc2) {
+        push(&stack, cc1);
+        while(!stackIsEmpty(&stack)) {
+            v = pop(&stack);
+            if(v != cc2) {
+                if (search(hashtable, v, HT_BIG) == NOT_FOUND) {
+                    insert(hashtable, v, HT_BIG);
 
-
+                    temp = updateIndex[v];
+                    while(temp[i] != DEFAULT) {
+                        push(&stack, temp[i]);
+                        i++;
+                    }
+                }
+            }
+            else if(v == cc2) return FOUND;
+        }
+        return NOT_FOUND;
     }
-
 }
