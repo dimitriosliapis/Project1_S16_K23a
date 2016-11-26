@@ -247,7 +247,7 @@ int CreateUpdateIndex(uint32_t *cc_index, uint32_t **updateIndex, uint32_t *init
     }
 }
 
-int SearchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, uint32_t N2, ht_Node *hashtable) {
+int SearchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, int update_node_size, uint32_t N1, uint32_t N2, ht_Node *hashtable) {
 
     uint32_t cc1 = cc_index[N1];
     uint32_t cc2 = cc_index[N2];
@@ -261,12 +261,13 @@ int SearchUpdateIndex(uint32_t *cc_index,uint32_t **updateIndex, uint32_t N1, ui
         push(&stack, cc1);
         while(!stackIsEmpty(&stack)) {
             v = pop(&stack);
+            printf("to v twra einai %d\n", v);
             if(v != cc2) {
                 if (search(hashtable, v, HT_BIG) == NOT_FOUND) {
                     insert(hashtable, v, HT_BIG);
 
                     temp = updateIndex[v];
-                    while(temp[i] != DEFAULT) {
+                    while(temp[i] != DEFAULT && i < update_node_size) {
                         push(&stack, temp[i]);
                         i++;
                     }
