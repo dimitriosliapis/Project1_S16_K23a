@@ -26,5 +26,7 @@ typedef struct CC_t{
 }CC;
 
 uint32_t createCCIndex(uint32_t *, ind*, ind*, list_node*, list_node*, uint32_t, uint32_t);
-int CreateUpdateIndex(uint32_t *, uint32_t **, uint32_t*, uint32_t*, uint32_t, uint32_t);
-int SearchUpdateIndex( uint32_t *,uint32_t **, int, uint32_t, uint32_t, ht_Node *);
+int refreshUpdateIndex(uint32_t *, uint32_t **, uint32_t*, uint32_t*, uint32_t, uint32_t);
+int searchUpdateIndex( uint32_t *,uint32_t **, uint32_t, uint32_t);
+uint32_t findCCMax(uint32_t *, uint32_t);
+int updateCCIndex(uint32_t *, ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, uint32_t **, uint32_t *, uint32_t );

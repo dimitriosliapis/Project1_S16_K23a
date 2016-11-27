@@ -15,10 +15,12 @@ int main(int argc, char *argv[]) {
     int steps = 0;
 
 
+
     uint32_t *cc_index = NULL;
     uint32_t cc_size = 0;
+    uint32_t cc_max = 0;
 
-    uint32_t **updateIndex = NULL;
+    uint32_t **update_index = NULL;
     uint32_t update_node_size = 32;
     uint32_t update_index_size = 64;
 
@@ -65,24 +67,19 @@ int main(int argc, char *argv[]) {
     else cc_size = index_size_out;
 
     cc_index = malloc(sizeof(uint32_t) * cc_size);
-    printf("%d\n",createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out));
+    cc_max = createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out);
 
-    updateIndex = malloc(update_index_size * sizeof(uint32_t*));
-    int a = 0;
+    update_index_size = cc_max;
+
+    update_index = malloc(update_index_size * sizeof(uint32_t*));
+
+    uint32_t a = 0;
     while(a < update_index_size) {
-        updateIndex[a] = NULL;
+        update_index[a] = NULL;
         a++;
     }
 
-    printf("to megethos einai %d\n", CreateUpdateIndex(cc_index, updateIndex, &update_node_size, &update_index_size, 35, 70));
-    printf("to megethos einai %d\n", CreateUpdateIndex(cc_index, updateIndex, &update_node_size, &update_index_size, 1, 67));
-
-
-    ht_Node *update_hashtable = NULL;
-    update_hashtable = createHashtable(HT_BIG);
-
-    printf("to apotelesma einai %d\n", SearchUpdateIndex(cc_index, updateIndex, update_node_size, 1, 70, update_hashtable));
-
+    //printf("%d\n", CreateUpdateIndex(cc_index, update_index, &update_node_size, &update_index_size, 1, 67));
 
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
@@ -108,12 +105,13 @@ int main(int argc, char *argv[]) {
 
             addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in);
 
+            refreshUpdateIndex(cc_index, update_index, &update_node_size, &update_index_size, N1, N2);
+
         } else if (str[0] == 'Q') {
 
             toID(str, &N1, &N2);
 
-            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS &&
-                lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
+            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc_index[N1] == cc_index[N2] || searchUpdateIndex(cc_index,update_index,N1,N2) == FOUND)) {
 
                 steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB);
                 printf("%d\n", steps);
@@ -125,9 +123,9 @@ int main(int argc, char *argv[]) {
     }
     fclose(Queries);
 
-    printf("%d\n",createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out));
+    //printf("%d\n",createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out));
 
-    printf("to megethos einai %d\n", CreateUpdateIndex(cc_index, updateIndex, &update_node_size, &update_index_size, 1, 67));
+    //printf("%d\n", CreateUpdateIndex(cc_index, update_index, &update_node_size, &update_index_size, 1, 67));
 
     gettimeofday(&tv2, NULL);
     printf("Total time = %f seconds\n",
