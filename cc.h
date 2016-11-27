@@ -1,5 +1,7 @@
 #include "search.h"
 
+#define INIT_UNODE_SIZE 32
+
 #define CC_SIZE 4096
 
 typedef struct sNode_t{
@@ -11,6 +13,10 @@ typedef struct stack_t{
     sNode *last;
 }Stack;
 
+typedef struct u_unode_t{
+    uint32_t *cc_array;
+    uint32_t size;
+}u_node;
 
 
 void push(Stack*, uint32_t);
@@ -26,7 +32,7 @@ typedef struct CC_t{
 }CC;
 
 uint32_t createCCIndex(uint32_t *, ind*, ind*, list_node*, list_node*, uint32_t, uint32_t);
-int refreshUpdateIndex(uint32_t *, uint32_t **, uint32_t*, uint32_t*, uint32_t, uint32_t);
-int searchUpdateIndex( uint32_t *,uint32_t **, uint32_t, uint32_t);
+void refreshUpdateIndex(uint32_t *, u_node *, uint32_t*, uint32_t, uint32_t);
+int searchUpdateIndex( uint32_t *,u_node *, uint32_t, uint32_t);
 uint32_t findCCMax(uint32_t *, uint32_t);
-int updateCCIndex(uint32_t *, ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, uint32_t **, uint32_t *, uint32_t );
+int updateCCIndex(uint32_t *, ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, u_node *, uint32_t *, uint32_t );
