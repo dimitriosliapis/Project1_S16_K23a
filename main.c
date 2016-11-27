@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     uint32_t N1, N2, buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
     ptrdiff_t available_in = 0, available_out = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
-    ht_Node *exploredF = NULL, *exploredB = NULL;
+    ht_Node *exploredF = NULL, *exploredB = NULL, *explored = NULL;
     int steps = 0;
 
 
@@ -37,6 +37,9 @@ int main(int argc, char *argv[]) {
     index_in = createNodeIndex(index_size_in);
     buffer_out = createBuffer(buffer_size_out);
     index_out = createNodeIndex(index_size_out);
+
+    explored = createHashtable(HT_BIG);
+
 
     struct timeval tv1, tv2;
     gettimeofday(&tv1, NULL);
@@ -66,7 +69,7 @@ int main(int argc, char *argv[]) {
     else cc_size = index_size_out;
 
     cc_index = malloc(sizeof(uint32_t) * cc_size);
-    cc_max = createCCIndex(cc_index, cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out);
+    cc_max = createCCIndex(&cc_index, cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, explored);
 
     update_index_size = cc_max;
 
@@ -79,8 +82,6 @@ int main(int argc, char *argv[]) {
         update_index[a].state = 'o';//empty
         a++;
     }
-
-    //printf("%d\n", CreateUpdateIndex(cc_index, update_index, &update_node_size, &update_index_size, 1, 67));
 
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
@@ -106,15 +107,21 @@ int main(int argc, char *argv[]) {
 
             addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in);
 
-            refreshUpdateIndex(cc_index, update_index, &update_index_size, N1, N2);
+            refreshUpdateIndex(cc_index, &update_index, &update_index_size, N1, N2);
 
         } else if (str[0] == 'Q') {
 
             toID(str, &N1, &N2);
 
-            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && ((N1 < cc_size && N2 < cc_size && cc_index[N1] == cc_index[N2] && cc_index[N1] != DEFAULT) || searchUpdateIndex(cc_index,update_index,N1,N2) == FOUND)) {
+            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && ((N1 < cc_size && N2 < cc_size && cc_index[N1] == cc_index[N2] && cc_index[N1] != DEFAULT) || searchUpdateIndex(cc_index,update_index,N1,N2,explored) == FOUND)) {
 
+/*                if(N1 == 212969 && N2 == 233631){
+                    printf("helloooooo\n");
+                }*/
                 steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB);
+/*                if(steps == 3){
+                    steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB);
+                }*/
                 printf("%d\n", steps);
             } else
                 printf("-1\n");
@@ -124,9 +131,6 @@ int main(int argc, char *argv[]) {
     }
     fclose(Queries);
 
-    //printf("%d\n",createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out));
-
-    //printf("%d\n", CreateUpdateIndex(cc_index, update_index, &update_node_size, &update_index_size, 1, 67));
 
     gettimeofday(&tv2, NULL);
     printf("Total time = %f seconds\n",
@@ -137,10 +141,16 @@ int main(int argc, char *argv[]) {
     empty(frontierB);
     delete(exploredF, HT_BIG);
     delete(exploredB, HT_BIG);
+    delete(explored, HT_BIG);
     destroyBuffer(buffer_in);
     destroyBuffer(buffer_out);
     destroyNodeIndex(index_in, index_size_in);
     destroyNodeIndex(index_out, index_size_out);
+    free(cc_index);
+    for(a = 0; a < update_index_size; a++ ){
+        free(update_index[a].cc_array);
+    }
+    free(update_index);
 
     return 0;
 }

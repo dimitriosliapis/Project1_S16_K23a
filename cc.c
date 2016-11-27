@@ -44,10 +44,9 @@ void deleteStack(Stack *stack, sNode *current) {
     deleteStack(stack, current->next);
 }
 
-uint32_t createCCIndex(uint32_t *cc_index, uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in,
-                       uint32_t size_out) {
+uint32_t createCCIndex(uint32_t **cc_index, uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in,
+                       uint32_t size_out, ht_Node *explored) {
 
-    ht_Node *explored = createHashtable(HT_BIG);
     Stack stack;
     uint32_t cur = 0;
     uint32_t v = 0;
@@ -64,7 +63,7 @@ uint32_t createCCIndex(uint32_t *cc_index, uint32_t cc_size, ind *index_in, ind 
     stack.last = NULL;
 
     for(i = 0; i < cc_size; i++){
-        cc_index[i] = DEFAULT;
+        (*cc_index)[i] = DEFAULT;
     }
 
     cc_counter = 0;
@@ -77,7 +76,7 @@ uint32_t createCCIndex(uint32_t *cc_index, uint32_t cc_size, ind *index_in, ind 
 
 
             if (search(explored, v, HT_BIG) == NOT_FOUND) {
-                cc_index[v] = cc_counter;
+                (*cc_index)[v] = cc_counter;
                 insert(explored, v, HT_BIG);
 
                 offset_in = getListHead(index_in, v);
@@ -114,12 +113,13 @@ uint32_t createCCIndex(uint32_t *cc_index, uint32_t cc_size, ind *index_in, ind 
         }
         cc_counter++;
     }
-    delete(explored, HT_BIG);
+    //delete(explored, HT_BIG);
+    reinitialize(explored, HT_BIG);
 
     return cc_counter;
 }
 
-void refreshUpdateIndex(uint32_t *cc_index, u_node *updateIndex, uint32_t *update_index_size, uint32_t N1, uint32_t N2) {
+void refreshUpdateIndex(uint32_t *cc_index, u_node **updateIndex, uint32_t *update_index_size, uint32_t N1, uint32_t N2) {
 
     uint32_t cc[2];
     /*uint32_t cc2 = cc_index[N2];*/
@@ -127,79 +127,79 @@ void refreshUpdateIndex(uint32_t *cc_index, u_node *updateIndex, uint32_t *updat
     uint32_t i = 0, realloc_size = 0, realloc_update_index_size = *update_index_size;
     uint32_t *temp = NULL;
 
+    /////////////////////
     cc[0] = cc_index[N1];
     cc[1] = cc_index[N2];
 
+    if(cc[0] != DEFAULT && cc[1] != DEFAULT && cc[0] == cc[1]) return;// an einai sto idio sinexise
 
-    if(cc[0] == DEFAULT || cc[1] == DEFAULT) {
-        //ama toulaxiston ena cc den uparxei (kanourgios komvos)
+    if(cc[0] == DEFAULT || cc[1] == DEFAULT) {                          // an einai kainourio cc estw ena apo ta 2
         i = 0;
-        while(updateIndex[i].state != 'e' && i < *update_index_size) i++;
+        while((*updateIndex)[i].state != 'e' && i < *update_index_size) i++; //vres tin kainouria thesi
 
         if(i < *update_index_size) new_cc = i;
-        else{
+        else{                                                                   //an de xwraei kane realloc
             new_cc = *update_index_size;
             realloc_update_index_size = 2 * (*update_index_size);
-            updateIndex = realloc(updateIndex, realloc_update_index_size * sizeof(u_node));
+            *updateIndex = realloc(*updateIndex, realloc_update_index_size * sizeof(u_node));
             for (i = (new_cc + 1); i < realloc_update_index_size; i++) {
-                updateIndex[i].cc_array = NULL;
-                updateIndex[i].state = 'e';
+                (*updateIndex)[i].cc_array = NULL;
+                (*updateIndex)[i].state = 'e';
             }
             *update_index_size = realloc_update_index_size;
         }
 
 
-        if(cc[0] == DEFAULT) cc[0] = new_cc;
+        if(cc[0] == DEFAULT) cc[0] = new_cc;        //neo cc gia opoio einai kainourio
         if(cc[1] == DEFAULT) cc[1] = new_cc;
 
-        updateIndex[new_cc].cc_array = NULL;
-        updateIndex[new_cc].size = 0;
-        updateIndex[new_cc].state = 'n';//new
+        (*updateIndex)[new_cc].cc_array = NULL;
+        (*updateIndex)[new_cc].size = 0;
+        (*updateIndex)[new_cc].state = 'n';//new
     }
 
     int j = 0;
 
-    if(cc[0] == cc[1]) j = 1;
+    if(cc[0] == cc[1]) j = 1;//an einai kai ta 2 kainouria tote kanto 1 fora apla gia na dimiourgiseis kainourio cc
 
     while(j < 2) {
 
-        if (updateIndex[cc[j]].cc_array == NULL) {
-            updateIndex[cc[j]].cc_array = malloc(INIT_UNODE_SIZE * sizeof(uint32_t));
-            temp = updateIndex[cc[j]].cc_array;
-            if(j == 0) temp[0] = cc[1];
+        if ((*updateIndex)[cc[j]].cc_array == NULL) {       //an den exei sindethei me alla cc (o pinakas twn cc einai kenos)
+            (*updateIndex)[cc[j]].cc_array = malloc(INIT_UNODE_SIZE * sizeof(uint32_t));
+            temp = (*updateIndex)[cc[j]].cc_array;
+            if(j == 0) temp[0] = cc[1];             //elegxos se poio apo ta 2 vriskomaste ligo mpakalistikos alla klain
             else temp[0] = cc[0];
-            updateIndex[cc[j]].size = INIT_UNODE_SIZE;
+            (*updateIndex)[cc[j]].size = INIT_UNODE_SIZE;
             i = 1;
             while (i < INIT_UNODE_SIZE) {
                 temp[i] = DEFAULT;
                 i++;
             }
         } else {
-            temp = updateIndex[cc[j]].cc_array;
+            temp = (*updateIndex)[cc[j]].cc_array;
             i = 0;
-            while (temp[i] != DEFAULT && i < updateIndex[cc[j]].size) i++;
-            if (i < updateIndex[cc[j]].size) {
+            while (temp[i] != DEFAULT && i < (*updateIndex)[cc[j]].size) i++;
+            if (i < (*updateIndex)[cc[j]].size) {
                 if(j == 0) temp[i] = cc[1];
                 else temp[i] = cc[0];
             }
-            else if (i == updateIndex[cc[j]].size) {
-                realloc_size = 2 * updateIndex[cc[j]].size;
+            else if (i == (*updateIndex)[cc[j]].size) {
+                realloc_size = 2 * (*updateIndex)[cc[j]].size;
                 uint32_t *new = NULL;
-                new = realloc(updateIndex[cc[j]].cc_array, realloc_size * sizeof(uint32_t));
+                new = realloc((*updateIndex)[cc[j]].cc_array, realloc_size * sizeof(uint32_t));
                 if(j == 0) new[i] = cc[1];
                 else new[i] = cc[0];
-                for (i = updateIndex[cc[j]].size + 1; i < realloc_size; i++) new[i] = DEFAULT;
-                updateIndex[cc[j]].size = realloc_size;
-                updateIndex[cc[j]].cc_array = new;
+                for (i = (*updateIndex)[cc[j]].size + 1; i < realloc_size; i++) new[i] = DEFAULT;
+                (*updateIndex)[cc[j]].size = realloc_size;
+                (*updateIndex)[cc[j]].cc_array = new;
             }
         }
         j++;
     }
 }
 
-int searchUpdateIndex(uint32_t *cc_index,u_node *updateIndex, uint32_t N1, uint32_t N2) {
+int searchUpdateIndex(uint32_t *cc_index,u_node *updateIndex, uint32_t N1, uint32_t N2, ht_Node *explored) {
 
-    ht_Node *explored = createHashtable(HT_BIG);
     uint32_t cc1 = cc_index[N1];
     uint32_t cc2 = cc_index[N2];
     uint32_t v = 0;
@@ -230,15 +230,15 @@ int searchUpdateIndex(uint32_t *cc_index,u_node *updateIndex, uint32_t N1, uint3
                 }
             }
             else {
-                delete(explored, HT_BIG);
+                reinitialize(explored, HT_BIG);
                 return FOUND;
             }
         }
-        delete(explored, HT_BIG);
+        reinitialize(explored, HT_BIG);
         return NOT_FOUND;
     }
     else{
-        delete(explored, HT_BIG);
+        reinitialize(explored, HT_BIG);
         return FOUND;
     }
 }
@@ -249,6 +249,7 @@ uint32_t findCCMax(uint32_t *cc_index, uint32_t cc_index_size){
     uint32_t max = 0;
 
     for(i = 0; i < cc_index_size; i++){
+        if(cc_index[i] == DEFAULT) break;
         if(cc_index[i] > max) max = cc_index[i];
     }
 

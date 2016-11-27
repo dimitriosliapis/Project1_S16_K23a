@@ -1,6 +1,6 @@
 #include "index.h"
 
-#define QUEUE_SIZE 64
+#define QUEUE_SIZE 4096
 
 typedef struct qEntry_t {
     uint32_t id;

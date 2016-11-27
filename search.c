@@ -29,8 +29,11 @@ int isEmpty(Queue *queue) {
 
 int enq(Queue *queue, uint32_t id, int steps) {
 
+    qEntry *new = NULL;
+
     if (queue->count >= queue->size) {
-        queue->entries = realloc(queue->entries, queue->size * 2 * sizeof(qEntry));
+        new = realloc(queue->entries, queue->size * 2 * sizeof(qEntry));
+        queue->entries = new;
         queue->size *= 2;
     }
 
@@ -45,6 +48,7 @@ int enq(Queue *queue, uint32_t id, int steps) {
 uint32_t deq(Queue *queue, int *steps) {
 
     uint32_t id = DEFAULT;
+
 
     if (queue->count == 0)
         return DEFAULT;
@@ -106,6 +110,10 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
     enq(frontierB, end, steps);
 
     while (!isEmpty(frontierF) && !isEmpty(frontierB)) {    // oso ta 2 synora den einai adeia
+
+/*        if(node == 23630){
+            printf("helloman\n");
+        }*/
 
         if (!isEmpty(frontierF)) {
 
