@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     else cc_size = index_size_out;
 
     cc_index = malloc(sizeof(uint32_t) * cc_size);
-    cc_max = createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out);
+    cc_max = createCCIndex(cc_index, cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out);
 
     update_index_size = cc_max;
 
@@ -75,6 +75,8 @@ int main(int argc, char *argv[]) {
     uint32_t a = 0;
     while(a < update_index_size) {
         update_index[a].cc_array = NULL;
+        update_index[a].size = 0;
+        update_index[a].state = 'o';//empty
         a++;
     }
 
