@@ -20,9 +20,8 @@ int main(int argc, char *argv[]) {
     uint32_t cc_size = 0;
     uint32_t cc_max = 0;
 
-    uint32_t **update_index = NULL;
-    uint32_t update_node_size = 32;
-    uint32_t update_index_size = 64;
+    u_node *update_index = NULL;
+    uint32_t update_index_size = 0;
 
     // orismata
     if (argc == 3) {
@@ -71,11 +70,11 @@ int main(int argc, char *argv[]) {
 
     update_index_size = cc_max;
 
-    update_index = malloc(update_index_size * sizeof(uint32_t*));
+    update_index = malloc(update_index_size * sizeof(u_node));
 
     uint32_t a = 0;
     while(a < update_index_size) {
-        update_index[a] = NULL;
+        update_index[a].cc_array = NULL;
         a++;
     }
 
@@ -105,7 +104,7 @@ int main(int argc, char *argv[]) {
 
             addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in);
 
-            refreshUpdateIndex(cc_index, update_index, &update_node_size, &update_index_size, N1, N2);
+            refreshUpdateIndex(cc_index, update_index, &update_index_size, N1, N2);
 
         } else if (str[0] == 'Q') {
 
