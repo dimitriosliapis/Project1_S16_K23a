@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
 
             toID(str, &N1, &N2);
 
-            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc_index[N1] == cc_index[N2] || searchUpdateIndex(cc_index,update_index,N1,N2) == FOUND)) {
+            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && ((N1 < cc_size && N2 < cc_size && cc_index[N1] == cc_index[N2] && cc_index[N1] != DEFAULT) || searchUpdateIndex(cc_index,update_index,N1,N2) == FOUND)) {
 
                 steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB);
                 printf("%d\n", steps);

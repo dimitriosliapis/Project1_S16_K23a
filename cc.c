@@ -114,6 +114,7 @@ uint32_t createCCIndex(uint32_t *cc_index, uint32_t cc_size, ind *index_in, ind 
         }
         cc_counter++;
     }
+    delete(explored, HT_BIG);
 
     return cc_counter;
 }
@@ -132,27 +133,24 @@ void refreshUpdateIndex(uint32_t *cc_index, u_node *updateIndex, uint32_t *updat
 
     if(cc[0] == DEFAULT || cc[1] == DEFAULT) {
         //ama toulaxiston ena cc den uparxei (kanourgios komvos)
+        i = 0;
+        while(updateIndex[i].state != 'e' && i < *update_index_size) i++;
 
-        if(cc[0] >= *update_index_size || cc[1] >= *update_index_size ) {
+        if(i < *update_index_size) new_cc = i;
+        else{
             new_cc = *update_index_size;
-            realloc_update_index_size = *update_index_size;
-            while (cc[0] >= realloc_update_index_size || cc[1] >= realloc_update_index_size) {
-                realloc_update_index_size = 2 * (*update_index_size);
-            }
+            realloc_update_index_size = 2 * (*update_index_size);
             updateIndex = realloc(updateIndex, realloc_update_index_size * sizeof(u_node));
-            for (i = *update_index_size + 1; i < realloc_update_index_size; i++) {
+            for (i = (new_cc + 1); i < realloc_update_index_size; i++) {
                 updateIndex[i].cc_array = NULL;
                 updateIndex[i].state = 'e';
             }
             *update_index_size = realloc_update_index_size;
         }
-        else{
-            i = 0;
-            while(updateIndex[i].state != 'e') i++;
-            new_cc = i;
-            if(cc[0] == DEFAULT) cc[0] = new_cc;
-            if(cc[1] == DEFAULT) cc[1] = new_cc;
-        }
+
+
+        if(cc[0] == DEFAULT) cc[0] = new_cc;
+        if(cc[1] == DEFAULT) cc[1] = new_cc;
 
         updateIndex[new_cc].cc_array = NULL;
         updateIndex[new_cc].size = 0;
@@ -231,11 +229,16 @@ int searchUpdateIndex(uint32_t *cc_index,u_node *updateIndex, uint32_t N1, uint3
                     }
                 }
             }
-            else return FOUND;
+            else {
+                delete(explored, HT_BIG);
+                return FOUND;
+            }
         }
+        delete(explored, HT_BIG);
         return NOT_FOUND;
     }
     else{
+        delete(explored, HT_BIG);
         return FOUND;
     }
 }
@@ -253,7 +256,7 @@ uint32_t findCCMax(uint32_t *cc_index, uint32_t cc_index_size){
 }
 
 
-int updateCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in,
+void updateCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in,
                   uint32_t size_out, u_node *updateIndex, uint32_t *cc_index_size, uint32_t update_index_size) {
 
     ht_Node *explored = createHashtable(HT_BIG);
@@ -341,4 +344,7 @@ int updateCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_node *
             }
         }
     }
+    delete(explored, HT_BIG);
+    delete(explored_new, HT_BIG);
+
 }
