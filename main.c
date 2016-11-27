@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     else cc_size = index_size_out;
 
     cc_index = malloc(sizeof(uint32_t) * cc_size);
-    cc_max = createCCIndex(cc_index, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out);
+    cc_max = createCCIndex(cc_index, cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out);
 
     update_index_size = cc_max;
 
@@ -75,6 +75,8 @@ int main(int argc, char *argv[]) {
     uint32_t a = 0;
     while(a < update_index_size) {
         update_index[a].cc_array = NULL;
+        update_index[a].size = 0;
+        update_index[a].state = 'o';//empty
         a++;
     }
 
@@ -110,7 +112,7 @@ int main(int argc, char *argv[]) {
 
             toID(str, &N1, &N2);
 
-            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc_index[N1] == cc_index[N2] || searchUpdateIndex(cc_index,update_index,N1,N2) == FOUND)) {
+            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && ((N1 < cc_size && N2 < cc_size && cc_index[N1] == cc_index[N2] && cc_index[N1] != DEFAULT) || searchUpdateIndex(cc_index,update_index,N1,N2) == FOUND)) {
 
                 steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB);
                 printf("%d\n", steps);
