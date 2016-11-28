@@ -78,8 +78,10 @@ int main(int argc, char *argv[]) {
     uint32_t a = 0;
     while(a < update_index_size) {
         update_index[a].cc_array = NULL;
+        update_index[a].new_nodes = NULL;
         update_index[a].size = 0;
-        update_index[a].state = 'o';//empty
+        update_index[a].n_size = 0;
+        update_index[a].state = 'o';//old
         a++;
     }
 
@@ -107,7 +109,7 @@ int main(int argc, char *argv[]) {
 
             addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in);
 
-            refreshUpdateIndex(cc_index, &update_index, &update_index_size, N1, N2);
+            refreshUpdateIndex(cc_index, cc_size, &update_index, &update_index_size, N1, N2);
 
         } else if (str[0] == 'Q') {
 
