@@ -159,6 +159,7 @@ void refreshUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node **updateInd
                         }
                     }
                 }
+
                 i++;
             }
             if(!found){
