@@ -461,7 +461,7 @@ void updateCCIndex(uint32_t **cc_index, u_node *updateIndex, uint32_t *cc_index_
     //uint32_t max = findCCMax(cc_index, *cc_index_size);
     ptrdiff_t offset_in, offset_out;
     list_node *neighbors_in, *neighbors_out;
-    int k, realloc_size = 128;
+    int k, realloc_size = *cc_index_size;
 
     stack.last = NULL;
     stack_new.last = NULL;
@@ -470,11 +470,12 @@ void updateCCIndex(uint32_t **cc_index, u_node *updateIndex, uint32_t *cc_index_
     for(i = 0; i < update_index_size; i++ ) {
         if(updateIndex[i].new_nodes != NULL) {
             for(k = 0 ; k < updateIndex[i].n_size ; k++) {
-                if(updateIndex[i].new_nodes[k] < update_index_size) {
+                if(updateIndex[i].new_nodes[k] == DEFAULT) break;
+                if(updateIndex[i].new_nodes[k] < *cc_index_size) {
                     (*cc_index)[updateIndex[i].new_nodes[k]] = i;
                 }
                 else {
-                    while(updateIndex[i].new_nodes[k] < realloc_size) realloc_size = realloc_size*2;
+                    while(updateIndex[i].new_nodes[k] < realloc_size) realloc_size *= 2;
                     (*cc_index) = realloc((*cc_index), realloc_size*sizeof(uint32_t));
                     (*cc_index)[updateIndex[i].new_nodes[k]] = i;
                 }
@@ -490,6 +491,7 @@ void updateCCIndex(uint32_t **cc_index, u_node *updateIndex, uint32_t *cc_index_
                 insert(explored, v, HT_BIG);
                 if(updateIndex[v].cc_array != NULL) {
                     for (k = 0; k < updateIndex[v].size; k++) {
+                        if(updateIndex[v].cc_array[k] == DEFAULT) break;
                         push(&stack, updateIndex[v].cc_array[k]);
                     }
                 }
