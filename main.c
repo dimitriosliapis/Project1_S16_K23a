@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 
             toID(str, &N1, &N2);
 
-            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && ((N1 < cc_size && N2 < cc_size && cc_index[N1] == cc_index[N2] && cc_index[N1] != DEFAULT) || searchUpdateIndex(cc_index,update_index, update_index_size,N1,N2,explored) == FOUND)) {
+            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc_index[N1] == cc_index[N2] || searchUpdateIndex(cc_index, cc_size, update_index, update_index_size,N1,N2,explored) == FOUND)) {
 
 /*                if(N1 == 212969 && N2 == 233631){
                     printf("helloooooo\n");

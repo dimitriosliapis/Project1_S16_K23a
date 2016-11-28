@@ -194,6 +194,26 @@ void refreshUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node **updateInd
                 if(cc[0] == cc[1]) return;
             }
         }
+        else{
+            realloc_size = 2 * (*update_index_size);
+            (*updateIndex) = realloc((*updateIndex),realloc_size * sizeof(u_node));
+            new_cc = *update_index_size;
+            (*updateIndex)[new_cc].state = 'n';
+            (*updateIndex)[new_cc].n_size = INIT_NEWNODE_SIZE;
+            (*updateIndex)[new_cc].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
+            (*updateIndex)[new_cc].new_nodes[0] = N1;
+            (*updateIndex)[new_cc].new_nodes[1] = N2;
+            for(k = 2; k < INIT_NEWNODE_SIZE; k++) (*updateIndex)[new_cc].new_nodes[k] = DEFAULT;
+            for(l = new_cc + 1; l < realloc_size; l++){
+                (*updateIndex)[l].new_nodes = NULL;
+                (*updateIndex)[l].state = 'e';
+                (*updateIndex)[l].n_size = 0;
+                (*updateIndex)[l].cc_array = NULL;
+                (*updateIndex)[l].size = 0;
+            }
+            (*update_index_size) = realloc_size;
+            return;
+        }
 
     }
     if(cc[0] == DEFAULT) {
@@ -273,15 +293,20 @@ void refreshUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node **updateInd
     }
 }
 
-int searchUpdateIndex(uint32_t *cc_index,u_node *updateIndex, uint32_t update_index_size, uint32_t N1, uint32_t N2, ht_Node *explored) {
+int searchUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node *updateIndex, uint32_t update_index_size, uint32_t N1, uint32_t N2, ht_Node *explored) {
 
-    uint32_t cc1 = cc_index[N1];
-    uint32_t cc2 = cc_index[N2];
+    uint32_t cc1 = 0;
+    uint32_t cc2 = 0;
     uint32_t v = 0;
     uint32_t *temp = NULL;
     uint32_t i = 0, j = 0;
     Stack stack;
     stack.last = NULL;
+
+    if(N1 >= cc_size) cc1 = DEFAULT;
+    else cc1 = cc_index[N1];
+    if(N2 >= cc_size) cc2 = DEFAULT;
+    else cc2 = cc_index[N2];
 
     if(cc1 == DEFAULT){
         i = 0;
