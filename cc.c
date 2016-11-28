@@ -221,6 +221,7 @@ void refreshUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node **updateInd
             (*updateIndex)[cc[1]].n_size = INIT_NEWNODE_SIZE;
             (*updateIndex)[cc[1]].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
             (*updateIndex)[cc[1]].new_nodes[0] = N1;
+            for(k = 1; k < INIT_NEWNODE_SIZE; k++) (*updateIndex)[cc[1]].new_nodes[k] = DEFAULT;
         }
         else{
             k = 0;
@@ -239,6 +240,7 @@ void refreshUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node **updateInd
             (*updateIndex)[cc[0]].n_size = INIT_NEWNODE_SIZE;
             (*updateIndex)[cc[0]].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
             (*updateIndex)[cc[0]].new_nodes[0] = N2;
+            for(k = 1; k < INIT_NEWNODE_SIZE; k++) (*updateIndex)[cc[0]].new_nodes[k] = DEFAULT;
         }
         else{
             k = 0;
