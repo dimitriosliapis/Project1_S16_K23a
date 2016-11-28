@@ -32,8 +32,8 @@ typedef struct CC_t{
     //uint32_t metricVal;*/
 }CC;
 
-uint32_t createCCIndex(uint32_t *, uint32_t , ind*, ind*, list_node*, list_node*, uint32_t, uint32_t);
-void refreshUpdateIndex(uint32_t *, u_node *, uint32_t*, uint32_t, uint32_t);
-int searchUpdateIndex( uint32_t *,u_node *, uint32_t, uint32_t);
+uint32_t createCCIndex(uint32_t **, uint32_t , ind*, ind*, list_node*, list_node*, uint32_t, uint32_t, ht_Node*);
+void refreshUpdateIndex(uint32_t *, u_node **, uint32_t*, uint32_t, uint32_t);
+int searchUpdateIndex( uint32_t *,u_node *, uint32_t, uint32_t, ht_Node*);
 uint32_t findCCMax(uint32_t *, uint32_t);
 void updateCCIndex(uint32_t *, ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, u_node *, uint32_t *, uint32_t );
