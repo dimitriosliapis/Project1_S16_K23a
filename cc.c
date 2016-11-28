@@ -458,7 +458,7 @@ void updateCCIndex(uint32_t **cc_index, u_node *updateIndex, uint32_t *cc_index_
     Stack stack, stack_new;
     uint32_t parent_cc = 0;
     uint32_t new_size = *cc_index_size;
-    uint32_t max = findCCMax(cc_index, *cc_index_size);
+    //uint32_t max = findCCMax(cc_index, *cc_index_size);
     ptrdiff_t offset_in, offset_out;
     list_node *neighbors_in, *neighbors_out;
     int k, realloc_size = 128;
@@ -471,12 +471,12 @@ void updateCCIndex(uint32_t **cc_index, u_node *updateIndex, uint32_t *cc_index_
         if(updateIndex[i].new_nodes != NULL) {
             for(k = 0 ; k < updateIndex[i].n_size ; k++) {
                 if(updateIndex[i].new_nodes[k] < update_index_size) {
-                    cc_index[updateIndex[i].new_nodes[k]] = i;
+                    (*cc_index)[updateIndex[i].new_nodes[k]] = i;
                 }
                 else {
                     while(updateIndex[i].new_nodes[k] < realloc_size) realloc_size = realloc_size*2;
-                    cc_index = realloc(cc_index, realloc_size*sizeof(uint32_t));
-                    cc_index[updateIndex[i].new_nodes[k]] = i;
+                    (*cc_index) = realloc((*cc_index), realloc_size*sizeof(uint32_t));
+                    (*cc_index)[updateIndex[i].new_nodes[k]] = i;
                 }
             }
         }
@@ -496,8 +496,8 @@ void updateCCIndex(uint32_t **cc_index, u_node *updateIndex, uint32_t *cc_index_
             }
         }
         for(k = 0 ; k < *cc_index_size ; k++) {
-            if(search(explored, cc_index[k], HT_BIG) == FOUND) {
-                cc_index[k] = i;
+            if(search(explored, (*cc_index)[k], HT_BIG) == FOUND) {
+                (*cc_index)[k] = i;
             }
         }
     }
