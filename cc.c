@@ -217,42 +217,97 @@ void refreshUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node **updateInd
 
     }
     if(cc[0] == DEFAULT) {
-        if((*updateIndex)[cc[1]].new_nodes == NULL){
-            (*updateIndex)[cc[1]].n_size = INIT_NEWNODE_SIZE;
-            (*updateIndex)[cc[1]].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
-            (*updateIndex)[cc[1]].new_nodes[0] = N1;
-            for(k = 1; k < INIT_NEWNODE_SIZE; k++) (*updateIndex)[cc[1]].new_nodes[k] = DEFAULT;
-        }
-        else{
-            k = 0;
-            while((*updateIndex)[cc[1]].new_nodes[k] != DEFAULT && k < (*updateIndex)[cc[1]].n_size) k++;
-            if(k == (*updateIndex)[cc[1]].n_size){
-                realloc_size = 2 * (*updateIndex)[cc[1]].n_size;
-                (*updateIndex)[cc[1]].new_nodes = realloc((*updateIndex)[cc[1]].new_nodes, realloc_size * sizeof(uint32_t));
-                for(l = (*updateIndex)[cc[1]].n_size + 1; l < realloc_size; l++) (*updateIndex)[cc[1]].new_nodes[l] = DEFAULT;
+
+        i = 0;
+        found = 0;
+        while((*updateIndex)[i].state == 'o' && i < *update_index_size) i++; //vres tin kainouria thesi
+
+        if(i < *update_index_size) {
+
+            l = i;
+            while ((*updateIndex)[l].state != 'e' && l < *update_index_size) l++;
+            while (i < l) {
+                if ((*updateIndex)[i].new_nodes != NULL) {
+                    for (k = 0; k < (*updateIndex)[i].n_size; k++) {
+                        if ((*updateIndex)[i].new_nodes[k] == DEFAULT) break;
+                        if ((*updateIndex)[i].new_nodes[k] == N1) {
+                            cc[0] = i;
+                            found = 1;
+                        }
+                    }
+                }
+
+                i++;
             }
-            (*updateIndex)[cc[1]].new_nodes[k] = N1;
         }
-        return;
+        if(!found) {
+            if ((*updateIndex)[cc[1]].new_nodes == NULL) {
+                (*updateIndex)[cc[1]].n_size = INIT_NEWNODE_SIZE;
+                (*updateIndex)[cc[1]].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
+                (*updateIndex)[cc[1]].new_nodes[0] = N1;
+                for (k = 1; k < INIT_NEWNODE_SIZE; k++) (*updateIndex)[cc[1]].new_nodes[k] = DEFAULT;
+            }
+            else {
+                k = 0;
+                while ((*updateIndex)[cc[1]].new_nodes[k] != DEFAULT && k < (*updateIndex)[cc[1]].n_size) k++;
+                if (k == (*updateIndex)[cc[1]].n_size) {
+                    realloc_size = 2 * (*updateIndex)[cc[1]].n_size;
+                    (*updateIndex)[cc[1]].new_nodes = realloc((*updateIndex)[cc[1]].new_nodes,
+                                                              realloc_size * sizeof(uint32_t));
+                    for (l = (*updateIndex)[cc[1]].n_size + 1; l < realloc_size; l++)
+                        (*updateIndex)[cc[1]].new_nodes[l] = DEFAULT;
+                }
+                (*updateIndex)[cc[1]].new_nodes[k] = N1;
+            }
+            return;
+        }
     }
     else if(cc[1] == DEFAULT){
-        if((*updateIndex)[cc[0]].new_nodes == NULL){
-            (*updateIndex)[cc[0]].n_size = INIT_NEWNODE_SIZE;
-            (*updateIndex)[cc[0]].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
-            (*updateIndex)[cc[0]].new_nodes[0] = N2;
-            for(k = 1; k < INIT_NEWNODE_SIZE; k++) (*updateIndex)[cc[0]].new_nodes[k] = DEFAULT;
-        }
-        else{
-            k = 0;
-            while((*updateIndex)[cc[0]].new_nodes[k] != DEFAULT && k < (*updateIndex)[cc[0]].n_size) k++;
-            if(k == (*updateIndex)[cc[0]].n_size){
-                realloc_size = 2 * (*updateIndex)[cc[0]].n_size;
-                (*updateIndex)[cc[0]].new_nodes = realloc((*updateIndex)[cc[0]].new_nodes, realloc_size * sizeof(uint32_t));
-                for(l = (*updateIndex)[cc[0]].n_size + 1; l < realloc_size; l++) (*updateIndex)[cc[0]].new_nodes[l] = DEFAULT;
+
+        found = 0;
+        i = 0;
+        while((*updateIndex)[i].state == 'o' && i < *update_index_size) i++; //vres tin kainouria thesi
+
+        if(i < *update_index_size) {
+
+            l = i;
+            while ((*updateIndex)[l].state != 'e' && l < *update_index_size) l++;
+            while (i < l) {
+                if ((*updateIndex)[i].new_nodes != NULL) {
+                    for (k = 0; k < (*updateIndex)[i].n_size; k++) {
+                        if ((*updateIndex)[i].new_nodes[k] == DEFAULT) break;
+                        if ((*updateIndex)[i].new_nodes[k] == N2) {
+                            cc[1] = i;
+                            found = 1;
+                        }
+                    }
+                }
+
+                i++;
             }
-            (*updateIndex)[cc[0]].new_nodes[k] = N2;
         }
-        return;
+
+        if(!found) {
+            if ((*updateIndex)[cc[0]].new_nodes == NULL) {
+                (*updateIndex)[cc[0]].n_size = INIT_NEWNODE_SIZE;
+                (*updateIndex)[cc[0]].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
+                (*updateIndex)[cc[0]].new_nodes[0] = N2;
+                for (k = 1; k < INIT_NEWNODE_SIZE; k++) (*updateIndex)[cc[0]].new_nodes[k] = DEFAULT;
+            }
+            else {
+                k = 0;
+                while ((*updateIndex)[cc[0]].new_nodes[k] != DEFAULT && k < (*updateIndex)[cc[0]].n_size) k++;
+                if (k == (*updateIndex)[cc[0]].n_size) {
+                    realloc_size = 2 * (*updateIndex)[cc[0]].n_size;
+                    (*updateIndex)[cc[0]].new_nodes = realloc((*updateIndex)[cc[0]].new_nodes,
+                                                              realloc_size * sizeof(uint32_t));
+                    for (l = (*updateIndex)[cc[0]].n_size + 1; l < realloc_size; l++)
+                        (*updateIndex)[cc[0]].new_nodes[l] = DEFAULT;
+                }
+                (*updateIndex)[cc[0]].new_nodes[k] = N2;
+            }
+            return;
+        }
     }
 
     int j = 0;
@@ -312,7 +367,7 @@ int searchUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node *updateIndex,
 
     if(cc1 == DEFAULT){
         i = 0;
-        while(updateIndex[i].state == 'o' && i < update_index_size) i++;
+        //while(updateIndex[i].state == 'o' && i < update_index_size) i++;
         if(i == update_index_size || updateIndex[i].state == 'e') return NOT_FOUND;
         while(i < update_index_size){
             if(updateIndex[i].new_nodes != NULL){
@@ -328,7 +383,7 @@ int searchUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node *updateIndex,
     }
     if(cc2 == DEFAULT){
         i = 0;
-        while(updateIndex[i].state == 'o' && i < update_index_size) i++;
+        //while(updateIndex[i].state == 'o' && i < update_index_size) i++;
         if(i == update_index_size || updateIndex[i].state == 'e') return NOT_FOUND;
         while(i < update_index_size){
             if(updateIndex[i].new_nodes != NULL){
