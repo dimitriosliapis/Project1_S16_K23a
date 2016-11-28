@@ -274,15 +274,49 @@ void refreshUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node **updateInd
     }
 }
 
-int searchUpdateIndex(uint32_t *cc_index,u_node *updateIndex, uint32_t N1, uint32_t N2, ht_Node *explored) {
+int searchUpdateIndex(uint32_t *cc_index,u_node *updateIndex, uint32_t update_index_size, uint32_t N1, uint32_t N2, ht_Node *explored) {
 
     uint32_t cc1 = cc_index[N1];
     uint32_t cc2 = cc_index[N2];
     uint32_t v = 0;
     uint32_t *temp = NULL;
-    uint32_t i = 0;
+    uint32_t i = 0, j = 0;
     Stack stack;
     stack.last = NULL;
+
+    if(cc1 == DEFAULT){
+        i = 0;
+        while(updateIndex[i].state == 'o' && i < update_index_size) i++;
+        if(i == update_index_size || updateIndex[i].state == 'e') return NOT_FOUND;
+        while(i < update_index_size){
+            if(updateIndex[i].new_nodes != NULL){
+                for(j = 0; j < updateIndex[i].n_size; j++){
+                    if(updateIndex[i].new_nodes[j] == N1) {
+                        cc1 = i;
+                        break;
+                    }
+                }
+            }
+            i++;
+        }
+    }
+    if(cc2 == DEFAULT){
+        i = 0;
+        while(updateIndex[i].state == 'o' && i < update_index_size) i++;
+        if(i == update_index_size || updateIndex[i].state == 'e') return NOT_FOUND;
+        while(i < update_index_size){
+            if(updateIndex[i].new_nodes != NULL){
+                for(j = 0; j < updateIndex[i].n_size; j++){
+                    if(updateIndex[i].new_nodes[j] == N2) {
+                        cc2 = i;
+                        break;
+                    }
+                }
+            }
+            i++;
+        }
+    }
+    if(cc1 == DEFAULT || cc2 == DEFAULT) return NOT_FOUND;
 
     if(cc1 != cc2) {
         push(&stack, cc1);
