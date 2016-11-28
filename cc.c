@@ -487,8 +487,9 @@ void updateCCIndex(uint32_t **cc_index, u_node *updateIndex, uint32_t *cc_index_
         push(&stack, i);
         while(!stackIsEmpty(&stack)) {
             v = pop(&stack);
-            if(search(explored, v, HT_BIG) == NOT_FOUND) {
+            if(search(explored_new, v, HT_BIG) == NOT_FOUND) {
                 insert(explored, v, HT_BIG);
+                insert(explored_new, v, HT_BIG);
                 if(updateIndex[v].cc_array != NULL) {
                     for (k = 0; k < updateIndex[v].size; k++) {
                         if(updateIndex[v].cc_array[k] == DEFAULT) break;
@@ -502,6 +503,7 @@ void updateCCIndex(uint32_t **cc_index, u_node *updateIndex, uint32_t *cc_index_
                 (*cc_index)[k] = i;
             }
         }
+        reinitialize(explored, HT_BIG);
     }
 
     delete(explored, HT_BIG);
