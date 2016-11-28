@@ -448,8 +448,7 @@ uint32_t findCCMax(uint32_t *cc_index, uint32_t cc_index_size){
 }
 
 
-void updateCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in,
-                  uint32_t size_out, u_node *updateIndex, uint32_t *cc_index_size, uint32_t update_index_size) {
+void updateCCIndex(uint32_t **cc_index, u_node *updateIndex, uint32_t *cc_index_size, uint32_t update_index_size) {
 
     ht_Node *explored = createHashtable(HT_BIG);
     ht_Node *explored_new = createHashtable(HT_BIG);
@@ -462,102 +461,47 @@ void updateCCIndex(uint32_t *cc_index, ind *index_in, ind *index_out, list_node 
     uint32_t max = findCCMax(cc_index, *cc_index_size);
     ptrdiff_t offset_in, offset_out;
     list_node *neighbors_in, *neighbors_out;
+    int k, realloc_size = 128;
 
     stack.last = NULL;
     stack_new.last = NULL;
 
-
+    //gia ta new nodes
     for(i = 0; i < update_index_size; i++ ) {
-
-        parent_cc = i;
-
-        if(updateIndex[i].state == 'e') break;
-        if(updateIndex[i].state != 'v'){          //visited
-
-            if(updateIndex[i].state == 'n'){
-
-            }
-            if (search(explored, parent_cc, HT_BIG) == FOUND) continue;
-
-            push(&stack, parent_cc);
-
-            while (!stackIsEmpty(&stack)) {
-
-                v = pop(&stack);
-                updateIndex[v].state = 'v';
-                //cc_index[v] = parent_cc;
-
-                insert(explored, v, HT_BIG);
-
-                for (j = 0; j < updateIndex[v].size; j++) {
-                    push(&stack, updateIndex[v].cc_array[j]);
+        if(updateIndex[i].new_nodes != NULL) {
+            for(k = 0 ; k < updateIndex[i].n_size ; k++) {
+                if(updateIndex[i].new_nodes[k] < update_index_size) {
+                    cc_index[updateIndex[i].new_nodes[k]] = i;
                 }
-
-            }
-
-            for(j = 0; j < *cc_index_size; j++){
-                if (search(explored, cc_index[j], HT_BIG) == FOUND){
-                    cc_index[j] = parent_cc;
+                else {
+                    while(updateIndex[i].new_nodes[k] < realloc_size) realloc_size = realloc_size*2;
+                    cc_index = realloc(cc_index, realloc_size*sizeof(uint32_t));
+                    cc_index[updateIndex[i].new_nodes[k]] = i;
                 }
-
             }
         }
-
-
-
-        /*parent_cc = cc_index[i];
-////////////////////////////////////////////////////////////////////////
-        if(parent_cc == DEFAULT){
-            if((lookup(index_in, parent_cc, size_in) == NOT_EXIST) && (lookup(index_out, parent_cc, size_out) == NOT_EXIST)) continue;
-            if (search(explored_new, parent_cc, HT_BIG) == FOUND) continue; // visited
-            push(&stack_new, parent_cc);
-            while (!stackIsEmpty(&stack_new)) {
-                v_new = pop(&stack_new);
-
-
-                if (search(explored_new, v_new, HT_BIG) == NOT_FOUND) {
-                    cc_index[v_new] = i;
-                    insert(explored_new, v_new, HT_BIG);
-                    insert(explored, i, HT_BIG);//gia na min to tsekarei pali apo katw
-
-                    offset_in = getListHead(index_in, v_new);
-                    offset_out = getListHead(index_out, v_new);
-                    neighbors_in = buffer_in + offset_in;
-                    neighbors_out = buffer_out + offset_out;
-
-                    if(offset_in >= 0) {
-                        i = 0;
-                        while (i < N) {
-                            if (neighbors_in->neighbor[i] == DEFAULT) break;
-                            push(&stack_new, neighbors_in->neighbor[i]);
-                            i++;
-                            if (i == N && neighbors_in->nextListNode != -1) {
-                                neighbors_in = buffer_in + neighbors_in->nextListNode;
-                                i = 0;
-                            }
-                        }
-                    }
-                    if(offset_out >= 0) {
-                        i = 0;
-                        while (i < N) {
-                            if (neighbors_out->neighbor[i] == DEFAULT) break;
-                            push(&stack_new, neighbors_out->neighbor[i]);
-                            i++;
-                            if (i == N && neighbors_out->nextListNode != -1) {
-                                neighbors_out = buffer_out + neighbors_out->nextListNode;
-                                i = 0;
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-/////////////////////////////////////////////////////////////////////////
-        else {
-
-        }*/
     }
+
+    for(i = 0 ; i < update_index_size ; i++) {
+        push(&stack, i);
+        while(!stackIsEmpty(&stack)) {
+            v = pop(&stack);
+            if(search(explored, v, HT_BIG) == NOT_FOUND) {
+                insert(explored, v, HT_BIG);
+                if(updateIndex[v].cc_array != NULL) {
+                    for (k = 0; k < updateIndex[v].size; k++) {
+                        push(&stack, updateIndex[v].cc_array[k]);
+                    }
+                }
+            }
+        }
+        for(k = 0 ; k < *cc_index_size ; k++) {
+            if(search(explored, cc_index[k], HT_BIG) == FOUND) {
+                cc_index[k] = i;
+            }
+        }
+    }
+
     delete(explored, HT_BIG);
     delete(explored_new, HT_BIG);
 

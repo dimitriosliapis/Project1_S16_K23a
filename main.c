@@ -133,6 +133,7 @@ int main(int argc, char *argv[]) {
     }
     fclose(Queries);
 
+    updateCCIndex(&cc_index, update_index, &cc_size, update_index_size);
 
     gettimeofday(&tv2, NULL);
     printf("Total time = %f seconds\n",
