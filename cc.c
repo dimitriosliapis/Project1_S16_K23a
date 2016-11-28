@@ -129,17 +129,18 @@ void refreshUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node **updateInd
     uint32_t *temp = NULL;
 
     /////////////////////
-    if(N1 > cc_size) cc[0] = DEFAULT;
+    if(N1 >= cc_size) cc[0] = DEFAULT;
     else cc[0] = cc_index[N1];
 
-    if(N2 > cc_size) cc[1] = DEFAULT;
+    if(N2 >= cc_size) cc[1] = DEFAULT;
     else cc[1] = cc_index[N2];
 
     if(cc[0] != DEFAULT && cc[1] != DEFAULT && cc[0] == cc[1]) return;// an einai sto idio sinexise
 
-    if(cc[0] == DEFAULT || cc[1] == DEFAULT) {                          // an einai kainourio cc estw ena apo ta 2
+    if(cc[0] == DEFAULT && cc[1] == DEFAULT) {                          // an einai kainouria cc
         i = 0;
-        while((*updateIndex)[i].state != 'o' && i < *update_index_size) i++; //vres tin kainouria thesi
+        //ti ginetai an kapoio einai hdh sto cc_index?
+        while((*updateIndex)[i].state == 'o' && i < *update_index_size) i++; //vres tin kainouria thesi
 
         if(i < *update_index_size) {
 
@@ -148,7 +149,7 @@ void refreshUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node **updateInd
             while(i < l){
                 if(updateIndex[i]->new_nodes != NULL){
                     for(k = 0; k < updateIndex[i]->n_size; k++){
-                        if(updateIndex[i]->new_nodes[k] == DEFAULT) continue;
+                        if(updateIndex[i]->new_nodes[k] == DEFAULT) break;
                         if(updateIndex[i]->new_nodes[k] == N1){
                             cc[0] = i;
                             found = 1;
@@ -182,25 +183,60 @@ void refreshUpdateIndex(uint32_t *cc_index, uint32_t cc_size, u_node **updateInd
                 updateIndex[new_cc]->state = 'n';
                 updateIndex[new_cc]->n_size = INIT_NEWNODE_SIZE;
                 updateIndex[new_cc]->new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
-                for(k = 0; k < INIT_NEWNODE_SIZE; k++) updateIndex[new_cc]->new_nodes[k] = DEFAULT;
                 updateIndex[new_cc]->new_nodes[0] = N1;
                 updateIndex[new_cc]->new_nodes[1] = N2;
+                for(k = 2; k < INIT_NEWNODE_SIZE; k++) updateIndex[new_cc]->new_nodes[k] = DEFAULT;
+
                 return;
 
             }
             else{
                 if(cc[0] == cc[1]) return;
-                if(cc[0] == DEFAULT) cc[0] = cc[1];
-                if(cc[1] == DEFAULT) cc[1] = cc[0];
 
             }
         }
 
     }
+    if(cc[0] == DEFAULT) {
+        if(updateIndex[cc[1]]->new_nodes == NULL){
+            updateIndex[cc[1]]->n_size = INIT_NEWNODE_SIZE;
+            updateIndex[cc[1]]->new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
+            updateIndex[cc[1]]->new_nodes[0] = N1;
+        }
+        else{
+            k = 0;
+            while(updateIndex[cc[1]]->new_nodes[k] != DEFAULT && k < updateIndex[cc[1]]->n_size) k++;
+            if(k == updateIndex[cc[1]]->n_size){
+                realloc_size = 2 * updateIndex[cc[1]]->n_size;
+                updateIndex[cc[1]]->new_nodes = realloc(updateIndex[cc[1]]->new_nodes, realloc_size * sizeof(uint32_t));
+                for(l = updateIndex[cc[1]]->n_size + 1; l < realloc_size; l++) updateIndex[cc[1]]->new_nodes[l] = DEFAULT;
+            }
+            updateIndex[cc[1]]->new_nodes[k] = N1;
+        }
+        return;
+    }
+    else if(cc[1] == DEFAULT){
+        if(updateIndex[cc[0]]->new_nodes == NULL){
+            updateIndex[cc[0]]->n_size = INIT_NEWNODE_SIZE;
+            updateIndex[cc[0]]->new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
+            updateIndex[cc[0]]->new_nodes[0] = N2;
+        }
+        else{
+            k = 0;
+            while(updateIndex[cc[0]]->new_nodes[k] != DEFAULT && k < updateIndex[cc[0]]->n_size) k++;
+            if(k == updateIndex[cc[0]]->n_size){
+                realloc_size = 2 * updateIndex[cc[0]]->n_size;
+                updateIndex[cc[0]]->new_nodes = realloc(updateIndex[cc[0]]->new_nodes, realloc_size * sizeof(uint32_t));
+                for(l = updateIndex[cc[0]]->n_size + 1; l < realloc_size; l++) updateIndex[cc[0]]->new_nodes[l] = DEFAULT;
+            }
+            updateIndex[cc[0]]->new_nodes[k] = N2;
+        }
+        return;
+    }
 
     int j = 0;
 
-    if(cc[0] == cc[1]) j = 1;//an einai kai ta 2 kainouria tote kanto 1 fora apla gia na dimiourgiseis kainourio cc
+    //if(cc[0] == cc[1]) j = 1;//an einai kai ta 2 kainouria tote kanto 1 fora apla gia na dimiourgiseis kainourio cc
 
     while(j < 2) {
 
