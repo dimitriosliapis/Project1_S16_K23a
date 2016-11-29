@@ -25,8 +25,8 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
         if(search(explored, i, HT_BIG) == FOUND) continue;
 
         push(&stack, i);
-        (*index_out).lowlink = index;
-        (*index_out).index = index;
+        index_out[i].lowlink = index;
+        index_out[i].index = index;
         index++;
         while(!stackIsEmpty(&stack)) {
             v = peek(&stack);
@@ -49,11 +49,11 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
                     }
                 }
                 if((*index_out).lowlink == (*index_out).index) {
-                    (*scc).components[i].component_id = i;
+                    scc->components[i].component_id = i;
                     while (k != v) {
                         k = pop(&stack);
-                        (*scc).components[i].included_node_ids[a] = k;
-                        (*scc).components[i].included_nodes_count++;
+                        scc->components[i].included_node_ids[a] = k;
+                        scc->components[i].included_nodes_count++;
                         a++;
                     }
                     a = 0;
