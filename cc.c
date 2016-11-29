@@ -44,6 +44,21 @@ void deleteStack(Stack *stack, sNode *current) {
     deleteStack(stack, current->next);
 }
 
+int onStack(Stack *stack, uint32_t id){
+
+    sNode *cur = NULL;
+
+    if (stack == NULL) return 0;
+    if (stack->last == NULL) return 0;
+
+    cur = stack->last;
+    while(cur != NULL){
+        if(cur->id == id) return 1;
+        cur = cur->next;
+    }
+    return 0;
+}
+
 CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in, uint32_t size_out, ht_Node *explored) {
 
     Stack stack;

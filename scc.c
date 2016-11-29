@@ -43,6 +43,10 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
                         if(neighbors_out->neighbor[k] == DEFAULT) break;
                         if(search(explored, neighbors_out->neighbor[k], HT_BIG) == NOT_FOUND) {
                             push(&stack, neighbors_out->neighbor[k]);
+                            if(index_out[v].lowlink > index_out[k].lowlink) index_out[v].lowlink = index_out[k].lowlink;
+                        }
+                        else if(onStack(&stack, k)){
+                            if(index_out[v].lowlink > index_out[k].index) index_out[v].lowlink = index_out[k].index;
                         }
                         k++;
                         if(k == N && neighbors_out->nextListNode != -1) {

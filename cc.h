@@ -27,6 +27,7 @@ void push(Stack*, uint32_t);
 uint32_t pop(Stack*);
 int stackIsEmpty(Stack*);
 void deleteStack(Stack*, sNode*);
+int onStack(Stack*, uint32_t);
 
 
 typedef struct CC_t{
