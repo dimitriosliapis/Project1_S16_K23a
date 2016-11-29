@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "index.h"
 
 ind *createNodeIndex(uint32_t index_size) {
@@ -9,6 +10,8 @@ ind *createNodeIndex(uint32_t index_size) {
     for (i = 0; i < index_size; i++) {
         index[i].first = -1;
         index[i].last = -1;
+        index[i].lowlink = DEFAULT;
+        index[i].index = DEFAULT;
         index[i].neighbors = NULL;
     }
 
