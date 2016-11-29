@@ -44,22 +44,6 @@ void deleteStack(Stack *stack, sNode *current) {
     deleteStack(stack, current->next);
 }
 
-/*CC* initCCIndex(uint32_t cc_size){
-
-    uint32_t i = 0;
-    CC *cc = malloc(sizeof(CC));
-    uint32_t *cc_index = malloc(sizeof(uint32_t) * cc_size);
-
-    for(i = 0; i < cc_size; i++){
-        cc_index[i] = DEFAULT;
-    }
-
-    cc->cc_index = cc_index;
-    cc->cc_size = cc_size;
-
-    return cc;
-}*/
-
 CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in, uint32_t size_out, ht_Node *explored) {
 
     Stack stack;
@@ -67,7 +51,6 @@ CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
     uint32_t v = 0;
     list_node *neighbors_in, *neighbors_out;
     uint32_t cc_counter = 0;
-    ind *cur_ind = NULL;
     ptrdiff_t offset_in, offset_out;
     uint32_t i = 0;
     uint32_t size;
