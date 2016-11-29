@@ -1,6 +1,12 @@
 #include "scc.h"
 #include "cc.h"
 
+uint32_t peek(Stack *stack) {
+
+    return stack->last->id;
+
+}
+
 void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
 
     Stack stack;
@@ -8,8 +14,10 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
     list_node *neighbors_out;
     ind *cur_ind = NULL;
     ptrdiff_t offset_out;
-    uint32_t size = size_out;
-    uint32_t i = 0, v = 0, k = 0;
+    uint32_t size = size_out, index = 0;
+    uint32_t i = 0, v = 0, k = 0, a = 0;
+
+    SCC *scc = malloc(sizeof(SCC));
 
     stack.last = NULL;
 
@@ -18,15 +26,18 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
         if(search(explored, i, HT_BIG) == FOUND) continue;
 
         push(&stack, i);
+        (*index_out).lowlink = index;
+        (*index_out).index = index;
+        index++;
         while(!stackIsEmpty(&stack)) {
-            v = pop(&stack);
+            v = peek(&stack);
 
             if(search(explored, v, HT_BIG) == NOT_FOUND) {
                 insert(explored, v, HT_BIG);
                 offset_out = getListHead(index_out, v);
-                neighbors_out = buffer_out + offset_out;
 
                 if(offset_out >= 0) {
+                    neighbors_out = buffer_out + offset_out;
                     k = 0;
                     while(k < N) {
                         if(neighbors_out->neighbor[k] == DEFAULT) break;
@@ -38,13 +49,17 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
                         }
                     }
                 }
+                if((*index_out).lowlink == (*index_out).index) {
+                    (*scc).components[i].component_id = i;
+                    while (k != v) {
+                        k = pop(&stack);
+                        (*scc).components[i].included_node_ids[a] = k;
+                        (*scc).components[i].included_nodes_count++;
+                        a++;
+                    }
+                    a = 0;
+                }
             }
         }
     }
-
-
-
-
-
-
 }
