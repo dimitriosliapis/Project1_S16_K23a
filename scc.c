@@ -12,7 +12,6 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
     Stack stack;
     ht_Node *explored = createHashtable(HT_BIG);
     list_node *neighbors_out;
-    ind *cur_ind = NULL;
     ptrdiff_t offset_out;
     uint32_t size = size_out, index = 0;
     uint32_t i = 0, v = 0, k = 0, a = 0;
