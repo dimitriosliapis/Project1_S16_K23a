@@ -30,13 +30,16 @@ void deleteStack(Stack*, sNode*);
 
 
 typedef struct CC_t{
-    uint32_t *ids; //CCInde
-    uint32_t ** updateIndex;
-    //uint32_t metricVal;*/
+    uint32_t *cc_index; //CCInde
+    uint32_t cc_size;
+    uint32_t cc_max;
+    u_node * updateIndex;
+    uint32_t u_size;
+    uint32_t metricVal;
 }CC;
 
-uint32_t createCCIndex(uint32_t **, uint32_t , ind*, ind*, list_node*, list_node*, uint32_t, uint32_t, ht_Node*);
-void refreshUpdateIndex(uint32_t *, uint32_t, u_node **, uint32_t*, uint32_t, uint32_t);
-int searchUpdateIndex( uint32_t *, uint32_t ,u_node *, uint32_t , uint32_t, uint32_t, ht_Node*);
-uint32_t findCCMax(uint32_t *, uint32_t);
-void updateCCIndex(uint32_t **, u_node *, uint32_t *, uint32_t );
+CC* createCCIndex(uint32_t, ind*, ind*, list_node*, list_node*, uint32_t, uint32_t, ht_Node*);
+void initUpdateIndex(CC *);
+void refreshUpdateIndex(CC *, uint32_t, uint32_t);
+int searchUpdateIndex(CC, uint32_t, uint32_t, ht_Node*);
+void updateCCIndex(CC *);
