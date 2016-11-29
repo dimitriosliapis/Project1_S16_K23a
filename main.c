@@ -15,13 +15,9 @@ int main(int argc, char *argv[]) {
     int steps = 0;
 
 
-
-    uint32_t *cc_index = NULL;
+    CC *cc = NULL;
     uint32_t cc_size = 0;
-    uint32_t cc_max = 0;
 
-    u_node *update_index = NULL;
-    uint32_t update_index_size = 0;
 
     // orismata
     if (argc == 3) {
@@ -68,23 +64,11 @@ int main(int argc, char *argv[]) {
     if(index_size_in > index_size_out) cc_size = index_size_in;
     else cc_size = index_size_out;
 
-    cc_index = malloc(sizeof(uint32_t) * cc_size);
-    cc_max = createCCIndex(&cc_index, cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, explored);
+    cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, explored);
 
-    update_index_size = cc_max;
+    cc->u_size = cc->cc_max;
 
-    update_index = malloc(update_index_size * sizeof(u_node));
-
-    uint32_t a = 0;
-    while(a < update_index_size) {
-        update_index[a].cc_array = NULL;
-        update_index[a].new_nodes = NULL;
-        update_index[a].size = 0;
-        update_index[a].n_size = 0;
-        update_index[a].state = 'o';//old
-        a++;
-    }
-
+    initUpdateIndex(cc);
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
 
@@ -109,13 +93,13 @@ int main(int argc, char *argv[]) {
 
             addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in);
 
-            refreshUpdateIndex(cc_index, cc_size, &update_index, &update_index_size, N1, N2);
+            refreshUpdateIndex(cc, N1, N2);
 
         } else if (str[0] == 'Q') {
 
             toID(str, &N1, &N2);
 
-            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc_index[N1] == cc_index[N2] || searchUpdateIndex(cc_index, cc_size, update_index, update_index_size,N1,N2,explored) == FOUND)) {
+            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,explored) == FOUND)) {
 
 /*                if(N1 == 212969 && N2 == 233631){
                     printf("helloooooo\n");
@@ -149,11 +133,11 @@ int main(int argc, char *argv[]) {
     destroyBuffer(buffer_out);
     destroyNodeIndex(index_in, index_size_in);
     destroyNodeIndex(index_out, index_size_out);
-    free(cc_index);
+/*    free(cc_index);
     for(a = 0; a < update_index_size; a++ ){
         free(update_index[a].cc_array);
     }
-    free(update_index);
+    free(update_index);*/
 
     return 0;
 }
