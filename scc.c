@@ -48,7 +48,7 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
                         }
                     }
                 }
-                if((*index_out).lowlink == (*index_out).index) {
+                else if(index_out[v].lowlink == index_out[v].index) {
                     scc->components[i].component_id = i;
                     while (k != v) {
                         k = pop(&stack);
