@@ -78,7 +78,7 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
 
         while(!stackIsEmpty(&stack)) {
             if(check == 0) v = peek(&stack);
-            else v = nextfromStack(&stack, v);
+            else v = nextfromStack(&parent_stack, v);
             check = 0;
 
             if(onStack(&parent_stack, v)) {
@@ -148,8 +148,8 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
                     scc_counter++;
                 }
                 else {
-                    v  = pop(&parent_stack);
-                    v = nextfromStack(&parent_stack, v);
+                    pop(&parent_stack);
+                    v = peek(&parent_stack);
                     check = 1;
                 }
             }
