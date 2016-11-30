@@ -1,5 +1,7 @@
-#include "search.h"
+#include "cc.h"
 
+#define COMPONENT_SIZE 32
+#define NODE_IDS_SIZE 16
 
 
 typedef struct Component_t{
@@ -14,3 +16,6 @@ typedef struct SCC_t{
     uint32_t *id_belongs_to_component; //inverted index
 
 }SCC;
+
+uint32_t peek(Stack *);
+void tarjan(ind*, list_node*, uint32_t);
