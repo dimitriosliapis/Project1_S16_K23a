@@ -52,6 +52,7 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
     Stack stack;
     Stack parent_stack;
     ht_Node *explored = createHashtable(HT_BIG);
+    ht_Node *explored_stack = createHashtable(HT_BIG);
     list_node *neighbors_out;
     ptrdiff_t offset_out;
     uint32_t size = size_out, index = 0;
@@ -137,6 +138,8 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
                     while (k != v) {
                         k = pop(&stack);
                         if(k == DEFAULT) break;
+                        if(search(explored_stack, k, HT_BIG) == FOUND) continue;
+                        insert(explored_stack, k, HT_BIG);
                         if(onStack(&parent_stack, k)) removefromStack(&parent_stack, k);
 
                         scc->components[scc_counter].included_node_ids[a] = k;
@@ -156,4 +159,5 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
         }
     }
     delete(explored, HT_BIG);
+    delete(explored_stack, HT_BIG);
 }
