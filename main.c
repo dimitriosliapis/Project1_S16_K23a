@@ -1,5 +1,5 @@
 #include <sys/time.h>
-#include "scc.h"
+#include "grail.h"
 
 int toID(char *, uint32_t *, uint32_t *);
 
@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
     uint32_t scc_size = 0;
 
     SCC *scc = NULL;
+    GrailIndex *grail = NULL;
 
 
     // orismata
@@ -122,7 +123,9 @@ int main(int argc, char *argv[]) {
 
     if(index_size_in > index_size_out) scc_size = index_size_in;
     else scc_size = index_size_out;
-    scc = estimateStronglyConnectedComponents(index_out, buffer_out, buffer_size_out,index_in, buffer_in, buffer_size_in, scc_size);
+    scc = estimateStronglyConnectedComponents(index_out, buffer_out, buffer_size_out, scc_size);
+    reinitialize(exploredA, HT_BIG);
+    grail = buildGrailIndex(index_out, buffer_out, buffer_size_out,index_in, buffer_in, buffer_size_in, scc, exploredA);
    // updateCCIndex(&cc_index, update_index, &cc_size, update_index_size);
 
     gettimeofday(&tv2, NULL);

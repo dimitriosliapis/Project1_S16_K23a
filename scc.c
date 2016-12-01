@@ -57,85 +57,10 @@ uint32_t nextfromStack(Stack *stack, uint32_t id) {
     return DEFAULT;
 }
 
-SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t size_out, ind *index_in, list_node *buffer_in, uint32_t size_in, uint32_t num_nodes/*, ht_Node *explored*/){
+SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes){
 
-    Stack stack;
+
     SCC *scc = tarjan(index_out, buffer_out, size_out, num_nodes);
-    uint32_t i = 0, j = 0, k = 0;
-    ptrdiff_t available_in = 0;
-    ptrdiff_t available_out = 0;
-    ptrdiff_t offset_in;
-    ptrdiff_t offset_out;
-    list_node *neighbors_in, *neighbors_out;
-    uint32_t neigh_scc = 0;
-
-
-    scc->buf_size_in = 2*scc->components_count;
-    scc->buf_size_out = 2*scc->components_count;
-
-    scc->hyper_buffer_in = createBuffer(scc->buf_size_in);
-    scc->hyper_index_in = createNodeIndex(scc->components_count);
-    scc->hyper_buffer_out = createBuffer(scc->buf_size_out);
-    scc->hyper_index_out = createNodeIndex(scc->components_count);
-
-
-    for(i = 0; i < scc->components_count; i++){
-        insertNode(&scc->hyper_index_out, i, &scc->hyper_buffer_out, &scc->components_count, &scc->buf_size_out, &available_out);
-        insertNode(&scc->hyper_index_in, i, &scc->hyper_buffer_in, &scc->components_count, &scc->buf_size_in, &available_in);
-    }
-
-    for(i = 0; i < scc->components_count; i++){
-
-        for(j = 0; j < scc->components[i].included_nodes_count; j++){
-
-            offset_out = getListHead(index_out, scc->components[i].included_node_ids[j]);
-            neighbors_out = buffer_out + offset_out;
-
-            k = 0;
-            while (k < N) {
-                if (neighbors_out->neighbor[k] == DEFAULT) break;
-
-                neigh_scc = scc->id_belongs_to_component[neighbors_out->neighbor[k]];
-
-                if(neigh_scc != i){
-                    addEdge(&scc->hyper_index_out, i, neigh_scc, &scc->hyper_buffer_out, &scc->buf_size_out, &available_out);
-                }
-
-                k++;
-                if (k == N) {
-                    if (neighbors_out->nextListNode > 0) {
-                        neighbors_out = buffer_out + neighbors_out->nextListNode;  // an uparxei sunexizei se auton
-                        k = 0;
-                    }
-                }
-            }
-
-
-
-            offset_in = getListHead(index_in, scc->components[i].included_node_ids[j]);
-            neighbors_in = buffer_in + offset_in;
-
-            k = 0;
-            while (k < N) {
-                if (neighbors_in->neighbor[k] == DEFAULT) break;
-
-                neigh_scc = scc->id_belongs_to_component[neighbors_in->neighbor[k]];
-
-                if(neigh_scc != i){
-                    addEdge(&scc->hyper_index_in, i, neigh_scc, &scc->hyper_buffer_in, &scc->buf_size_in, &available_in);
-                }
-
-                k++;
-                if (k == N) {
-                    if (neighbors_in->nextListNode > 0) {
-                        neighbors_in = buffer_in + neighbors_in->nextListNode;  // an uparxei sunexizei se auton
-                        k = 0;
-                    }
-                }
-            }
-        }
-    }
-
 
     return scc;
 }
@@ -215,7 +140,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 offset_out = getListHead(index_out, v);
                 neighbors_out = buffer_out + offset_out;
 
-                if(offset_out >= 0 && !onStack(&parent_stack, v)) {
+                if(offset_out >= 0 && neighbors_out->neighbor[0] != DEFAULT && !onStack(&parent_stack, v)) { // den htan swsti sinthiki gia na deis an exei neighbors
                     push(&parent_stack, v);
                     k = 0;
 
@@ -236,6 +161,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 }
                 else if(index_out[v].lowlink == index_out[v].index) {
                     scc->components[scc_counter].component_id = scc_counter;
+                    scc->components[scc_counter].included_nodes_count = 0;
                     scc->components[scc_counter].included_node_ids = malloc(NODE_IDS_SIZE*sizeof(uint32_t));
                     for(a = 0 ; a < NODE_IDS_SIZE ; a++) scc->components[scc_counter].included_node_ids[a] = DEFAULT;
                     k = DEFAULT;

@@ -15,6 +15,8 @@ typedef struct index_t{
     uint32_t max;
     uint32_t lowlink;
     uint32_t index;
+    uint32_t rank;
+    uint32_t min_rank;
     ht_Node *neighbors;
 }ind;
 

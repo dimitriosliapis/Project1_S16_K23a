@@ -14,12 +14,6 @@ typedef struct SCC_t{
     Component *components; // Components index - a vector which stores the components information
     uint32_t components_count;
     uint32_t *id_belongs_to_component; //inverted index
-    ind *hyper_index_in;
-    ind *hyper_index_out;
-    list_node *hyper_buffer_out;
-    list_node *hyper_buffer_in;
-    uint32_t buf_size_in;
-    uint32_t buf_size_out;
 }SCC;
 
 uint32_t peek(Stack *);
@@ -27,4 +21,4 @@ uint32_t nextfromStack(Stack *stack, uint32_t id);
 void removefromStack(Stack *stack, uint32_t id);
 SCC* tarjan(ind*, list_node*, uint32_t, uint32_t);
 
-SCC* estimateStronglyConnectedComponents(ind *, list_node *, uint32_t, ind *, list_node *, uint32_t, uint32_t);
+SCC* estimateStronglyConnectedComponents(ind *, list_node *, uint32_t, uint32_t);
