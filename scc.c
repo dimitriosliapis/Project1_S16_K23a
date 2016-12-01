@@ -15,7 +15,14 @@ void removefromStack(Stack *stack, uint32_t id) {
     if(stack->last == NULL) return;
 
     sNode *cur = NULL;
-    sNode *prev;
+    sNode *prev = NULL;
+
+    if(stack->last->id == id){
+        pop(stack);
+        return;
+    }
+
+
 
     cur = stack->last;
     prev = cur;
