@@ -1,5 +1,5 @@
 #include <sys/time.h>
-#include "cc.h"
+#include "scc.h"
 
 int toID(char *, uint32_t *, uint32_t *);
 
@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     uint32_t N1, N2, buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
     ptrdiff_t available_in = 0, available_out = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
-    ht_Node *exploredF = NULL, *exploredB = NULL, *explored = NULL;
+    ht_Node *exploredF = NULL, *exploredB = NULL, *exploredA = NULL;
     int steps = 0;
 
 
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
     buffer_out = createBuffer(buffer_size_out);
     index_out = createNodeIndex(index_size_out);
 
-    explored = createHashtable(HT_BIG);
+    exploredA = createHashtable(HT_BIG);
 
 
     struct timeval tv1, tv2;
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
     if(index_size_in > index_size_out) cc_size = index_size_in;
     else cc_size = index_size_out;
 
-    cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, explored);
+    cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, exploredA);
 
     cc->u_size = cc->cc_max;
 
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
 
             toID(str, &N1, &N2);
 
-            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,explored) == FOUND)) {
+            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,exploredA) == FOUND)) {
 
 /*                if(N1 == 212969 && N2 == 233631){
                     printf("helloooooo\n");
@@ -117,6 +117,7 @@ int main(int argc, char *argv[]) {
     }
     fclose(Queries);
 
+    tarjan(index_out, buffer_out, buffer_size_out);
    // updateCCIndex(&cc_index, update_index, &cc_size, update_index_size);
 
     gettimeofday(&tv2, NULL);
@@ -128,16 +129,18 @@ int main(int argc, char *argv[]) {
     empty(frontierB);
     delete(exploredF, HT_BIG);
     delete(exploredB, HT_BIG);
-    delete(explored, HT_BIG);
+    delete(exploredA, HT_BIG);
     destroyBuffer(buffer_in);
     destroyBuffer(buffer_out);
     destroyNodeIndex(index_in, index_size_in);
     destroyNodeIndex(index_out, index_size_out);
+
 /*    free(cc_index);
     for(a = 0; a < update_index_size; a++ ){
         free(update_index[a].cc_array);
     }
-    free(update_index);*/
+    free(update_index);
+    */
 
     return 0;
 }
