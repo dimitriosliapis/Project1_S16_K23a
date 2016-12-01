@@ -2,6 +2,9 @@
 
 uint32_t peek(Stack *stack) {
 
+    if(stack == NULL) return DEFAULT;
+    if(stack->last == NULL) return DEFAULT;
+
     return stack->last->id;
 
 }
@@ -29,8 +32,8 @@ void removefromStack(Stack *stack, uint32_t id) {
 
 uint32_t nextfromStack(Stack *stack, uint32_t id) {
 
-    if(stack == NULL) return 0;
-    if(stack->last == NULL) return 0;
+    if(stack == NULL) return DEFAULT;
+    if(stack->last == NULL) return DEFAULT;
 
     sNode *cur = NULL;
     sNode *prev = NULL;
@@ -44,7 +47,7 @@ uint32_t nextfromStack(Stack *stack, uint32_t id) {
         cur = cur->next;
     }
 
-    return 0;
+    return DEFAULT;
 }
 
 void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
@@ -78,8 +81,14 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
         index++;
 
         while(!stackIsEmpty(&stack)) {
-            if(check == 0) v = peek(&stack);
-            else v = nextfromStack(&parent_stack, v);
+            if(check == 0) {
+                v = peek(&stack);
+                if(v == DEFAULT) return;
+            }
+            else {
+                v = nextfromStack(&parent_stack, v);
+                if(v == DEFAULT) return;
+            }
             check = 0;
 
             if(onStack(&parent_stack, v)) {
@@ -153,6 +162,7 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
                 else {
                     pop(&parent_stack);
                     v = peek(&parent_stack);
+                    if(v == DEFAULT) return;
                     check = 1;
                 }
             }
