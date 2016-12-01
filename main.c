@@ -17,6 +17,9 @@ int main(int argc, char *argv[]) {
 
     CC *cc = NULL;
     uint32_t cc_size = 0;
+    uint32_t scc_size = 0;
+
+    SCC *scc = NULL;
 
 
     // orismata
@@ -117,7 +120,9 @@ int main(int argc, char *argv[]) {
     }
     fclose(Queries);
 
-    tarjan(index_out, buffer_out, buffer_size_out);
+    if(index_size_in > index_size_out) scc_size = index_size_in;
+    else scc_size = index_size_out;
+    scc = estimateStronglyConnectedComponents(index_out, buffer_out, buffer_size_out,index_in, buffer_in, buffer_size_in, scc_size);
    // updateCCIndex(&cc_index, update_index, &cc_size, update_index_size);
 
     gettimeofday(&tv2, NULL);

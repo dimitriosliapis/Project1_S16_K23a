@@ -57,7 +57,90 @@ uint32_t nextfromStack(Stack *stack, uint32_t id) {
     return DEFAULT;
 }
 
-void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
+SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t size_out, ind *index_in, list_node *buffer_in, uint32_t size_in, uint32_t num_nodes/*, ht_Node *explored*/){
+
+    Stack stack;
+    SCC *scc = tarjan(index_out, buffer_out, size_out, num_nodes);
+    uint32_t i = 0, j = 0, k = 0;
+    ptrdiff_t available_in = 0;
+    ptrdiff_t available_out = 0;
+    ptrdiff_t offset_in;
+    ptrdiff_t offset_out;
+    list_node *neighbors_in, *neighbors_out;
+    uint32_t neigh_scc = 0;
+
+
+    scc->buf_size_in = 2*scc->components_count;
+    scc->buf_size_out = 2*scc->components_count;
+
+    scc->hyper_buffer_in = createBuffer(scc->buf_size_in);
+    scc->hyper_index_in = createNodeIndex(scc->components_count);
+    scc->hyper_buffer_out = createBuffer(scc->buf_size_out);
+    scc->hyper_index_out = createNodeIndex(scc->components_count);
+
+
+    for(i = 0; i < scc->components_count; i++){
+        insertNode(&scc->hyper_index_out, i, &scc->hyper_buffer_out, &scc->components_count, &scc->buf_size_out, &available_out);
+        insertNode(&scc->hyper_index_in, i, &scc->hyper_buffer_in, &scc->components_count, &scc->buf_size_in, &available_in);
+    }
+
+    for(i = 0; i < scc->components_count; i++){
+
+        for(j = 0; j < scc->components[i].included_nodes_count; j++){
+
+            offset_out = getListHead(index_out, scc->components[i].included_node_ids[j]);
+            neighbors_out = buffer_out + offset_out;
+
+            k = 0;
+            while (k < N) {
+                if (neighbors_out->neighbor[k] == DEFAULT) break;
+
+                neigh_scc = scc->id_belongs_to_component[neighbors_out->neighbor[k]];
+
+                if(neigh_scc != i){
+                    addEdge(&scc->hyper_index_out, i, neigh_scc, &scc->hyper_buffer_out, &scc->buf_size_out, &available_out);
+                }
+
+                k++;
+                if (k == N) {
+                    if (neighbors_out->nextListNode > 0) {
+                        neighbors_out = buffer_out + neighbors_out->nextListNode;  // an uparxei sunexizei se auton
+                        k = 0;
+                    }
+                }
+            }
+
+
+
+            offset_in = getListHead(index_in, scc->components[i].included_node_ids[j]);
+            neighbors_in = buffer_in + offset_in;
+
+            k = 0;
+            while (k < N) {
+                if (neighbors_in->neighbor[k] == DEFAULT) break;
+
+                neigh_scc = scc->id_belongs_to_component[neighbors_in->neighbor[k]];
+
+                if(neigh_scc != i){
+                    addEdge(&scc->hyper_index_in, i, neigh_scc, &scc->hyper_buffer_in, &scc->buf_size_in, &available_in);
+                }
+
+                k++;
+                if (k == N) {
+                    if (neighbors_in->nextListNode > 0) {
+                        neighbors_in = buffer_in + neighbors_in->nextListNode;  // an uparxei sunexizei se auton
+                        k = 0;
+                    }
+                }
+            }
+        }
+    }
+
+
+    return scc;
+}
+
+SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes) {
 
     Stack stack;
     Stack parent_stack;
@@ -73,6 +156,12 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
 
     scc->components = malloc(COMPONENT_SIZE*sizeof(Component));
     //for(k = 0 ; k < COMPONENT_SIZE ; k++) scc->components[k] = NULL;
+    scc->components_count = DEFAULT;
+
+    scc->id_belongs_to_component = malloc(num_nodes*sizeof(uint32_t));
+    for(i = 0; i < num_nodes; i++){
+        scc->id_belongs_to_component[i] = DEFAULT;
+    }
 
 
     stack.last = NULL;
@@ -90,11 +179,11 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
         while(!stackIsEmpty(&stack)) {
             if(check == 0) {
                 v = peek(&stack);
-                if(v == DEFAULT) return;
+                //if(v == DEFAULT) return;
             }
             else {
                 v = nextfromStack(&parent_stack, v);
-                if(v == DEFAULT) return;
+                //if(v == DEFAULT) return;
             }
             check = 0;
 
@@ -160,6 +249,7 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
 
                         scc->components[scc_counter].included_node_ids[a] = k;
                         scc->components[scc_counter].included_nodes_count++;
+                        scc->id_belongs_to_component[k] = scc_counter;
                         a++;
                         printf("ta scc %d exei ta %d ids\n", scc_counter, k);
                     }
@@ -169,13 +259,20 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
                 else {
                     pop(&parent_stack);
                     v = peek(&parent_stack);
-                    if(v == DEFAULT) return;
+                    //if(v == DEFAULT) return;
                     check = 1;
                 }
             }
         }
     }
+
+    scc->components_count = scc_counter;
+
     delete(explored, HT_BIG);
     delete(explored_stack, HT_BIG);
+
+
+
+    return scc;
 
 }
