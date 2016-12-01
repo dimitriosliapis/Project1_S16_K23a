@@ -160,4 +160,5 @@ void tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out) {
     }
     delete(explored, HT_BIG);
     delete(explored_stack, HT_BIG);
+
 }
