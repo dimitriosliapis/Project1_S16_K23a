@@ -8,14 +8,14 @@
 #define N 8
 #define DEFAULT 16777216
 
-#define OK_SUCCESS 0;
+#define OK_SUCCESS 0
 #define ERROR -1
 
 typedef struct list_node_t {
     uint32_t neighbor[N];
     //uint32_t edgeProperty[N];
     ptrdiff_t nextListNode;
-} list_node;
+}list_node;
 
 list_node *createBuffer(uint32_t);
 

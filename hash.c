@@ -90,9 +90,9 @@ void reinitialize(ht_Node *hashTable, uint32_t size) {
     if (hashTable == NULL)
         return;
 
-    for (i = 0; i < size; i++) {
+    for (i = 0; i < size ; i++) {
         if (hashTable[i].bucket != NULL) {
-            for (j = 0; j < hashTable[i].size; j++) {
+            for (j = 0; j < hashTable[i].size ; j++) {
                 if (hashTable[i].bucket[j] == DEFAULT)
                     break;
                 hashTable[i].bucket[j] = DEFAULT;

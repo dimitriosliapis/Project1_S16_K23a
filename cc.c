@@ -59,6 +59,7 @@ int onStack(Stack *stack, uint32_t id){
     return 0;
 }
 
+
 CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in, uint32_t size_out, ht_Node *explored) {
 
     Stack stack;
@@ -442,7 +443,10 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored) {
             i++;
         }
     }
-    if(cc1 == DEFAULT || cc2 == DEFAULT) return NOT_FOUND;
+    if(cc1 == DEFAULT || cc2 == DEFAULT) {
+        reinitialize(explored, HT_BIG);
+        return NOT_FOUND;
+    }
 
     if(cc1 != cc2) {
         push(&stack, cc1);
