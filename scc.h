@@ -8,6 +8,7 @@ typedef struct Component_t{
     uint32_t component_id; //current component id
     uint32_t included_nodes_count; //number of nodes in component
     uint32_t *included_node_ids;
+    uint32_t node_array_size;
 }Component;
 
 typedef struct SCC_t{
