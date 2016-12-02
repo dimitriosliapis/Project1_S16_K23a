@@ -28,7 +28,7 @@ void removefromStack(Stack *stack, uint32_t id) {
     prev = cur;
     while (cur!=NULL) {
         if(cur->id == id) {
-            prev->next = cur->next;
+            prev->next = cur;
             free(prev);
             return;
         }
@@ -73,7 +73,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     ht_Node *explored_stack = createHashtable(HT_BIG);
     list_node *neighbors_out;
     ptrdiff_t offset_out;
-    uint32_t size = size_out, index = 0;
+    uint32_t size = size_out, index = 0, realloc_node_size;
     uint32_t i = 0, v = 0, k = 0, a = 0, check = 0;
     uint32_t scc_counter = 0;
 
@@ -104,11 +104,11 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
         while(!stackIsEmpty(&stack)) {
             if(check == 0) {
                 v = peek(&stack);
-                //if(v == DEFAULT) return;
+                if(v == DEFAULT) return NULL;
             }
             else {
                 v = nextfromStack(&parent_stack, v);
-                //if(v == DEFAULT) return;
+                if(v == DEFAULT) return NULL;
             }
             check = 0;
 
@@ -174,8 +174,14 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                         if(onStack(&parent_stack, k)) removefromStack(&parent_stack, k);
 
                         scc->components[scc_counter].included_node_ids[a] = k;
+                        if(a == NODE_IDS_SIZE) {
+                            realloc_node_size = 2*NODE_IDS_SIZE;
+                            scc->components[scc_counter].included_node_ids = realloc(scc->components[scc_counter].included_node_ids, realloc_node_size*sizeof(uint32_t));
+                            for(a = NODE_IDS_SIZE ; a < realloc_node_size ; a++) scc->components[scc_counter].included_node_ids[a] = DEFAULT;
+                        }
                         scc->components[scc_counter].included_nodes_count++;
                         scc->id_belongs_to_component[k] = scc_counter;
+
                         a++;
                         printf("ta scc %d exei ta %d ids\n", scc_counter, k);
                     }
@@ -185,7 +191,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 else {
                     pop(&parent_stack);
                     v = peek(&parent_stack);
-                    //if(v == DEFAULT) return;
+                    if(v == DEFAULT) return NULL;
                     check = 1;
                 }
             }
