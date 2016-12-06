@@ -57,7 +57,7 @@ void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
     uint32_t prev_size = hashTable[offset].size;
 
     if (hashTable[offset].bucket == NULL) {    // this bucket doesn't exist yet - create it and insert id
-        hashTable[offset].bucket = malloc(HT_N * sizeof(uint32_t));
+        hashTable[offset].bucket = malloc(HT_N * sizeof(node_bucket));
         hashTable[offset].bucket[0].id = id;
         hashTable[offset].bucket[0].version = version;
         for (i = 1; i < HT_N; i++) {
@@ -79,7 +79,7 @@ void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
         }
 
         // duplicate bucket and insert id
-        hashTable[offset].bucket = realloc(hashTable[offset].bucket, prev_size * 2 * sizeof(uint32_t));
+        hashTable[offset].bucket = realloc(hashTable[offset].bucket, prev_size * 2 * sizeof(node_bucket));
         hashTable[offset].size *= 2;
         hashTable[offset].bucket[prev_size].id = id;
         hashTable[offset].bucket[prev_size].version = version;
