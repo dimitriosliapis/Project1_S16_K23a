@@ -8,6 +8,7 @@ unsigned int hash(uint32_t x) {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
     x = (x >> 16) ^ x;
     return x;
+
 }
 
 ht_Node *createHashtable(uint32_t size) {
@@ -29,7 +30,7 @@ ht_Node *createHashtable(uint32_t size) {
 int search(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
 
     uint32_t i = 0;
-    uint32_t offset = hash(id) % size;
+    uint32_t offset = id % size;
     node_bucket *bucket = NULL;
 
     if (hashTable == NULL)
@@ -53,7 +54,7 @@ int search(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
 void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
 
     uint32_t i = 0;
-    uint32_t offset = hash(id) % size;
+    uint32_t offset = id % size;
     uint32_t prev_size = hashTable[offset].size;
 
     if (hashTable[offset].bucket == NULL) {    // this bucket doesn't exist yet - create it and insert id
