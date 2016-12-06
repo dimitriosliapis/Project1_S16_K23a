@@ -3,8 +3,6 @@
 #define INIT_UNODE_SIZE 32
 #define INIT_NEWNODE_SIZE 64
 
-#define CC_SIZE 4096
-
 typedef struct sNode_t{
     uint32_t id;
     struct sNode_t *next;
@@ -27,8 +25,6 @@ void push(Stack*, uint32_t);
 uint32_t pop(Stack*);
 int stackIsEmpty(Stack*);
 void deleteStack(Stack*, sNode*);
-int onStack(Stack*, uint32_t);
-
 
 typedef struct CC_t{
     uint32_t *cc_index; //CCInde
@@ -39,8 +35,8 @@ typedef struct CC_t{
     uint32_t metricVal;
 }CC;
 
-CC* createCCIndex(uint32_t, ind*, ind*, list_node*, list_node*, uint32_t, uint32_t, ht_Node*);
+CC* createCCIndex(uint32_t, ind*, ind*, list_node*, list_node*, uint32_t, uint32_t, ht_Node*, uint32_t);
 void initUpdateIndex(CC *);
 void refreshUpdateIndex(CC *, uint32_t, uint32_t);
-int searchUpdateIndex(CC, uint32_t, uint32_t, ht_Node*);
-void updateCCIndex(CC *);
+int searchUpdateIndex(CC, uint32_t, uint32_t, ht_Node*, uint32_t);
+void updateCCIndex(CC *, ht_Node*, ht_Node*, uint32_t);
