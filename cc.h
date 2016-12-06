@@ -24,7 +24,7 @@ typedef struct u_unode_t{
 void push(Stack*, uint32_t);
 uint32_t pop(Stack*);
 int stackIsEmpty(Stack*);
-void deleteStack(Stack*, sNode*);
+void deleteStack(Stack*);
 
 typedef struct CC_t{
     uint32_t *cc_index; //CCInde
@@ -40,3 +40,4 @@ void initUpdateIndex(CC *);
 void refreshUpdateIndex(CC *, uint32_t, uint32_t);
 int searchUpdateIndex(CC, uint32_t, uint32_t, ht_Node*, uint32_t);
 void updateCCIndex(CC *, ht_Node*, ht_Node*, uint32_t);
+void destroyCCIndex(CC*);

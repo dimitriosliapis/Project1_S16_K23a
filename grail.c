@@ -154,5 +154,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
         }
     }
 
+    deleteStack(&stack);
+
     return grail;
 }

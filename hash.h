@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#define HT_BIG 80671
+#define HT_BIG 328519
 #define HT_SMALL 97
 #define HT_N 101
 

@@ -6,7 +6,8 @@ void push(Stack *stack, uint32_t id) {
     sNode *new = malloc(sizeof(sNode));
 
     new->id = id;
-    new->next = stack->last;
+    if(stack->last == NULL) new->next = NULL;
+    else new->next = stack->last;
 
     stack->last = new;
 }
@@ -30,9 +31,9 @@ int stackIsEmpty(Stack *stack) {
     return 0;
 }
 
-void deleteStack(Stack *stack, sNode *current) {
+void deleteStack(Stack *stack) {
 
-    if (stack == NULL) return;
+/*    if (stack == NULL) return;
     if (stack->last == NULL) {
         free(stack);
         return;
@@ -41,7 +42,18 @@ void deleteStack(Stack *stack, sNode *current) {
         free(current);
         return;
     }
-    deleteStack(stack, current->next);
+    deleteStack(stack, current->next);*/
+    sNode *cur = NULL;
+    sNode *prev = NULL;
+
+    cur = stack->last;
+    prev = NULL;
+
+    while(cur != NULL){
+        prev = cur;
+        cur = cur->next;
+        free(prev);
+    }
 }
 
 CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in, uint32_t size_out, ht_Node *explored, uint32_t version) {
@@ -121,6 +133,7 @@ CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
     }
 
     cc->cc_max = cc_counter;
+    deleteStack(&stack);
 
     return cc;
 }
@@ -360,13 +373,12 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
             }
             else if (i == cc->updateIndex[cur_cc].size) {
                 realloc_size = 2 * cc->updateIndex[cur_cc].size;
-                uint32_t *new = NULL;
-                new = realloc(cc->updateIndex[cur_cc].cc_array, realloc_size * sizeof(uint32_t));
-                if(j == 0) new[i] = cc2;
-                else new[i] = cc1;
-                for (i = cc->updateIndex[cur_cc].size + 1; i < realloc_size; i++) new[i] = DEFAULT;
+                cc->updateIndex[cur_cc].cc_array = realloc(cc->updateIndex[cur_cc].cc_array, realloc_size * sizeof(uint32_t));
+                if(j == 0) cc->updateIndex[cur_cc].cc_array[i] = cc2;
+                else cc->updateIndex[cur_cc].cc_array[i] = cc1;
+                for (i = cc->updateIndex[cur_cc].size + 1; i < realloc_size; i++) cc->updateIndex[cur_cc].cc_array[i] = DEFAULT;
                 cc->updateIndex[cur_cc].size = realloc_size;
-                cc->updateIndex[cur_cc].cc_array = new;
+               // cc->updateIndex[cur_cc].cc_array = new;
             }
         }
         j++;
@@ -379,7 +391,6 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
     uint32_t cc1 = 0;
     uint32_t cc2 = 0;
     uint32_t v = 0;
-    uint32_t *temp = NULL;
     uint32_t i = 0, j = 0;
     Stack stack;
     stack.last = NULL;
@@ -422,6 +433,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
         }
     }
     if(cc1 == DEFAULT || cc2 == DEFAULT) {
+        deleteStack(&stack);
         return NOT_FOUND;
     }
 
@@ -433,26 +445,29 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
                 if (search(explored, v, HT_BIG, version) == NOT_FOUND) {
                     insert(explored, v, HT_BIG, version);
 
-                    temp = cc.updateIndex[v].cc_array;
-                    if(temp == NULL) {
+                    //temp = cc.updateIndex[v].cc_array;
+                    if(cc.updateIndex[v].cc_array == NULL) {
                         continue;//de tha prepe na nai NULL
                     }
 
                     i = 0;
 
-                    while(temp[i] != DEFAULT && i < cc.updateIndex[v].size) {
-                        push(&stack, temp[i]);
+                    while(cc.updateIndex[v].cc_array[i] != DEFAULT && i < cc.updateIndex[v].size) {
+                        push(&stack, cc.updateIndex[v].cc_array[i]);
                         i++;
                     }
                 }
             }
             else {
+                deleteStack(&stack);
                 return FOUND;
             }
         }
+        deleteStack(&stack);
         return NOT_FOUND;
     }
     else{
+        deleteStack(&stack);
         return FOUND;
     }
 }
@@ -462,7 +477,7 @@ void updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_t ve
     uint32_t v = 0;
     uint32_t i = 0;
     Stack stack;
-    int k, realloc_size = cc->cc_size;
+    uint32_t k, realloc_size = cc->cc_size;
 
     stack.last = NULL;
 
@@ -504,4 +519,19 @@ void updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_t ve
             }
         }
     }
+    deleteStack(&stack);
+}
+
+void destroyCCIndex(CC *cc){
+
+    uint32_t i = 0;
+
+    for(i = 0; i < cc->u_size; i++){
+        free(cc->updateIndex[i].cc_array);
+        free(cc->updateIndex[i].new_nodes);
+    }
+    free(cc->updateIndex);
+    free(cc->cc_index);
+    free(cc);
+    cc = NULL;
 }

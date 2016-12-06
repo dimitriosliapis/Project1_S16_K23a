@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
     destroyBuffer(buffer_out);
     destroyNodeIndex(index_in, index_size_in);
     destroyNodeIndex(index_out, index_size_out);
-
+    destroyCCIndex(cc);
 /*    free(cc_index);
     for(a = 0; a < update_index_size; a++ ){
         free(update_index[a].cc_array);

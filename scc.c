@@ -209,5 +209,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
     scc->components_count = scc_counter;
 
+    deleteStack(&scc_stack);
+    deleteStack(&dfs_stack);
+
     return scc;
 }
