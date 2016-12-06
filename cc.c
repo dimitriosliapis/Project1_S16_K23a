@@ -460,7 +460,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
 void updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_t version) {
 
     uint32_t v = 0;
-    uint32_t i = 0, j = 0;
+    uint32_t i = 0;
     Stack stack;
     int k, realloc_size = cc->cc_size;
 
