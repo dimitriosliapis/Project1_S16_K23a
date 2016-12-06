@@ -77,7 +77,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     uint32_t size = size_out, index = 0, realloc_node_size;
     uint32_t i = 0, v = 0, k = 0, a = 0, w = 0, r = 0, caller = DEFAULT;
     uint32_t scc_counter = 0;
-    int all_child_in_scc = 0;
+    //int all_child_in_scc = 0;
 
     SCC *scc = malloc(sizeof(SCC));
 
@@ -127,22 +127,24 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
             offset_out = getListHead(index_out, v);
             neighbors_out = buffer_out + offset_out;
 
-            if(offset_out >= 0 && neighbors_out->neighbor[0] != DEFAULT && all_child_in_scc == 0){   //if v has children
+            if(offset_out >= 0 && neighbors_out->neighbor[0] != DEFAULT && index_out[v].all_children_in_scc == 0){   //if v has children
 
                 if(search(explored_twice, v, HT_BIG) == FOUND) {
-                    pop(&dfs_stack);
+                        pop(&dfs_stack);
                 }
                 k = 0;
                 while (k < N) {
                     w = neighbors_out->neighbor[k];
                     if(w == DEFAULT) break;
 
+                    //index_out[v].all_children_in_scc = 0;
+
                     if(search(explored_scc, w, HT_BIG) == FOUND){
                         k++;
-                        all_child_in_scc = 1;
+                        index_out[v].all_children_in_scc = 1;
                         continue;
                     }
-                    all_child_in_scc = 0;
+                    index_out[v].all_children_in_scc = 0;
                     if(search(explored, w, HT_BIG) == NOT_FOUND){
                         index_out[w].index = index;
                         index_out[w].lowlink = index;
@@ -193,7 +195,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                                 scc->id_belongs_to_component[w] = scc_counter;
 
                                 a++;
-                                //printf("ta scc %d exei ta %d ids\n", scc_counter, w);
+                                printf("ta scc %d exei ta %d ids\n", scc_counter, w);
                                 if(w == v) break;
                             }
                             scc_counter++;
@@ -243,7 +245,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 scc->id_belongs_to_component[w] = scc_counter;
 
                 a++;
-                //printf("ta scc %d exei ta %d ids\n", scc_counter, w);
+                printf("ta scc %d exei ta %d ids\n", scc_counter, w);
                 scc_counter++;
                 if(scc_counter == scc->component_size){
                     scc->component_size *= 2;
