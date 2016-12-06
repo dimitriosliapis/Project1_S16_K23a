@@ -1,7 +1,7 @@
 #include "buffer.h"
 #include "hash.h"
 
-#define IND_SIZE 128
+#define IND_SIZE 1024
 
 #define IND_EMPTY -1
 #define ALLOC_FAIL -2

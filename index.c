@@ -13,6 +13,10 @@ ind *createNodeIndex(uint32_t index_size) {
         index[i].lowlink = DEFAULT;
         index[i].index = DEFAULT;
         index[i].neighbors = NULL;
+        index[i].all_children_in_scc = 0;
+        index[i].rank = DEFAULT;
+        index[i].min_rank = DEFAULT;
+        index[i].neighbors = NULL;
     }
 
     return index;
@@ -59,6 +63,12 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
     for (i = *index_size; i < realloc_size; i++) {  // arxikopoihsh twn newn index nodes
         (*index)[i].first = -1;
         (*index)[i].last = -1;
+        (*index)[i].lowlink = DEFAULT;
+        (*index)[i].index = DEFAULT;
+        (*index)[i].neighbors = NULL;
+        (*index)[i].all_children_in_scc = 0;
+        (*index)[i].rank = DEFAULT;
+        (*index)[i].min_rank = DEFAULT;
         (*index)[i].neighbors = NULL;
     }
     *index_size = realloc_size;

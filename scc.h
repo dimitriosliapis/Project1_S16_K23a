@@ -22,3 +22,4 @@ uint32_t peek(Stack *);
 SCC* tarjan(ind*, list_node*, uint32_t, uint32_t, ht_Node*, ht_Node*, ht_Node*, uint32_t);
 
 SCC* estimateStronglyConnectedComponents(ind *, list_node *, uint32_t, uint32_t, ht_Node*, ht_Node*, ht_Node*, uint32_t);
+void destroyStronglyConnectedComponents(SCC*);

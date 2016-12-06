@@ -19,10 +19,15 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
     grail->buf_size_in = 2*scc->components_count;
     grail->buf_size_out = 2*scc->components_count;
 
+    grail->ind_size_in = scc->components_count;
+    grail->ind_size_out = scc->components_count;
+
     grail->hyper_buffer_in = createBuffer(grail->buf_size_in);
-    grail->hyper_index_in = createNodeIndex(scc->components_count);
+    grail->hyper_index_in = createNodeIndex(grail->ind_size_in);
     grail->hyper_buffer_out = createBuffer(grail->buf_size_out);
-    grail->hyper_index_out = createNodeIndex(scc->components_count);
+    grail->hyper_index_out = createNodeIndex(grail->ind_size_out);
+
+
 
 
 
@@ -157,4 +162,24 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
     deleteStack(&stack);
 
     return grail;
+}
+
+int isReachableGrailIndex(GrailIndex* index, uint32_t source_node, uint32_t target_node, SCC *scc){
+
+    uint32_t scc_source, scc_target;
+
+    scc_source = scc->id_belongs_to_component[source_node];
+    scc_target = scc->id_belongs_to_component[target_node];
+
+    if(scc_source == DEFAULT || scc_target == DEFAULT) return NO;
+    if((index->hyper_index_out[scc_source].min_rank > index->hyper_index_out[scc_target].min_rank) && (index->hyper_index_out[scc_source].rank > index->hyper_index_out[scc_target].rank)) return MAYBE;
+    return NO;
+}
+
+void destroyGrailIndex(GrailIndex* index){
+
+    destroyBuffer(index->hyper_buffer_in);
+    destroyBuffer(index->hyper_buffer_out);
+    destroyNodeIndex(index->hyper_index_in, index->ind_size_in);
+    destroyNodeIndex(index->hyper_index_out, index->ind_size_out);
 }

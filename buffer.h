@@ -4,8 +4,8 @@
 #include <stddef.h>
 #include <string.h>
 
-#define BUFF_SIZE 128
-#define N 8
+#define BUFF_SIZE 4096
+#define N 64
 #define DEFAULT 16777216
 
 #define OK_SUCCESS 0
