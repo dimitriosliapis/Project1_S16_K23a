@@ -68,6 +68,7 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
 ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, ptrdiff_t *available) {
 
     int i = 0;
+    uint32_t version = 0;
     ptrdiff_t offset = 0, prev = 0;
 
     offset = getListHead(*index, id);   // offset 1ou komvou sto buffer gia to id
@@ -76,10 +77,10 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
     if ((*index)[id].neighbors == NULL)
         (*index)[id].neighbors = createHashtable(HT_SMALL);
 
-    if (search((*index)[id].neighbors, neighbor, HT_SMALL) == FOUND)
+    if (search((*index)[id].neighbors, neighbor, HT_SMALL, version) == FOUND)
         return ALR_CONNECTED;
     else
-        insert((*index)[id].neighbors, neighbor, HT_SMALL);
+        insert((*index)[id].neighbors, neighbor, HT_SMALL, version);
 
     while (i < N) { // psaxnei stous geitones (max N ana komvo)
 //        if (current->neighbor[i] == neighbor) return ALR_CONNECTED; // gia na dei an uparxei
