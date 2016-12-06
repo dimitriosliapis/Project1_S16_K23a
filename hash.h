@@ -2,7 +2,7 @@
 
 #define HT_BIG 25013
 #define HT_SMALL 97
-#define HT_N 7
+#define HT_N 101
 
 #define DEFAULT 16777216
 
@@ -11,7 +11,7 @@
 
 typedef struct htNode_t {
     uint32_t *bucket;
-    int size;
+    uint32_t size;
 } ht_Node;
 
 unsigned int hash(uint32_t x);

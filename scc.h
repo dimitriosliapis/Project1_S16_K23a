@@ -1,7 +1,7 @@
 #include "cc.h"
 
-#define COMPONENT_SIZE 32
-#define NODE_IDS_SIZE 16
+#define COMPONENT_SIZE 1024
+#define NODE_IDS_SIZE 128
 
 
 typedef struct Component_t{
@@ -14,6 +14,7 @@ typedef struct Component_t{
 typedef struct SCC_t{
     Component *components; // Components index - a vector which stores the components information
     uint32_t components_count;
+    uint32_t component_size;
     uint32_t *id_belongs_to_component; //inverted index
 }SCC;
 

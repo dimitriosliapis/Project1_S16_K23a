@@ -75,13 +75,20 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     list_node *neighbors_out;
     ptrdiff_t offset_out;
     uint32_t size = size_out, index = 0, realloc_node_size;
-    uint32_t i = 0, v = 0, k = 0, a = 0, w = 0, caller = DEFAULT;
+    uint32_t i = 0, v = 0, k = 0, a = 0, w = 0, r = 0, caller = DEFAULT;
     uint32_t scc_counter = 0;
     int all_child_in_scc = 0;
 
     SCC *scc = malloc(sizeof(SCC));
 
     scc->components = malloc(COMPONENT_SIZE*sizeof(Component));
+    scc->component_size = COMPONENT_SIZE;
+    for(r = 0; r < scc->component_size; r++){
+        scc->components[r].included_node_ids = NULL;
+        scc->components[r].component_id = DEFAULT;
+        scc->components[r].included_nodes_count = 0;
+        scc->components[r].node_array_size = 0;
+    }
     //for(k = 0 ; k < COMPONENT_SIZE ; k++) scc->components[k] = NULL;
     scc->components_count = 0;
 
@@ -163,7 +170,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                             scc->components[scc_counter].included_nodes_count = 0;
                             scc->components[scc_counter].node_array_size = NODE_IDS_SIZE;
                             scc->components[scc_counter].included_node_ids = malloc(scc->components[scc_counter].node_array_size*sizeof(uint32_t));
-                            for(a = 0 ; a < scc->components[scc_counter].node_array_size ; a++) scc->components[scc_counter].included_node_ids[a] = DEFAULT;
+                            for(r = 0 ; r < scc->components[scc_counter].node_array_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
                             a = 0;
 
 
@@ -179,17 +186,27 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                                 if(a == (scc->components[scc_counter].node_array_size-1)) {
                                     realloc_node_size = 2*scc->components[scc_counter].node_array_size;
                                     scc->components[scc_counter].included_node_ids = realloc(scc->components[scc_counter].included_node_ids, realloc_node_size*sizeof(uint32_t));
-                                    for(a = scc->components[scc_counter].node_array_size ; a < realloc_node_size ; a++) scc->components[scc_counter].included_node_ids[a] = DEFAULT;
+                                    for(r = scc->components[scc_counter].node_array_size ; r < realloc_node_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
                                     scc->components[scc_counter].node_array_size = realloc_node_size;
                                 }
                                 scc->components[scc_counter].included_nodes_count++;
                                 scc->id_belongs_to_component[w] = scc_counter;
 
                                 a++;
-                                printf("ta scc %d exei ta %d ids\n", scc_counter, w);
+                                //printf("ta scc %d exei ta %d ids\n", scc_counter, w);
                                 if(w == v) break;
                             }
                             scc_counter++;
+                            if(scc_counter == scc->component_size){
+                                scc->component_size *= 2;
+                                scc->components = realloc(scc->components, scc->component_size * sizeof(Component));
+                                for(r = scc_counter; r < scc->component_size; r++){
+                                    scc->components[r].included_node_ids = NULL;
+                                    scc->components[r].component_id = DEFAULT;
+                                    scc->components[r].included_nodes_count = 0;
+                                    scc->components[r].node_array_size = 0;
+                                }
+                            }
                         }
                     }
                     k++;
@@ -211,7 +228,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 scc->components[scc_counter].included_nodes_count = 0;
                 scc->components[scc_counter].node_array_size = NODE_IDS_SIZE;
                 scc->components[scc_counter].included_node_ids = malloc(scc->components[scc_counter].node_array_size*sizeof(uint32_t));
-                for(a = 0 ; a < scc->components[scc_counter].node_array_size ; a++) scc->components[scc_counter].included_node_ids[a] = DEFAULT;
+                for(r = 0 ; r < scc->components[scc_counter].node_array_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
                 a = 0;
 
                 scc->components[scc_counter].included_node_ids[a] = w;
@@ -219,15 +236,25 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 if(a == (scc->components[scc_counter].node_array_size-1)) {
                     realloc_node_size = 2*scc->components[scc_counter].node_array_size;
                     scc->components[scc_counter].included_node_ids = realloc(scc->components[scc_counter].included_node_ids, realloc_node_size*sizeof(uint32_t));
-                    for(a = scc->components[scc_counter].node_array_size ; a < realloc_node_size ; a++) scc->components[scc_counter].included_node_ids[a] = DEFAULT;
+                    for(r = scc->components[scc_counter].node_array_size ; r < realloc_node_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
                     scc->components[scc_counter].node_array_size = realloc_node_size;
                 }
                 scc->components[scc_counter].included_nodes_count++;
                 scc->id_belongs_to_component[w] = scc_counter;
 
                 a++;
-                printf("ta scc %d exei ta %d ids\n", scc_counter, w);
+                //printf("ta scc %d exei ta %d ids\n", scc_counter, w);
                 scc_counter++;
+                if(scc_counter == scc->component_size){
+                    scc->component_size *= 2;
+                    scc->components = realloc(scc->components, scc->component_size * sizeof(Component));
+                    for(r = scc_counter; r < scc->component_size; r++){
+                        scc->components[r].included_node_ids = NULL;
+                        scc->components[r].component_id = DEFAULT;
+                        scc->components[r].included_nodes_count = 0;
+                        scc->components[r].node_array_size = 0;
+                    }
+                }
             }
         }
     }

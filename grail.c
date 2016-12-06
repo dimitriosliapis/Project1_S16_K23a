@@ -36,51 +36,58 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, uint32_t size
         for(j = 0; j < scc->components[i].included_nodes_count; j++){
 
             offset_out = getListHead(index_out, scc->components[i].included_node_ids[j]);
-            neighbors_out = buffer_out + offset_out;
+            if(offset_out >= 0) {                                                                       //DEBUG
+                neighbors_out = buffer_out + offset_out;
 
-            k = 0;
-            while (k < N) {
-                if (neighbors_out->neighbor[k] == DEFAULT) break;
+                k = 0;
+                while (k < N) {
+                    if (neighbors_out->neighbor[k] == DEFAULT) break;
 
-                neigh_scc = scc->id_belongs_to_component[neighbors_out->neighbor[k]];
+                    neigh_scc = scc->id_belongs_to_component[neighbors_out->neighbor[k]];
 
-                if(neigh_scc != i){
-                    addEdge(&grail->hyper_index_out, i, neigh_scc, &grail->hyper_buffer_out, &grail->buf_size_out, &available_out);
-                }
+                    if (neigh_scc != i) {
+                        addEdge(&grail->hyper_index_out, i, neigh_scc, &grail->hyper_buffer_out, &grail->buf_size_out,
+                                &available_out);
+                    }
 
-                k++;
-                if (k == N) {
-                    if (neighbors_out->nextListNode > 0) {
-                        neighbors_out = buffer_out + neighbors_out->nextListNode;  // an uparxei sunexizei se auton
-                        k = 0;
+                    k++;
+                    if (k == N) {
+                        if (neighbors_out->nextListNode > 0) {
+                            neighbors_out = buffer_out + neighbors_out->nextListNode;  // an uparxei sunexizei se auton
+                            k = 0;
+                        }
                     }
                 }
             }
 
 
-
             offset_in = getListHead(index_in, scc->components[i].included_node_ids[j]);
-            neighbors_in = buffer_in + offset_in;
 
-            k = 0;
-            while (k < N) {
-                if (neighbors_in->neighbor[k] == DEFAULT) break;
+            if(offset_in >= 0) {
+                neighbors_in = buffer_in + offset_in;
 
-                neigh_scc = scc->id_belongs_to_component[neighbors_in->neighbor[k]];
+                k = 0;
+                while (k < N) {
+                    if (neighbors_in->neighbor[k] == DEFAULT) break;
 
-                if(neigh_scc != i){
-                    addEdge(&grail->hyper_index_in, i, neigh_scc, &grail->hyper_buffer_in, &grail->buf_size_in, &available_in);
-                }
+                    neigh_scc = scc->id_belongs_to_component[neighbors_in->neighbor[k]];
 
-                k++;
-                if (k == N) {
-                    if (neighbors_in->nextListNode > 0) {
-                        neighbors_in = buffer_in + neighbors_in->nextListNode;  // an uparxei sunexizei se auton
-                        k = 0;
+                    if (neigh_scc != i) {
+                        addEdge(&grail->hyper_index_in, i, neigh_scc, &grail->hyper_buffer_in, &grail->buf_size_in,
+                                &available_in);
+                    }
+
+                    k++;
+                    if (k == N) {
+                        if (neighbors_in->nextListNode > 0) {
+                            neighbors_in = buffer_in + neighbors_in->nextListNode;  // an uparxei sunexizei se auton
+                            k = 0;
+                        }
                     }
                 }
             }
         }
+
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
