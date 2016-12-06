@@ -12,6 +12,7 @@ int main(int argc, char *argv[]) {
     ptrdiff_t available_in = 0, available_out = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
     ht_Node *exploredF = NULL, *exploredB = NULL, *exploredA = NULL;
+    uint32_t version = 0;
     int steps = 0;
 
 
@@ -63,12 +64,14 @@ int main(int argc, char *argv[]) {
 
         fgets(str, sizeof(str), Graph);
     }
+
     fclose(Graph);
 
     if(index_size_in > index_size_out) cc_size = index_size_in;
     else cc_size = index_size_out;
 
-    cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, exploredA);
+    cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, exploredA, version);
+    version++;
 
     cc->u_size = cc->cc_max;
 
@@ -103,18 +106,15 @@ int main(int argc, char *argv[]) {
 
             toID(str, &N1, &N2);
 
-            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,exploredA) == FOUND)) {
+            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND)) {
 
-/*                if(N1 == 212969 && N2 == 233631){
-                    printf("helloooooo\n");
-                }*/
-                steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB);
-/*                if(steps == 3){
-                    steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB);
-                }*/
+                steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
+
                 printf("%d\n", steps);
             } else
                 printf("-1\n");
+
+            version++;
         }
 
         fgets(str, sizeof(str), Queries);
@@ -123,10 +123,11 @@ int main(int argc, char *argv[]) {
 
     if(index_size_in > index_size_out) scc_size = index_size_in;
     else scc_size = index_size_out;
-    scc = estimateStronglyConnectedComponents(index_out, buffer_out, buffer_size_out, scc_size);
-    reinitialize(exploredA, HT_BIG);
-    grail = buildGrailIndex(index_out, buffer_out, buffer_size_out,index_in, buffer_in, buffer_size_in, scc, exploredA);
-   // updateCCIndex(&cc_index, update_index, &cc_size, update_index_size);
+    scc = estimateStronglyConnectedComponents(index_out, buffer_out, buffer_size_out, scc_size, exploredA, exploredB, exploredF, version);
+    version++;
+
+    grail = buildGrailIndex(index_out, buffer_out,index_in, buffer_in, scc, exploredA, version);
+    updateCCIndex(cc, exploredA, exploredB, version);
 
     gettimeofday(&tv2, NULL);
     printf("Total time = %f seconds\n",
