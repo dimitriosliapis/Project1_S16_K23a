@@ -93,7 +93,7 @@ void empty(Queue *queue) {
 }
 
 
-int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end, Queue *frontierF, Queue *frontierB, ht_Node *exploredF, ht_Node *exploredB) {
+int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end, Queue *frontierF, Queue *frontierB, ht_Node *exploredF, ht_Node *exploredB, uint32_t version) {
 
     list_node *neighbors = NULL;
     uint32_t node = DEFAULT, successor = DEFAULT;
@@ -103,17 +103,13 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
     if (start == end)   // an o komvos ekkinhshs einai o komvos stoxos tote steps=0
         return 0;
 
-    insert(exploredF, start, HT_BIG);
+    insert(exploredF, start, HT_BIG, version);
     enq(frontierF, start, steps);
 
-    insert(exploredB, end, HT_BIG);
+    insert(exploredB, end, HT_BIG, version);
     enq(frontierB, end, steps);
 
     while (!isEmpty(frontierF) && !isEmpty(frontierB)) {    // oso ta 2 synora den einai adeia
-
-/*        if(node == 23630){
-            printf("helloman\n");
-        }*/
 
         if (!isEmpty(frontierF)) {
 
@@ -129,15 +125,13 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     successor = neighbors->neighbor[i];
                     if (successor != DEFAULT) {
 
-                        if (search(exploredF, successor, HT_BIG) == NOT_FOUND) {
-                            insert(exploredF, successor, HT_BIG);
+                        if (search(exploredF, successor, HT_BIG, version) == NOT_FOUND) {
+                            insert(exploredF, successor, HT_BIG, version);
 
-                            if (search(exploredB, successor, HT_BIG) == FOUND) {
+                            if (search(exploredB, successor, HT_BIG, version) == FOUND) {
                                 path = nsteps(frontierB, successor) + steps;
                                 restartQueue(frontierF);
                                 restartQueue(frontierB);
-                                reinitialize(exploredF, HT_BIG);
-                                reinitialize(exploredB, HT_BIG);
                                 return path;
                             } else {    // alliws eisagwgh sto synoro
                                 enq(frontierF, successor, steps);
@@ -172,15 +166,13 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     successor = neighbors->neighbor[i];
                     if (successor != DEFAULT) {
 
-                        if (search(exploredB, successor, HT_BIG) == NOT_FOUND) {
-                            insert(exploredB, successor, HT_BIG);
+                        if (search(exploredB, successor, HT_BIG, version) == NOT_FOUND) {
+                            insert(exploredB, successor, HT_BIG, version);
 
-                            if (search(exploredF, successor, HT_BIG) == FOUND) {
+                            if (search(exploredF, successor, HT_BIG, version) == FOUND) {
                                 path = nsteps(frontierF, successor) + steps;
                                 restartQueue(frontierB);
                                 restartQueue(frontierF);
-                                reinitialize(exploredB, HT_BIG);
-                                reinitialize(exploredF, HT_BIG);
                                 return path;
                             } else {    // alliws eisagwgh sto synoro
                                 enq(frontierB, successor, steps);
@@ -204,7 +196,5 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
 
     restartQueue(frontierF);
     restartQueue(frontierB);
-    reinitialize(exploredF, HT_BIG);
-    reinitialize(exploredB, HT_BIG);
     return -1;  // an den vrethei monopati epistrefei -1
 }
