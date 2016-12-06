@@ -70,7 +70,11 @@ void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
     } else {
 
         while (i < prev_size) { // find empty cell in bucket and insert id
-            if (hashTable[offset].bucket[i].id == DEFAULT) {
+            if(hashTable[offset].bucket[i].id == id) {
+                hashTable[offset].bucket[i].version = version;
+                return;
+            }
+            else if (hashTable[offset].bucket[i].id == DEFAULT) {
                 hashTable[offset].bucket[i].id = id;
                 hashTable[offset].bucket[i].version = version;
                 return;
