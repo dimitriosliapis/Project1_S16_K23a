@@ -96,8 +96,8 @@ void empty(Queue *queue) {
 int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end, Queue *frontierF, Queue *frontierB, ht_Node *exploredF, ht_Node *exploredB, uint32_t version) {
 
     list_node *neighbors = NULL;
-    uint32_t node = DEFAULT, successor = DEFAULT;
-    int i = 0, steps = 0, path = 0;
+    uint32_t node = DEFAULT, successor = DEFAULT, optimal = DEFAULT;
+    int i = 0, steps = 0, curr_steps = 0, min_steps = -1, path = 0;
     ptrdiff_t offset = 0;
 
     if (start == end)   // an o komvos ekkinhshs einai o komvos stoxos tote steps=0
@@ -129,13 +129,18 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                             insert(exploredF, successor, HT_BIG, version);
 
                             if (search(exploredB, successor, HT_BIG, version) == FOUND) {
-                                path = nsteps(frontierB, successor) + steps;
-                                restartQueue(frontierF);
-                                restartQueue(frontierB);
-                                return path;
-                            } else {    // alliws eisagwgh sto synoro
+
+                                curr_steps = nsteps(frontierB, successor);
+                                if (min_steps == -1) {
+                                    min_steps = curr_steps;
+                                    optimal = successor;
+                                } else if (curr_steps < min_steps) {
+                                    min_steps = curr_steps;
+                                    optimal = successor;
+                                }
+
+                            } else      // alliws eisagwgh sto synoro
                                 enq(frontierF, successor, steps);
-                            }
                         }
                     } else
                         break;
@@ -148,9 +153,18 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     }
                 }
 
+                if (min_steps != -1) {
+                    path = min_steps + steps;
+                    restartQueue(frontierF);
+                    restartQueue(frontierB);
+                    return path;
+                }
+
                 i = 0;
             }
         }
+
+        min_steps = -1;
 
         if (!isEmpty(frontierB)) {
 
@@ -170,13 +184,18 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                             insert(exploredB, successor, HT_BIG, version);
 
                             if (search(exploredF, successor, HT_BIG, version) == FOUND) {
-                                path = nsteps(frontierF, successor) + steps;
-                                restartQueue(frontierB);
-                                restartQueue(frontierF);
-                                return path;
-                            } else {    // alliws eisagwgh sto synoro
+
+                                curr_steps = nsteps(frontierF, successor);
+                                if (min_steps == -1) {
+                                    min_steps = curr_steps;
+                                    optimal = successor;
+                                } else if (curr_steps < min_steps) {
+                                    min_steps = curr_steps;
+                                    optimal = successor;
+                                }
+
+                            } else      // alliws eisagwgh sto synoro
                                 enq(frontierB, successor, steps);
-                            }
                         }
                     } else
                         break;
@@ -189,9 +208,18 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     }
                 }
 
+                if (min_steps != -1) {
+                    path = min_steps + steps;
+                    restartQueue(frontierB);
+                    restartQueue(frontierF);
+                    return path;
+                }
+
                 i = 0;
             }
         }
+
+        min_steps = -1;
     }
 
     restartQueue(frontierF);
