@@ -1,6 +1,6 @@
 #include "grail.h"
 
-GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, uint32_t size_out, ind *index_in, list_node *buffer_in, uint32_t size_in, SCC* scc, ht_Node *explored){
+GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in, list_node *buffer_in, SCC* scc, ht_Node *explored, uint32_t version){
 
     uint32_t i = 0, j = 0, k = 0, v = 0;
     ptrdiff_t available_in = 0;
@@ -90,11 +90,9 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, uint32_t size
 
     }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     for(i = 0; i < scc->components_count; i++){
 
-        if (search(explored, i, HT_BIG) == FOUND) continue;
+        if (search(explored, i, HT_BIG, version) == FOUND) continue;
 
         push(&stack, i);
         //offset_in = getListHead(grail->hyper_index_in, v);
@@ -106,7 +104,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, uint32_t size
             k = 0;
             while (k < N) {
                 if (neighbors_out->neighbor[k] == DEFAULT) break;
-                if (search(explored, neighbors_out->neighbor[k], HT_BIG) == NOT_FOUND) {
+                if (search(explored, neighbors_out->neighbor[k], HT_BIG, version) == NOT_FOUND) {
                     push(&stack, neighbors_out->neighbor[k]);
                 }
                 k++;
@@ -144,18 +142,17 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, uint32_t size
                 grail->hyper_index_out[v].rank = rank;
                 grail->hyper_index_out[v].min_rank = min_rank;
                 rank++;
-                insert(explored, v, HT_BIG);
+                insert(explored, v, HT_BIG, version);
             }
             else{
                 grail->hyper_index_out[v].rank = rank;
                 grail->hyper_index_out[v].min_rank = rank;
                 rank++;
-                insert(explored, v, HT_BIG);
+                insert(explored, v, HT_BIG, version);
             }
 
         }
     }
-
 
     return grail;
 }
