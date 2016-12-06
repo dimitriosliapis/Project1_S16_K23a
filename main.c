@@ -33,6 +33,8 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+
+
     // zeugh indexes kai buffers
     buffer_in = createBuffer(buffer_size_in);
     index_in = createNodeIndex(index_size_in);
@@ -47,6 +49,8 @@ int main(int argc, char *argv[]) {
 
     char str[64];
     fgets(str, sizeof(str), Graph);
+
+
 
     while (str[0] != 'S') {
 
@@ -67,15 +71,6 @@ int main(int argc, char *argv[]) {
 
     fclose(Graph);
 
-    if(index_size_in > index_size_out) cc_size = index_size_in;
-    else cc_size = index_size_out;
-
-    cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, exploredA, version);
-    version++;
-
-    cc->u_size = cc->cc_max;
-
-    initUpdateIndex(cc);
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
 
@@ -84,50 +79,95 @@ int main(int argc, char *argv[]) {
 
     fgets(str, sizeof(str), Queries);
 
-    while (!feof(Queries)) {
+    if(strcmp(str, "STATIC\n") == 0){
 
-        if (str[0] == 'A') {
+        if(index_size_in > index_size_out) scc_size = index_size_in;
+        else scc_size = index_size_out;
 
-            toID(str, &N1, &N2);
+        scc = estimateStronglyConnectedComponents(index_out, buffer_out, buffer_size_out, scc_size, exploredA, exploredB, exploredF, version);
+        version++;
 
-            if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
-                insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out);
-
-            if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
-                insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
-
-            addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out);
-
-            addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in);
-
-            refreshUpdateIndex(cc, N1, N2);
-
-        } else if (str[0] == 'Q') {
-
-            toID(str, &N1, &N2);
-
-            if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND)) {
-                version++;
-                steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
-
-                printf("%d\n", steps);
-            } else
-                printf("-1\n");
-
-            version++;
-        }
+        grail = buildGrailIndex(index_out, buffer_out,index_in, buffer_in, scc, exploredA, version);
+        version++;
 
         fgets(str, sizeof(str), Queries);
+
+        while (!feof(Queries)) {
+            if (str[0] == 'Q') {
+
+                toID(str, &N1, &N2);
+
+                if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && isReachableGrailIndex(grail,N1,N2,scc) == MAYBE) {
+                    version++;
+                    steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
+
+                    printf("%d\n", steps);
+                } else
+                    printf("-1\n");
+
+                version++;
+            }
+
+            fgets(str, sizeof(str), Queries);
+        }
+        fclose(Queries);
     }
-    fclose(Queries);
+    else{
+        if(index_size_in > index_size_out) cc_size = index_size_in;
+        else cc_size = index_size_out;
+
+        cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, exploredA, version);
+        version++;
+
+        cc->u_size = cc->cc_max;
+
+        initUpdateIndex(cc);
+
+        //fgets(str, sizeof(str), Queries);
+
+        while (!feof(Queries)) {
+
+            if (str[0] == 'A') {
+
+                toID(str, &N1, &N2);
+
+                if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
+                    insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out);
+
+                if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
+                    insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
+
+                addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out);
+
+                addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in);
+
+                refreshUpdateIndex(cc, N1, N2);
+
+            } else if (str[0] == 'Q') {
+
+                toID(str, &N1, &N2);
+
+                if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND)) {
+                    version++;
+                    steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
+
+                    printf("%d\n", steps);
+                } else
+                    printf("-1\n");
+
+                version++;
+            }
+
+            fgets(str, sizeof(str), Queries);
+        }
+        fclose(Queries);
+    }
+
+
 
     if(index_size_in > index_size_out) scc_size = index_size_in;
     else scc_size = index_size_out;
-    /*scc = estimateStronglyConnectedComponents(index_out, buffer_out, buffer_size_out, scc_size, exploredA, exploredB, exploredF, version);
-    version++;
 
-    grail = buildGrailIndex(index_out, buffer_out,index_in, buffer_in, scc, exploredA, version);
-    updateCCIndex(cc, exploredA, exploredB, version);*/
 
     gettimeofday(&tv2, NULL);
     printf("Total time = %f seconds\n",
@@ -143,7 +183,9 @@ int main(int argc, char *argv[]) {
     destroyBuffer(buffer_out);
     destroyNodeIndex(index_in, index_size_in);
     destroyNodeIndex(index_out, index_size_out);
-    destroyCCIndex(cc);
+    if(cc != NULL) destroyCCIndex(cc);
+    if(scc != NULL) destroyStronglyConnectedComponents(scc);
+    if(grail != NULL) destroyGrailIndex(grail);
 /*    free(cc_index);
     for(a = 0; a < update_index_size; a++ ){
         free(update_index[a].cc_array);

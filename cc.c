@@ -17,10 +17,11 @@ uint32_t pop(Stack *stack) {
     sNode *rem = stack->last;
     uint32_t id;
 
-    if (rem == NULL) return DEFAULT;
+    if (stack->last == NULL) return DEFAULT;
 
-    id = rem->id;
-    stack->last = rem->next;
+    id = stack->last->id;
+    if(stack->last->next == NULL) stack->last = NULL;
+    else stack->last = stack->last->next;
     free(rem);
     return id;
 }
@@ -87,7 +88,7 @@ CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
 
     cc_counter = 0;
     for (cur = 0; cur < size; cur++) {
-        if((lookup(index_in, cur, size_in) == NOT_EXIST) && (lookup(index_out, cur, size_out) == NOT_EXIST)) continue;
+        if((lookup(index_in, cur, size_in) == NOT_EXIST)  && (lookup(index_out, cur, size_out) == NOT_EXIST)) continue;
         if (search(explored, cur, HT_BIG, version) == FOUND) continue; // visited
         push(&stack, cur);
         while (!stackIsEmpty(&stack)) {
@@ -108,7 +109,7 @@ CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
                         if (neighbors_in->neighbor[i] == DEFAULT) break;
                         push(&stack, neighbors_in->neighbor[i]);
                         i++;
-                        if (i == N && neighbors_in->nextListNode != -1) {
+                        if ((i == N ) && ( neighbors_in->nextListNode != -1)) {
                             neighbors_in = buffer_in + neighbors_in->nextListNode;
                             i = 0;
                         }
@@ -120,7 +121,7 @@ CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
                         if (neighbors_out->neighbor[i] == DEFAULT) break;
                         push(&stack, neighbors_out->neighbor[i]);
                         i++;
-                        if (i == N && neighbors_out->nextListNode != -1) {
+                        if ((i == N ) && ( neighbors_out->nextListNode != -1)) {
                             neighbors_out = buffer_out + neighbors_out->nextListNode;
                             i = 0;
                         }
@@ -171,17 +172,17 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     if(N2 >= cc->cc_size) cc2 = DEFAULT;
     else cc2 = cc->cc_index[N2];
 
-    if(cc1 != DEFAULT && cc2 != DEFAULT && cc1 == cc2) return;// an einai sto idio sinexise
+    if((cc1 != DEFAULT) && (cc2 != DEFAULT) && (cc1 == cc2)) return;// an einai sto idio sinexise
 
-    if(cc1 == DEFAULT && cc2 == DEFAULT) {                          // an einai kainouria cc
+    if((cc1 == DEFAULT) && (cc2 == DEFAULT)) {                          // an einai kainouria cc
         i = 0;
         //ti ginetai an kapoio einai hdh sto cc_index?
-        while(cc->updateIndex[i].state == 'o' && i < cc->u_size) i++; //vres tin kainouria thesi
+        while((cc->updateIndex[i].state == 'o') && (i < cc->u_size)) i++; //vres tin kainouria thesi
 
         if(i < cc->u_size) {
 
             l = i;
-            while(cc->updateIndex[l].state != 'e' && l < cc->u_size) l++;
+            while((cc->updateIndex[l].state != 'e') && (l < cc->u_size)) l++;
             while(i < l){
                 if(cc->updateIndex[i].new_nodes != NULL){
                     for(k = 0; k < cc->updateIndex[i].n_size; k++){
@@ -257,12 +258,12 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
 
         i = 0;
         found = 0;
-        while(cc->updateIndex[i].state == 'o' && i < cc->u_size) i++; //vres tin kainouria thesi
+        while((cc->updateIndex[i].state == 'o') && (i < cc->u_size)) i++; //vres tin kainouria thesi
 
         if(i < cc->u_size) {
 
             l = i;
-            while (cc->updateIndex[l].state != 'e' && l < cc->u_size) l++;
+            while ((cc->updateIndex[l].state != 'e') && (l < cc->u_size)) l++;
             while (i < l) {
                 if (cc->updateIndex[i].new_nodes != NULL) {
                     for (k = 0; k < cc->updateIndex[i].n_size; k++) {
@@ -286,7 +287,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
             }
             else {
                 k = 0;
-                while (cc->updateIndex[cc2].new_nodes[k] != DEFAULT && k < cc->updateIndex[cc2].n_size) k++;
+                while ((cc->updateIndex[cc2].new_nodes[k] != DEFAULT ) && ( k < cc->updateIndex[cc2].n_size)) k++;
                 if (k == cc->updateIndex[cc2].n_size) {
                     realloc_size = 2 * cc->updateIndex[cc2].n_size;
                     cc->updateIndex[cc2].new_nodes = realloc(cc->updateIndex[cc2].new_nodes,
@@ -303,12 +304,12 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
 
         found = 0;
         i = 0;
-        while(cc->updateIndex[i].state == 'o' && i < cc->u_size) i++; //vres tin kainouria thesi
+        while((cc->updateIndex[i].state == 'o' ) && ( i < cc->u_size)) i++; //vres tin kainouria thesi
 
         if(i < cc->u_size) {
 
             l = i;
-            while (cc->updateIndex[l].state != 'e' && l < cc->u_size) l++;
+            while ((cc->updateIndex[l].state != 'e' ) && ( l < cc->u_size)) l++;
             while (i < l) {
                 if (cc->updateIndex[i].new_nodes != NULL) {
                     for (k = 0; k < cc->updateIndex[i].n_size; k++) {
@@ -333,7 +334,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
             }
             else {
                 k = 0;
-                while (cc->updateIndex[cc1].new_nodes[k] != DEFAULT && k < cc->updateIndex[cc1].n_size) k++;
+                while ((cc->updateIndex[cc1].new_nodes[k] != DEFAULT ) && ( k < cc->updateIndex[cc1].n_size)) k++;
                 if (k == cc->updateIndex[cc1].n_size) {
                     realloc_size = 2 * cc->updateIndex[cc1].n_size;
                     cc->updateIndex[cc1].new_nodes = realloc(cc->updateIndex[cc1].new_nodes,
@@ -366,7 +367,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
         } else {
             temp = cc->updateIndex[cur_cc].cc_array;
             i = 0;
-            while (temp[i] != DEFAULT && i < cc->updateIndex[cur_cc].size) i++;
+            while ((temp[i] != DEFAULT ) && ( i < cc->updateIndex[cur_cc].size)) i++;
             if (i < cc->updateIndex[cur_cc].size) {
                 if(j == 0) temp[i] = cc2;
                 else temp[i] = cc1;
@@ -452,7 +453,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
 
                     i = 0;
 
-                    while(cc.updateIndex[v].cc_array[i] != DEFAULT && i < cc.updateIndex[v].size) {
+                    while((cc.updateIndex[v].cc_array[i] != DEFAULT ) && ( i < cc.updateIndex[v].size)) {
                         push(&stack, cc.updateIndex[v].cc_array[i]);
                         i++;
                     }
