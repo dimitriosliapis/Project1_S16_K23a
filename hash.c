@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "hash.h"
 
 unsigned int hash(uint32_t x) {
@@ -25,11 +26,11 @@ ht_Node *createHashtable(uint32_t size) {
     }
 }
 
-int search(ht_Node *hashTable, uint32_t id, uint32_t size) {
+int search(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
 
     uint32_t i = 0;
     uint32_t offset = hash(id) % size;
-    uint32_t *bucket = NULL;
+    node_bucket *bucket = NULL;
 
     if (hashTable == NULL)
         return NOT_FOUND;
@@ -39,16 +40,17 @@ int search(ht_Node *hashTable, uint32_t id, uint32_t size) {
         return NOT_FOUND;
 
     while (i < hashTable[offset].size) {
-
-        if (bucket[i] == id)
+        if ((bucket[i].id == id) && (bucket[i].version == version))
             return FOUND;
+        if(bucket[i].id == id)
+            return NOT_FOUND;
         i++;
     }
 
     return NOT_FOUND;
 }
 
-void insert(ht_Node *hashTable, uint32_t id, uint32_t size) {
+void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
 
     uint32_t i = 0;
     uint32_t offset = hash(id) % size;
@@ -56,9 +58,11 @@ void insert(ht_Node *hashTable, uint32_t id, uint32_t size) {
 
     if (hashTable[offset].bucket == NULL) {    // this bucket doesn't exist yet - create it and insert id
         hashTable[offset].bucket = malloc(HT_N * sizeof(uint32_t));
-        hashTable[offset].bucket[0] = id;
+        hashTable[offset].bucket[0].id = id;
+        hashTable[offset].bucket[0].version = version;
         for (i = 1; i < HT_N; i++) {
-            hashTable[offset].bucket[i] = DEFAULT;
+            hashTable[offset].bucket[i].id = DEFAULT;
+            hashTable[offset].bucket[i].version = DEFAULT;
         }
         hashTable[offset].size = HT_N;
         return;
@@ -66,8 +70,9 @@ void insert(ht_Node *hashTable, uint32_t id, uint32_t size) {
     } else {
 
         while (i < prev_size) { // find empty cell in bucket and insert id
-            if (hashTable[offset].bucket[i] == DEFAULT) {
-                hashTable[offset].bucket[i] = id;
+            if (hashTable[offset].bucket[i].id == DEFAULT) {
+                hashTable[offset].bucket[i].id = id;
+                hashTable[offset].bucket[i].version = version;
                 return;
             }
             i++;
@@ -76,13 +81,16 @@ void insert(ht_Node *hashTable, uint32_t id, uint32_t size) {
         // duplicate bucket and insert id
         hashTable[offset].bucket = realloc(hashTable[offset].bucket, prev_size * 2 * sizeof(uint32_t));
         hashTable[offset].size *= 2;
-        hashTable[offset].bucket[prev_size] = id;
+        hashTable[offset].bucket[prev_size].id = id;
+        hashTable[offset].bucket[prev_size].version = version;
         for (i = prev_size + 1; i < hashTable[offset].size; i++) {
-            hashTable[offset].bucket[i] = DEFAULT;
+            hashTable[offset].bucket[i].id = DEFAULT;
+            hashTable[offset].bucket[i].version = DEFAULT;
         }
     }
 }
 
+/*
 void reinitialize(ht_Node *hashTable, uint32_t size) {
 
     uint32_t i = 0, j = 0;
@@ -100,6 +108,7 @@ void reinitialize(ht_Node *hashTable, uint32_t size) {
         }
     }
 }
+*/
 
 void delete(ht_Node *hashTable, uint32_t size) {
 
