@@ -19,8 +19,6 @@ typedef struct SCC_t{
 }SCC;
 
 uint32_t peek(Stack *);
-uint32_t nextfromStack(Stack *stack, uint32_t id);
-void removefromStack(Stack *stack, uint32_t id);
-SCC* tarjan(ind*, list_node*, uint32_t, uint32_t);
+SCC* tarjan(ind*, list_node*, uint32_t, uint32_t, ht_Node*, ht_Node*, ht_Node*, uint32_t);
 
-SCC* estimateStronglyConnectedComponents(ind *, list_node *, uint32_t, uint32_t);
+SCC* estimateStronglyConnectedComponents(ind *, list_node *, uint32_t, uint32_t, ht_Node*, ht_Node*, ht_Node*, uint32_t);
