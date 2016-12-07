@@ -1,8 +1,8 @@
 #include "search.h"
 
-#define INIT_UNODE_SIZE 64
-#define INIT_NEWNODE_SIZE 64
-#define METRIC 5000
+#define INIT_UNODE_SIZE 32
+#define INIT_NEWNODE_SIZE 8
+#define METRIC 1250
 
 typedef struct sNode_t{
     uint32_t id;

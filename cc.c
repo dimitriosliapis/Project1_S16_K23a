@@ -404,8 +404,8 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
     if(cc1 == DEFAULT){
         i = 0;
 
-        if(i == cc.u_size || cc.updateIndex[i].state == 'e') return NOT_FOUND;
         while(i < cc.u_size){
+            if(i == cc.u_size || cc.updateIndex[i].state == 'e') return NOT_FOUND;
             if(cc.updateIndex[i].new_nodes != NULL){
                 for(j = 0; j < cc.updateIndex[i].n_size; j++){
                     if(cc.updateIndex[i].new_nodes[j] == N1) {
@@ -420,8 +420,8 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
     if(cc2 == DEFAULT){
         i = 0;
 
-        if(i == cc.u_size || cc.updateIndex[i].state == 'e') return NOT_FOUND;
         while(i < cc.u_size){
+            if(i == cc.u_size || cc.updateIndex[i].state == 'e') return NOT_FOUND;
             if(cc.updateIndex[i].new_nodes != NULL){
                 for(j = 0; j < cc.updateIndex[i].n_size; j++){
                     if(cc.updateIndex[i].new_nodes[j] == N2) {
@@ -510,7 +510,7 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_
         if(search(explored, i, HT_BIG, version) == FOUND) continue;
         push(&stack, i);
         //insert(explored_new, i, HT_BIG, version_new);
-        new_cc[v] = parent_cc;
+        new_cc[i] = parent_cc;
         insert(explored, i, HT_BIG, version);
         while(!stackIsEmpty(&stack)) {
             v = pop(&stack);
@@ -529,15 +529,7 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_
             }
 
         }
-/*        for(k = 0 ; k < cc->cc_size ; k++) {
-            if(search(explored_new, cc->cc_index[k], HT_BIG, version_new) == FOUND) {
-                cc->cc_index[k] = i;
-            }
-        }*/
-        //(*version)++;
         parent_cc++;
-        //version_new++;
-        //printf("%d\n", i);
     }
     for(k = 0 ; k < cc->cc_size ; k++) {
         old_cc = cc->cc_index[k];

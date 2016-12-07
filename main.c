@@ -14,6 +14,7 @@ int main(int argc, char *argv[]) {
     ht_Node *exploredF = NULL, *exploredB = NULL, *exploredA = NULL;
     uint32_t version = 0;
     int steps = 0;
+    //uint32_t debug = 0;
 
 
     CC *cc = NULL;
@@ -84,11 +85,12 @@ int main(int argc, char *argv[]) {
         if(index_size_in > index_size_out) scc_size = index_size_in;
         else scc_size = index_size_out;
 
+        version++;
         scc = estimateStronglyConnectedComponents(index_out, buffer_out, buffer_size_out, scc_size, exploredA, exploredB, exploredF, version);
-        version++;
 
-        grail = buildGrailIndex(index_out, buffer_out,index_in, buffer_in, scc, exploredA, version);
         version++;
+        grail = buildGrailIndex(index_out, buffer_out,index_in, buffer_in, scc, exploredA, version);
+        //version++;
 
         fgets(str, sizeof(str), Queries);
 
@@ -155,13 +157,24 @@ int main(int argc, char *argv[]) {
                         printf("%d\n", steps);
                     }
                     else{
+                 //       debug++;
                         if(searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND){
                             version++;
                             steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
                             printf("%d\n", steps);
+                            version++;
+
+                            cc->metricVal--;
+                            if(cc->metricVal == 0){
+                                if(index_size_in > index_size_out) cc_size = index_size_in;
+                                else cc_size = index_size_out;
+                                cc->cc_max = updateCCIndex(cc,exploredA,exploredB, version, cc_size);
+                                version++;
+                                cc->metricVal = METRIC;
+                            }
                         }
                         else{
-                            printf("-1s\n");
+                            printf("-1\n");
                         }
                     }
                     /*version++;
@@ -171,15 +184,7 @@ int main(int argc, char *argv[]) {
                 } else
                     printf("-1\n");
 
-                version++;
-                cc->metricVal--;
-                if(cc->metricVal == 0){
-                    if(index_size_in > index_size_out) cc_size = index_size_in;
-                    else cc_size = index_size_out;
-                    cc->cc_max = updateCCIndex(cc,exploredA,exploredB, version, cc_size);
-                    version++;
-                    cc->metricVal = METRIC;
-                }
+
             }
 
             fgets(str, sizeof(str), Queries);
@@ -197,6 +202,8 @@ int main(int argc, char *argv[]) {
     printf("Total time = %f seconds\n",
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
+
+   // printf("DEBUG-> %d\n", debug);
 
     empty(frontierF);
     empty(frontierB);
