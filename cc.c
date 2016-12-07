@@ -480,7 +480,11 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_
     Stack stack;
     uint32_t k;
     uint32_t parent_cc = 0;
-    uint32_t version_new = 0;
+    //uint32_t version_new = 0;
+    uint32_t new_cc[cc->u_size];
+    uint32_t old_cc = 0;
+
+    for(i = 0; i < cc->u_size; i++) new_cc[i] = DEFAULT;
 
     stack.last = NULL;
 
@@ -502,8 +506,12 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_
     }
     parent_cc = 0;//gia na bgoun me ti seira ta CC
     for(i = 0 ; i < cc->u_size ; i++) {
+        if(cc->updateIndex[i].state == 'e') break;
         if(search(explored, i, HT_BIG, version) == FOUND) continue;
         push(&stack, i);
+        //insert(explored_new, i, HT_BIG, version_new);
+        new_cc[v] = parent_cc;
+        insert(explored, i, HT_BIG, version);
         while(!stackIsEmpty(&stack)) {
             v = pop(&stack);
 
@@ -511,22 +519,30 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_
                 for (k = 0; k < cc->updateIndex[v].size; k++) {
                     w = cc->updateIndex[v].cc_array[k];
                     if(w == DEFAULT) break;
-                    if(search(explored_new, w, HT_BIG, version_new) == FOUND) continue;
+                    if(new_cc[w] != DEFAULT) continue;
+                   // if(search(explored_new, w, HT_BIG, version_new) == FOUND) continue;
                     push(&stack, w);
-                    insert(explored_new, w, HT_BIG, version_new);
+                    //insert(explored_new, w, HT_BIG, version_new);
+                    new_cc[w] = parent_cc;
                     insert(explored, w, HT_BIG, version);
                 }
             }
 
         }
-        for(k = 0 ; k < cc->cc_size ; k++) {
+/*        for(k = 0 ; k < cc->cc_size ; k++) {
             if(search(explored_new, cc->cc_index[k], HT_BIG, version_new) == FOUND) {
-                cc->cc_index[k] = parent_cc;
+                cc->cc_index[k] = i;
             }
-        }
+        }*/
         //(*version)++;
         parent_cc++;
-        version_new++;
+        //version_new++;
+        //printf("%d\n", i);
+    }
+    for(k = 0 ; k < cc->cc_size ; k++) {
+        old_cc = cc->cc_index[k];
+        if(old_cc == DEFAULT) continue;
+        cc->cc_index[k] = new_cc[old_cc];
     }
     deleteStack(&stack);
     for(i = 0; i < cc->u_size; i++){

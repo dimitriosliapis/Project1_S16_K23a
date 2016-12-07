@@ -148,11 +148,26 @@ int main(int argc, char *argv[]) {
 
                 toID(str, &N1, &N2);
 
-                if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND)) {
-                    version++;
+                if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS /*&& (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND)*/) {
+                    if(cc->cc_index[N1] == cc->cc_index[N2]){
+                        version++;
+                        steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
+                        printf("%d\n", steps);
+                    }
+                    else{
+                        if(searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND){
+                            version++;
+                            steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
+                            printf("%d\n", steps);
+                        }
+                        else{
+                            printf("-1s\n");
+                        }
+                    }
+                    /*version++;
                     steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
 
-                    printf("%d\n", steps);
+                    printf("%d\n", steps);*/
                 } else
                     printf("-1\n");
 
