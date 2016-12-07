@@ -1,7 +1,8 @@
 #include "search.h"
 
-#define INIT_UNODE_SIZE 256
-#define INIT_NEWNODE_SIZE 256
+#define INIT_UNODE_SIZE 64
+#define INIT_NEWNODE_SIZE 64
+#define METRIC 5000
 
 typedef struct sNode_t{
     uint32_t id;
@@ -39,5 +40,5 @@ CC* createCCIndex(uint32_t, ind*, ind*, list_node*, list_node*, uint32_t, uint32
 void initUpdateIndex(CC *);
 void refreshUpdateIndex(CC *, uint32_t, uint32_t);
 int searchUpdateIndex(CC, uint32_t, uint32_t, ht_Node*, uint32_t);
-void updateCCIndex(CC *, ht_Node*, ht_Node*, uint32_t);
+uint32_t updateCCIndex(CC *, ht_Node*, ht_Node*, uint32_t, uint32_t);
 void destroyCCIndex(CC*);

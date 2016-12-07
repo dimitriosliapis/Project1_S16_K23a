@@ -120,6 +120,7 @@ int main(int argc, char *argv[]) {
         version++;
 
         cc->u_size = cc->cc_max;
+        cc->metricVal = METRIC;
 
         initUpdateIndex(cc);
 
@@ -156,6 +157,14 @@ int main(int argc, char *argv[]) {
                     printf("-1\n");
 
                 version++;
+                cc->metricVal--;
+                if(cc->metricVal == 0){
+                    if(index_size_in > index_size_out) cc_size = index_size_in;
+                    else cc_size = index_size_out;
+                    cc->cc_max = updateCCIndex(cc,exploredA,exploredB, version, cc_size);
+                    version++;
+                    cc->metricVal = METRIC;
+                }
             }
 
             fgets(str, sizeof(str), Queries);

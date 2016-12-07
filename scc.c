@@ -19,8 +19,8 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
 
 SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node* explored, ht_Node* explored_twice, ht_Node* explored_scc, uint32_t version) {
 
-    Stack *scc_stack = malloc(sizeof(Stack));
-    Stack *dfs_stack = malloc(sizeof(Stack));
+    Stack scc_stack;
+    Stack dfs_stack;
 
     list_node *neighbors_out;
     ptrdiff_t offset_out;
@@ -47,8 +47,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     }
 
 
-    scc_stack->last = NULL;
-    dfs_stack->last = NULL;
+    scc_stack.last = NULL;
+    dfs_stack.last = NULL;
 
 
     for(i = 0 ; i < size ; i++) {
@@ -57,12 +57,12 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
         index = 1;
 
-        push(dfs_stack, i);
-        push(scc_stack, i);
+        push(&dfs_stack, i);
+        push(&scc_stack, i);
 
-        while(!stackIsEmpty(scc_stack)){
+        while(!stackIsEmpty(&scc_stack)){
 
-            v = peek(dfs_stack);
+            v = peek(&dfs_stack);
             if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
                 index_out[v].index = index;
                 index_out[v].lowlink = index;
@@ -76,7 +76,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
             if(offset_out >= 0 && neighbors_out->neighbor[0] != DEFAULT && index_out[v].all_children_in_scc == 0){   //if v has children
 
                 if(search(explored_twice, v, HT_BIG, version) == FOUND) {
-                        pop(dfs_stack);
+                        pop(&dfs_stack);
                 }
                 k = 0;
                 while (k < N) {
@@ -95,8 +95,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                         index_out[w].index = index;
                         index_out[w].lowlink = index;
                         index++;
-                        push(scc_stack, w);
-                        push(dfs_stack, w);
+                        push(&scc_stack, w);
+                        push(&dfs_stack, w);
                         insert(explored, w, HT_BIG, version);
 
                     }
@@ -106,7 +106,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                             if (index_out[v].lowlink > index_out[w].lowlink)
                                 index_out[v].lowlink = index_out[w].lowlink;
 
-                            push(dfs_stack, w);
+                            push(&dfs_stack, w);
 
                             insert(explored_twice, w, HT_BIG, version);
                         }
@@ -122,10 +122,10 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                             a = 0;
 
 
-                            v = pop(dfs_stack);
-                            while(index_out[v].index != index_out[v].lowlink) v = pop(dfs_stack);
+                            v = pop(&dfs_stack);
+                            while(index_out[v].index != index_out[v].lowlink) v = pop(&dfs_stack);
                             while(1){
-                                w = pop(scc_stack);
+                                w = pop(&scc_stack);
                                 if(w == DEFAULT) break;
                                 insert(explored_scc, w, HT_BIG, version);
 
@@ -166,8 +166,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
             }
             else{
-                w = pop(scc_stack);
-                pop(dfs_stack);
+                w = pop(&scc_stack);
+                pop(&dfs_stack);
 
                 insert(explored, w, HT_BIG, version);
                 insert(explored_scc, w, HT_BIG, version);
@@ -209,8 +209,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
     scc->components_count = scc_counter;
 
-    deleteStack(scc_stack);
-    deleteStack(dfs_stack);
+    deleteStack(&scc_stack);
+    deleteStack(&dfs_stack);
 
     return scc;
 }
@@ -223,6 +223,7 @@ void destroyStronglyConnectedComponents(SCC* scc){
         free(scc->components[i].included_node_ids);
     }
     free(scc->id_belongs_to_component);
+    free(scc->components);
     free(scc);
 
 }

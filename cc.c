@@ -172,7 +172,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     if(N2 >= cc->cc_size) cc2 = DEFAULT;
     else cc2 = cc->cc_index[N2];
 
-    if((cc1 != DEFAULT) && (cc2 != DEFAULT) && (cc1 == cc2)) return;// an einai sto idio sinexise
+    if((cc1 != DEFAULT) && (cc1 == cc2)) return;// an einai sto idio sinexise
 
     if((cc1 == DEFAULT) && (cc2 == DEFAULT)) {                          // an einai kainouria cc
         i = 0;
@@ -473,54 +473,77 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
     }
 }
 
-void updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_t version) {
+uint32_t updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_t version, uint32_t new_size) {
 
-    uint32_t v = 0;
-    uint32_t i = 0;
+    uint32_t v = 0, w = 0;
+    uint32_t i = 0, j = 0;
     Stack stack;
-    uint32_t k, realloc_size = cc->cc_size;
+    uint32_t k;
+    uint32_t parent_cc = 0;
+    uint32_t version_new = 0;
 
     stack.last = NULL;
+
+    if(new_size > cc->cc_size){
+        cc->cc_index = realloc(cc->cc_index, new_size*sizeof(uint32_t));
+        for(j = cc->cc_size; j < new_size; j++){
+            cc->cc_index[j] = DEFAULT;
+        }
+    }
 
     //gia ta new nodes
     for(i = 0; i < cc->u_size; i++ ) {
         if(cc->updateIndex[i].new_nodes != NULL) {
             for(k = 0 ; k < cc->updateIndex[i].n_size ; k++) {
                 if(cc->updateIndex[i].new_nodes[k] == DEFAULT) break;
-                if(cc->updateIndex[i].new_nodes[k] < cc->cc_size) {
-                    cc->cc_index[cc->updateIndex[i].new_nodes[k]] = i;
-                }
-                else {
-                    while(cc->updateIndex[i].new_nodes[k] < realloc_size) realloc_size *= 2;
-                    cc->cc_index = realloc(cc->cc_index, realloc_size*sizeof(uint32_t));
-                    cc->cc_index[cc->updateIndex[i].new_nodes[k]] = i;
-                }
+                cc->cc_index[cc->updateIndex[i].new_nodes[k]] = i;
             }
         }
     }
-
+    parent_cc = 0;//gia na bgoun me ti seira ta CC
     for(i = 0 ; i < cc->u_size ; i++) {
+        if(search(explored, i, HT_BIG, version) == FOUND) continue;
         push(&stack, i);
         while(!stackIsEmpty(&stack)) {
             v = pop(&stack);
-            if(search(explored_new, v, HT_BIG, version) == NOT_FOUND) {
-                insert(explored, v, HT_BIG, version);
-                insert(explored_new, v, HT_BIG, version);
-                if(cc->updateIndex[v].cc_array != NULL) {
-                    for (k = 0; k < cc->updateIndex[v].size; k++) {
-                        if(cc->updateIndex[v].cc_array[k] == DEFAULT) break;
-                        push(&stack, cc->updateIndex[v].cc_array[k]);
-                    }
+
+            if(cc->updateIndex[v].cc_array != NULL) {
+                for (k = 0; k < cc->updateIndex[v].size; k++) {
+                    w = cc->updateIndex[v].cc_array[k];
+                    if(w == DEFAULT) break;
+                    if(search(explored_new, w, HT_BIG, version_new) == FOUND) continue;
+                    push(&stack, w);
+                    insert(explored_new, w, HT_BIG, version_new);
+                    insert(explored, w, HT_BIG, version);
                 }
             }
+
         }
         for(k = 0 ; k < cc->cc_size ; k++) {
-            if(search(explored, cc->cc_index[k], HT_BIG, version) == FOUND) {
-                cc->cc_index[k] = i;
+            if(search(explored_new, cc->cc_index[k], HT_BIG, version_new) == FOUND) {
+                cc->cc_index[k] = parent_cc;
             }
         }
+        //(*version)++;
+        parent_cc++;
+        version_new++;
     }
     deleteStack(&stack);
+    for(i = 0; i < cc->u_size; i++){
+        free(cc->updateIndex[i].cc_array);
+        free(cc->updateIndex[i].new_nodes);
+
+        cc->updateIndex[i].cc_array = NULL;
+        cc->updateIndex[i].new_nodes = NULL;
+    }
+    free(cc->updateIndex);
+    cc->updateIndex = NULL;
+
+    cc->u_size = parent_cc;
+
+    initUpdateIndex(cc);
+
+    return parent_cc;
 }
 
 void destroyCCIndex(CC *cc){

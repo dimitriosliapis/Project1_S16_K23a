@@ -16,8 +16,8 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
 
     GrailIndex *grail = malloc(sizeof(GrailIndex));
 
-    grail->buf_size_in = 2*scc->components_count;
-    grail->buf_size_out = 2*scc->components_count;
+    grail->buf_size_in = scc->components_count;
+    grail->buf_size_out = scc->components_count;
 
     grail->ind_size_in = scc->components_count;
     grail->ind_size_out = scc->components_count;
@@ -182,4 +182,6 @@ void destroyGrailIndex(GrailIndex* index){
     destroyBuffer(index->hyper_buffer_out);
     destroyNodeIndex(index->hyper_index_in, index->ind_size_in);
     destroyNodeIndex(index->hyper_index_out, index->ind_size_out);
+
+    free(index);
 }
