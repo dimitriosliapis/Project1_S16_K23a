@@ -10,8 +10,10 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
     list_node *neighbors_in, *neighbors_out;
     uint32_t neigh_scc = 0;
     uint32_t rank = 1, min_rank = 1;
+    Stack dfs_stack;
     Stack stack;
 
+    dfs_stack.last = NULL;
     stack.last = NULL;
 
     GrailIndex *grail = malloc(sizeof(GrailIndex));
@@ -22,8 +24,8 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
     grail->ind_size_in = scc->components_count;
     grail->ind_size_out = scc->components_count;
 
-    grail->hyper_buffer_in = createBuffer(grail->buf_size_in);
-    grail->hyper_index_in = createNodeIndex(grail->ind_size_in);
+    /*grail->hyper_buffer_in = createBuffer(grail->buf_size_in);
+    grail->hyper_index_in = createNodeIndex(grail->ind_size_in);*/
     grail->hyper_buffer_out = createBuffer(grail->buf_size_out);
     grail->hyper_index_out = createNodeIndex(grail->ind_size_out);
 
@@ -33,7 +35,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
 
     for(i = 0; i < scc->components_count; i++){
         insertNode(&grail->hyper_index_out, i, &grail->hyper_buffer_out, &scc->components_count, &grail->buf_size_out, &available_out);
-        insertNode(&grail->hyper_index_in, i, &grail->hyper_buffer_in, &scc->components_count, &grail->buf_size_in, &available_in);
+        //insertNode(&grail->hyper_index_in, i, &grail->hyper_buffer_in, &scc->components_count, &grail->buf_size_in, &available_in);
     }
 
     for(i = 0; i < scc->components_count; i++){
@@ -66,7 +68,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
             }
 
 
-            offset_in = getListHead(index_in, scc->components[i].included_node_ids[j]);
+            /*offset_in = getListHead(index_in, scc->components[i].included_node_ids[j]);
 
             if(offset_in >= 0) {
                 neighbors_in = buffer_in + offset_in;
@@ -90,7 +92,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
                         }
                     }
                 }
-            }
+            }*/
         }
 
     }
@@ -99,28 +101,34 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
 
         if (search(explored, i, HT_BIG, version) == FOUND) continue;
 
+        push(&dfs_stack, i);
         push(&stack, i);
-        //offset_in = getListHead(grail->hyper_index_in, v);
-        offset_out = getListHead(grail->hyper_index_out, i);
-        //neighbors_in = grail->hyper_buffer_in + offset_in;
-        neighbors_out = grail->hyper_buffer_out + offset_out;
+        while(!stackIsEmpty(&dfs_stack)) {
 
-        if(offset_out >= 0 && neighbors_out->neighbor[0] != DEFAULT) {
-            k = 0;
-            while (k < N) {
-                if (neighbors_out->neighbor[k] == DEFAULT) break;
-                if (search(explored, neighbors_out->neighbor[k], HT_BIG, version) == NOT_FOUND) {
-                    push(&stack, neighbors_out->neighbor[k]);
+            v = pop(&dfs_stack);
+            insert(explored, v, HT_BIG, version);
+            //offset_in = getListHead(grail->hyper_index_in, v);
+            offset_out = getListHead(grail->hyper_index_out, v);
+            //neighbors_in = grail->hyper_buffer_in + offset_in;
+            neighbors_out = grail->hyper_buffer_out + offset_out;
+
+            if (offset_out >= 0 && neighbors_out->neighbor[0] != DEFAULT) {
+                k = 0;
+                while (k < N) {
+                    if (neighbors_out->neighbor[k] == DEFAULT) break;
+                    if (search(explored, neighbors_out->neighbor[k], HT_BIG, version) == NOT_FOUND) {
+                        push(&stack, neighbors_out->neighbor[k]);
+                        push(&dfs_stack, neighbors_out->neighbor[k]);
+                    }
+                    k++;
+                    if (k == N && neighbors_out->nextListNode != -1) {
+                        neighbors_out = grail->hyper_buffer_out + neighbors_out->nextListNode;
+                        k = 0;
+                    }
                 }
-                k++;
-                if (k == N && neighbors_out->nextListNode != -1) {
-                    neighbors_out = grail->hyper_buffer_out + neighbors_out->nextListNode;
-                    k = 0;
-                }
+
             }
-
         }
-
         while (!stackIsEmpty(&stack)) {
 
             v = pop(&stack);
@@ -172,15 +180,15 @@ int isReachableGrailIndex(GrailIndex* index, uint32_t source_node, uint32_t targ
     scc_target = scc->id_belongs_to_component[target_node];
 
     if(scc_source == DEFAULT || scc_target == DEFAULT) return NO;
-    if((index->hyper_index_out[scc_source].min_rank >= index->hyper_index_out[scc_target].min_rank) && (index->hyper_index_out[scc_source].rank >= index->hyper_index_out[scc_target].rank)) return MAYBE;
+    if((index->hyper_index_out[scc_source].min_rank <= index->hyper_index_out[scc_target].min_rank) && (index->hyper_index_out[scc_source].rank > index->hyper_index_out[scc_target].rank)) return MAYBE;
     return NO;
 }
 
 void destroyGrailIndex(GrailIndex* index){
 
-    destroyBuffer(index->hyper_buffer_in);
+    //destroyBuffer(index->hyper_buffer_in);
     destroyBuffer(index->hyper_buffer_out);
-    destroyNodeIndex(index->hyper_index_in, index->ind_size_in);
+    //destroyNodeIndex(index->hyper_index_in, index->ind_size_in);
     destroyNodeIndex(index->hyper_index_out, index->ind_size_out);
 
     free(index);
