@@ -20,7 +20,7 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
 SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node* explored, ht_Node* explored_twice, ht_Node* explored_scc, uint32_t version) {
 
     Stack scc_stack;
-    Stack dfs_stack;
+    //Stack dfs_stack;
 
     Stack parent_stack;
     Stack next_child;
@@ -92,7 +92,10 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 k = 0;
 
                 while (1) {
-                    if(k >= N) break;
+                    if(k >= N) {
+                        w = DEFAULT;
+                        break;
+                    }
                     w = neighbors_out->neighbor[k];
                     if(w == DEFAULT) break;
 
@@ -189,7 +192,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                     for(r = 0 ; r < scc->components[scc_counter].node_array_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
                     a = 0;
 
-                    scc->components[scc_counter].included_node_ids[a] = w;
+                    scc->components[scc_counter].included_node_ids[a] = v;
 
                     if(a == (scc->components[scc_counter].node_array_size-1)) {
                         realloc_node_size = 2*scc->components[scc_counter].node_array_size;
@@ -198,11 +201,11 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                         scc->components[scc_counter].node_array_size = realloc_node_size;
                     }
                     scc->components[scc_counter].included_nodes_count++;
-                    scc->id_belongs_to_component[w] = scc_counter;
+                    scc->id_belongs_to_component[v] = scc_counter;
 
                     a++;
                     printf("SOLO SCC: %d\n",scc_counter);
-                    printf("%d\n", w);
+                    printf("%d\n", v);
 
                     scc_counter++;
                     if(scc_counter == scc->component_size){
@@ -422,7 +425,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     scc->components_count = scc_counter;
 
     deleteStack(&scc_stack);
-    deleteStack(&dfs_stack);
+    deleteStack(&next_child);
+    deleteStack(&parent_stack);
 
     return scc;
 }
