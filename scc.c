@@ -53,12 +53,13 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     scc_stack.last = NULL;
     dfs_stack.last = NULL;
 
+    index = 1;
+
 
     for(i = 0 ; i < size ; i++) {
         if(lookup(index_out, i, size_out) == NOT_EXIST) continue;
         if(search(explored_scc, i, HT_BIG, version) == FOUND) continue;
 
-        index = 1;
 
         push(&dfs_stack, i);
         push(&scc_stack, i);
@@ -93,6 +94,11 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
                         index_out[v].all_children_in_scc++;//de doulevei gia to tarjan.txt giati den metrame pote ta paidia toy 8 giati einai ola sto explored_scc
                         k++;
+                        if(k >= N && neighbors_out->nextListNode != -1) {
+                            neighbors_out = buffer_out + neighbors_out->nextListNode;
+                            k = 0;
+                        }
+                        else break;
                         continue;
                     }
                    // index_out[v].all_children_in_scc = 0;
