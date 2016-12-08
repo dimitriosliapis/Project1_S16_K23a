@@ -84,7 +84,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                         pop(&dfs_stack);
                 }
                 k = 0;
-                while (k < N) {
+                while (1) {
+                    if(k >= N) break;
                     w = neighbors_out->neighbor[k];
                     if(w == DEFAULT) break;
 
@@ -98,7 +99,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                             neighbors_out = buffer_out + neighbors_out->nextListNode;
                             k = 0;
                         }
-                        else break;
+                        //else break;
                         continue;
                     }
                    // index_out[v].all_children_in_scc = 0;
@@ -123,7 +124,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
                             insert(explored_twice, w, HT_BIG, version);
                         }
-                        else if(search(explored_scc, w, HT_BIG, version) == NOT_FOUND){
+                        else /*if(search(explored_scc, w, HT_BIG, version) == NOT_FOUND)*/{
 
                             if(index_out[v].lowlink > index_out[w].index) index_out[v].lowlink = index_out[w].index;
 
@@ -154,7 +155,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                                 scc->id_belongs_to_component[w] = scc_counter;
 
                                 a++;
-                               // printf("ta scc %d exei ta %d ids\n", scc_counter, w);
+                                printf("ta scc %d exei ta %d ids\n", scc_counter, w);
                                 if(w == v) break;
                             }
                             scc_counter++;
@@ -204,7 +205,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 scc->id_belongs_to_component[w] = scc_counter;
 
                 a++;
-              //  printf("ta scc %d exei ta %d ids\n", scc_counter, w);
+                printf("SOLO: ta scc %d exei ta %d ids\n", scc_counter, w);
                 scc_counter++;
                 if(scc_counter == scc->component_size){
                     scc->component_size *= 2;
