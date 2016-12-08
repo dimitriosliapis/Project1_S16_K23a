@@ -62,6 +62,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     for(i = 0 ; i < size ; i++) {
         if(lookup(index_out, i, size_out) == NOT_EXIST) continue;
         if(search(explored_scc, i, HT_BIG, version) == FOUND) continue;
+//        printf("%d\n",i);
 
 
         push(&parent_stack, i);
@@ -119,13 +120,14 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                         break;
                     }
                     else{
-                        //if(search(explored_twice, w, HT_BIG, version) == NOT_FOUND) {
+                        if(search(explored_twice, w, HT_BIG, version) == FOUND) {
+                            if(index_out[v].lowlink > index_out[w].index) index_out[v].lowlink = index_out[w].index;
+                        }
+                        else{
                             if (index_out[v].lowlink > index_out[w].lowlink)
                                 index_out[v].lowlink = index_out[w].lowlink;
-                       // }
-                        /*else{
-                            if(index_out[v].lowlink > index_out[w].index) index_out[v].lowlink = index_out[w].index;
-                        }*/
+                            insert(explored_twice, w, HT_BIG, version);
+                        }
                     }
 
 
@@ -184,6 +186,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
                     insert(explored, v, HT_BIG, version);
                     insert(explored_scc, v, HT_BIG, version);
+
+                    if(peek(&scc_stack) == v) pop(&scc_stack);
 
                     scc->components[scc_counter].component_id = scc_counter;
                     scc->components[scc_counter].included_nodes_count = 0;
