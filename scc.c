@@ -22,6 +22,9 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     Stack scc_stack;
     Stack dfs_stack;
 
+    Stack parent_stack;
+    Stack next_child;
+
     list_node *neighbors_out;
     ptrdiff_t offset_out;
     uint32_t size = size_out, index = 0, realloc_node_size;
@@ -49,12 +52,206 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
         scc->id_belongs_to_component[i] = DEFAULT;
     }
 
+    scc_stack.last = NULL;
+    next_child.last = NULL;
+    parent_stack.last = NULL;
+
+    index = 1;
+    scc_counter = 1;
+
+    for(i = 0 ; i < size ; i++) {
+        if(lookup(index_out, i, size_out) == NOT_EXIST) continue;
+        if(search(explored_scc, i, HT_BIG, version) == FOUND) continue;
+
+
+        push(&parent_stack, i);
+        push(&scc_stack, i);
+
+        while(!stackIsEmpty(&scc_stack)){
+
+            v = pop(&next_child);
+            if(v == DEFAULT) v = peek(&parent_stack);
+
+            if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
+                index_out[v].index = index;
+                index_out[v].lowlink = index;
+                //index_out[v].all_children_in_scc = 0;
+                index++;
+            }
+
+            if(index_out[v].num_of_children != 0 && index_out[v].all_children_in_scc != index_out[v].num_of_children){
+
+                if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
+                    push(&parent_stack, v);
+                    insert(explored, v, HT_BIG, version);
+                }
+
+                offset_out = getListHead(index_out, v);
+                neighbors_out = buffer_out + offset_out;
+
+                k = 0;
+
+                while (1) {
+                    if(k >= N) break;
+                    w = neighbors_out->neighbor[k];
+                    if(w == DEFAULT) break;
+
+                    /////////////////////////////////////////////////////////////
+                    if(search(explored_scc, w, HT_BIG, version) == FOUND){
+
+                        index_out[v].all_children_in_scc++;//de doulevei gia to tarjan.txt giati den metrame pote ta paidia toy 8 giati einai ola sto explored_scc
+                        k++;
+                        if(k >= N && neighbors_out->nextListNode != -1) {
+                            neighbors_out = buffer_out + neighbors_out->nextListNode;
+                            k = 0;
+                        }
+                        //else break;
+                        continue;
+                    }
+                    /////////////////////////////////////////////////////////////
+
+                    if(search(explored, w, HT_BIG, version) == NOT_FOUND){
+                        push(&next_child, w);
+                        push(&scc_stack, w);
+                        break;
+                    }
+                    else{
+                        //if(search(explored_twice, w, HT_BIG, version) == NOT_FOUND) {
+                            if (index_out[v].lowlink > index_out[w].lowlink)
+                                index_out[v].lowlink = index_out[w].lowlink;
+                       // }
+                        /*else{
+                            if(index_out[v].lowlink > index_out[w].index) index_out[v].lowlink = index_out[w].index;
+                        }*/
+                    }
+
+
+                    k++;
+                    if(k >= N && neighbors_out->nextListNode != -1) {
+                        neighbors_out = buffer_out + neighbors_out->nextListNode;
+                        k = 0;
+                    }
+                }
+                if(w == DEFAULT){
+                    pop(&parent_stack);
+                    if(index_out[v].lowlink == index_out[v].index){
+                        scc->components[scc_counter].component_id = scc_counter;
+                        scc->components[scc_counter].included_nodes_count = 0;
+                        scc->components[scc_counter].node_array_size = NODE_IDS_SIZE;
+                        scc->components[scc_counter].included_node_ids = malloc(scc->components[scc_counter].node_array_size*sizeof(uint32_t));
+                        for(r = 0 ; r < scc->components[scc_counter].node_array_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
+                        a = 0;
+                        printf("SCC: %d\n",scc_counter);
+                        do{
+                            w = pop(&scc_stack);
+                            insert(explored_scc, w, HT_BIG, version);
+
+                            scc->components[scc_counter].included_node_ids[a] = w;
+
+                            if(a == (scc->components[scc_counter].node_array_size-1)) {
+                                realloc_node_size = 2*scc->components[scc_counter].node_array_size;
+                                scc->components[scc_counter].included_node_ids = realloc(scc->components[scc_counter].included_node_ids, realloc_node_size*sizeof(uint32_t));
+                                for(r = scc->components[scc_counter].node_array_size ; r < realloc_node_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
+                                scc->components[scc_counter].node_array_size = realloc_node_size;
+                            }
+                            scc->components[scc_counter].included_nodes_count++;
+                            scc->id_belongs_to_component[w] = scc_counter;
+
+                            a++;
+
+
+                            printf("%d\n", w);
+                        }while(w != v);
+                        scc_counter++;
+
+                        if(scc_counter == scc->component_size){
+                            scc->component_size *= 2;
+                            scc->components = realloc(scc->components, scc->component_size * sizeof(Component));
+                            for(r = scc_counter; r < scc->component_size; r++){
+                                scc->components[r].included_node_ids = NULL;
+                                scc->components[r].component_id = DEFAULT;
+                                scc->components[r].included_nodes_count = 0;
+                                scc->components[r].node_array_size = 0;
+                            }
+                        }
+                    }
+                }
+            }
+            else{
+                if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
+                    insert(explored, v, HT_BIG, version);
+                    insert(explored_scc, v, HT_BIG, version);
+
+                    scc->components[scc_counter].component_id = scc_counter;
+                    scc->components[scc_counter].included_nodes_count = 0;
+                    scc->components[scc_counter].node_array_size = NODE_IDS_SIZE;
+                    scc->components[scc_counter].included_node_ids = malloc(scc->components[scc_counter].node_array_size*sizeof(uint32_t));
+                    for(r = 0 ; r < scc->components[scc_counter].node_array_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
+                    a = 0;
+
+                    scc->components[scc_counter].included_node_ids[a] = w;
+
+                    if(a == (scc->components[scc_counter].node_array_size-1)) {
+                        realloc_node_size = 2*scc->components[scc_counter].node_array_size;
+                        scc->components[scc_counter].included_node_ids = realloc(scc->components[scc_counter].included_node_ids, realloc_node_size*sizeof(uint32_t));
+                        for(r = scc->components[scc_counter].node_array_size ; r < realloc_node_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
+                        scc->components[scc_counter].node_array_size = realloc_node_size;
+                    }
+                    scc->components[scc_counter].included_nodes_count++;
+                    scc->id_belongs_to_component[w] = scc_counter;
+
+                    a++;
+                    printf("SOLO SCC: %d\n",scc_counter);
+                    printf("%d\n", w);
+
+                    scc_counter++;
+                    if(scc_counter == scc->component_size){
+                        scc->component_size *= 2;
+                        scc->components = realloc(scc->components, scc->component_size * sizeof(Component));
+                        for(r = scc_counter; r < scc->component_size; r++){
+                            scc->components[r].included_node_ids = NULL;
+                            scc->components[r].component_id = DEFAULT;
+                            scc->components[r].included_nodes_count = 0;
+                            scc->components[r].node_array_size = 0;
+                        }
+                    }
+
+                }
+            }
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
 
     scc_stack.last = NULL;
     dfs_stack.last = NULL;
 
     index = 1;
-
 
     for(i = 0 ; i < size ; i++) {
         if(lookup(index_out, i, size_out) == NOT_EXIST) continue;
@@ -124,7 +321,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
                             insert(explored_twice, w, HT_BIG, version);
                         }
-                        else /*if(search(explored_scc, w, HT_BIG, version) == NOT_FOUND)*/{
+                        else if(peek(&dfs_stack) == v){
 
                             if(index_out[v].lowlink > index_out[w].index) index_out[v].lowlink = index_out[w].index;
 
@@ -170,6 +367,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                                 }
                             }
                         }
+                        else push(&dfs_stack, v);
                     }
                     k++;
                     if(k >= N && neighbors_out->nextListNode != -1) {
@@ -219,7 +417,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 }
             }
         }
-    }
+    }*/
 
     scc->components_count = scc_counter;
 
