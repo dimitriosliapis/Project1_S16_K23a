@@ -27,6 +27,9 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     uint32_t size = size_out, index = 0, realloc_node_size;
     uint32_t i = 0, v = 0, k = 0, a = 0, w = 0, r = 0;
     uint32_t scc_counter = 0;
+    //unsigned int num_of_children[num_nodes];
+
+    //for(r = 0; r < num_nodes; r++) num_of_children[r] = 0;
 
     SCC *scc = malloc(sizeof(SCC));
 
@@ -66,6 +69,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
             if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
                 index_out[v].index = index;
                 index_out[v].lowlink = index;
+                index_out[v].all_children_in_scc = 0;
                 index++;
                 insert(explored, v, HT_BIG, version);
             }
@@ -73,7 +77,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
             offset_out = getListHead(index_out, v);
             neighbors_out = buffer_out + offset_out;
 
-            if(offset_out >= 0 && neighbors_out->neighbor[0] != DEFAULT && index_out[v].all_children_in_scc == 0){   //if v has children
+            if(index_out[v].num_of_children != 0 && index_out[v].all_children_in_scc != index_out[v].num_of_children){   //if v has children
 
                 if(search(explored_twice, v, HT_BIG, version) == FOUND) {
                         pop(&dfs_stack);
@@ -86,11 +90,12 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                     //index_out[v].all_children_in_scc = 0;
 
                     if(search(explored_scc, w, HT_BIG, version) == FOUND){
+
+                        index_out[v].all_children_in_scc++;//de doulevei gia to tarjan.txt giati den metrame pote ta paidia toy 8 giati einai ola sto explored_scc
                         k++;
-                        index_out[v].all_children_in_scc = 1;
                         continue;
                     }
-                    index_out[v].all_children_in_scc = 0;
+                   // index_out[v].all_children_in_scc = 0;
                     if(search(explored, w, HT_BIG, version) == NOT_FOUND){
                         index_out[w].index = index;
                         index_out[w].lowlink = index;
@@ -99,6 +104,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                         push(&dfs_stack, w);
                         insert(explored, w, HT_BIG, version);
 
+                        //num_of_children[v]++;
+                        index_out[w].all_children_in_scc = 0;
                     }
                     else{
                         if(search(explored_twice, w, HT_BIG, version) == NOT_FOUND){
@@ -110,7 +117,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
                             insert(explored_twice, w, HT_BIG, version);
                         }
-                        else{
+                        else if(search(explored_scc, w, HT_BIG, version) == NOT_FOUND){
 
                             if(index_out[v].lowlink > index_out[w].index) index_out[v].lowlink = index_out[w].index;
 
@@ -141,7 +148,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                                 scc->id_belongs_to_component[w] = scc_counter;
 
                                 a++;
-                                //printf("ta scc %d exei ta %d ids\n", scc_counter, w);
+                               // printf("ta scc %d exei ta %d ids\n", scc_counter, w);
                                 if(w == v) break;
                             }
                             scc_counter++;
@@ -191,7 +198,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 scc->id_belongs_to_component[w] = scc_counter;
 
                 a++;
-                //printf("ta scc %d exei ta %d ids\n", scc_counter, w);
+              //  printf("ta scc %d exei ta %d ids\n", scc_counter, w);
                 scc_counter++;
                 if(scc_counter == scc->component_size){
                     scc->component_size *= 2;

@@ -17,6 +17,8 @@ ind *createNodeIndex(uint32_t index_size) {
         index[i].rank = DEFAULT;
         index[i].min_rank = DEFAULT;
         index[i].neighbors = NULL;
+        index[i].all_children_in_scc = 0;
+        index[i].num_of_children = 0;
     }
 
     return index;
@@ -70,6 +72,9 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
         (*index)[i].rank = DEFAULT;
         (*index)[i].min_rank = DEFAULT;
         (*index)[i].neighbors = NULL;
+        (*index)[i].all_children_in_scc = 0;
+        (*index)[i].num_of_children = 0;
+
     }
     *index_size = realloc_size;
     return OK_SUCCESS;
@@ -113,6 +118,7 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
             i = 0;
         }
     }
+    (*index)[id].num_of_children++;
     return offset;
 }
 

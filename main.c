@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 
     fgets(str, sizeof(str), Queries);
 
-    if(strcmp(str, "STATIC\n") == 0){
+    if(strncmp(str, "STATIC", 6) == 0){
 
         if(index_size_in > index_size_out) scc_size = index_size_in;
         else scc_size = index_size_out;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
         version++;
         grail = buildGrailIndex(index_out, buffer_out,index_in, buffer_in, scc, exploredA, version);
-        //version++;
+        version++;
 
         fgets(str, sizeof(str), Queries);
 
@@ -157,13 +157,12 @@ int main(int argc, char *argv[]) {
                         printf("%d\n", steps);
                     }
                     else{
-                 //       debug++;
                         if(searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND){
                             version++;
                             steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
                             printf("%d\n", steps);
-                            version++;
 
+                            version++;
                             cc->metricVal--;
                             if(cc->metricVal == 0){
                                 if(index_size_in > index_size_out) cc_size = index_size_in;
@@ -176,6 +175,9 @@ int main(int argc, char *argv[]) {
                         else{
                             printf("-1\n");
                         }
+
+
+                        version++;
                     }
                     /*version++;
                     steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
@@ -183,7 +185,6 @@ int main(int argc, char *argv[]) {
                     printf("%d\n", steps);*/
                 } else
                     printf("-1\n");
-
 
             }
 

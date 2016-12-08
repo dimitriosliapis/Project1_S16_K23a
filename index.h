@@ -18,7 +18,8 @@ typedef struct index_t{
     uint32_t rank;
     uint32_t min_rank;
     ht_Node *neighbors;
-    int all_children_in_scc;
+    uint32_t all_children_in_scc;
+    uint32_t num_of_children;
 }ind;
 
 ind *createNodeIndex(uint32_t);
