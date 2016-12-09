@@ -20,6 +20,7 @@ typedef struct index_t{
     ht_Node *neighbors;
     uint32_t all_children_in_scc;
     uint32_t num_of_children;
+    uint32_t onStack;
 }ind;
 
 ind *createNodeIndex(uint32_t);

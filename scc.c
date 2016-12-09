@@ -73,12 +73,141 @@ void deletestack(Stack_t *stack) {
     free(stack);
 }
 
-SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node *explored, ht_Node *explored2, ht_Node* explored3, uint32_t version) {
+/*SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node *explored, ht_Node *explored2, ht_Node* explored3, uint32_t version) {
 
 
     SCC *scc = tarjan(index_out, buffer_out, size_out, num_nodes, explored, explored2, explored3, version);
 
     return scc;
+}*/
+SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node *explored, ht_Node *explored2, ht_Node* explored3, uint32_t version) {
+    Stack scc_stack;
+
+
+    uint32_t size = 0, index = 0, realloc_node_size;
+    uint32_t i = 0, r = 0;
+
+    //unsigned int num_of_children[num_nodes];
+
+    //for(r = 0; r < num_nodes; r++) num_of_children[r] = 0;
+
+    SCC *scc = malloc(sizeof(SCC));
+
+    scc->components = malloc(COMPONENT_SIZE*sizeof(Component));
+    scc->component_size = COMPONENT_SIZE;
+    for(r = 0; r < scc->component_size; r++){
+        scc->components[r].included_node_ids = NULL;
+        scc->components[r].component_id = DEFAULT;
+        scc->components[r].included_nodes_count = 0;
+        scc->components[r].node_array_size = 0;
+    }
+    //for(k = 0 ; k < COMPONENT_SIZE ; k++) scc->components[k] = NULL;
+    scc->components_count = 0;
+
+    scc->id_belongs_to_component = malloc(num_nodes*sizeof(uint32_t));
+    for(i = 0; i < num_nodes; i++){
+        scc->id_belongs_to_component[i] = DEFAULT;
+    }
+
+    scc_stack.last = NULL;
+
+    index = 1;
+
+    for(i = 0; i < num_nodes; i++) {
+        if(lookup(index_out, i, size_out) == NOT_EXIST) continue;
+        if(search(explored, i, HT_BIG, version) == FOUND) continue;
+        scc = tarjanRecursive(&scc, index_out, buffer_out, size_out, num_nodes, explored, version, i, index, &scc_stack);
+    }
+    return scc;
+}
+
+
+SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node* explored, uint32_t version, uint32_t v, uint32_t index, Stack *scc_stack){
+
+    uint32_t k = 0, w = 0, a = 0, r = 0, realloc_node_size;
+    ptrdiff_t offset_out;
+    list_node *neighbors_out;
+    uint32_t scc_counter = (*scc)->components_count;
+
+    insert(explored, v, HT_BIG, version);
+
+    if(scc_counter == (*scc)->component_size){
+        (*scc)->component_size *= 2;
+        (*scc)->components = realloc((*scc)->components, (*scc)->component_size * sizeof(Component));
+        for(r = scc_counter; r < (*scc)->component_size; r++){
+            (*scc)->components[r].included_node_ids = NULL;
+            (*scc)->components[r].component_id = DEFAULT;
+            (*scc)->components[r].included_nodes_count = 0;
+            (*scc)->components[r].node_array_size = 0;
+        }
+    }
+
+    index_out[v].index = index;
+    index_out[v].lowlink = index;
+    index++;
+    push(scc_stack, v);
+    index_out[v].onStack = 1;
+
+    if(index_out[v].num_of_children != 0 && index_out[v].all_children_in_scc != index_out[v].num_of_children) {
+
+        offset_out = getListHead(index_out, v);
+        neighbors_out = buffer_out + offset_out;
+
+        while(k < N){
+
+            w = neighbors_out->neighbor[k];
+
+            if(w == DEFAULT) break;
+            if(search(explored, w, HT_BIG, version) == NOT_FOUND){
+                *scc = tarjanRecursive(scc, index_out, buffer_out, size_out, num_nodes, explored, version, w, index, scc_stack);
+                if (index_out[v].lowlink > index_out[w].lowlink)
+                    index_out[v].lowlink = index_out[w].lowlink;
+            }
+            else if(index_out[w].onStack){
+                if(index_out[v].lowlink > index_out[w].index)
+                    index_out[v].lowlink = index_out[w].index;
+            }
+
+            k++;
+            if(k >= N && neighbors_out->nextListNode != -1) {
+                neighbors_out = buffer_out + neighbors_out->nextListNode;
+                k = 0;
+            }
+        }
+    }
+    if(index_out[v].lowlink == index_out[v].index) {
+        (*scc)->components[scc_counter].component_id = scc_counter;
+        (*scc)->components[scc_counter].included_nodes_count = 0;
+        (*scc)->components[scc_counter].node_array_size = NODE_IDS_SIZE;
+        (*scc)->components[scc_counter].included_node_ids = malloc((*scc)->components[scc_counter].node_array_size * sizeof(uint32_t));
+        //for(r = 0 ; r < (*scc)->components[scc_counter].node_array_size ; r++) (*scc)->components[scc_counter].included_node_ids[r] = DEFAULT;
+        (*scc)->components[scc_counter].included_node_ids[0] = DEFAULT;
+        a = 0;
+        //printf("SCC: %d\n", scc_counter);
+        do {
+            w = pop(scc_stack);
+            index_out[w].onStack = 0;
+
+            (*scc)->components[scc_counter].included_node_ids[a] = w;
+
+            if (a == ((*scc)->components[scc_counter].node_array_size - 1)) {
+                realloc_node_size = 2 * (*scc)->components[scc_counter].node_array_size;
+                (*scc)->components[scc_counter].included_node_ids = realloc((*scc)->components[scc_counter].included_node_ids,realloc_node_size * sizeof(uint32_t));
+                (*scc)->components[scc_counter].node_array_size = realloc_node_size;
+            }
+            (*scc)->components[scc_counter].included_node_ids[a + 1] = DEFAULT;
+            (*scc)->components[scc_counter].included_nodes_count++;
+            (*scc)->id_belongs_to_component[w] = scc_counter;
+
+            a++;
+
+
+            //printf("%d\n", w);
+        } while (w != v);
+        (*scc)->components_count++;
+    }
+    return *scc;
+
 }
 
 SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node* explored, ht_Node* explored_twice, ht_Node* explored_scc, uint32_t version) {
@@ -94,7 +223,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
     list_node *neighbors_out;
     ptrdiff_t offset_out;
-    uint32_t size = size_out, index = 0, realloc_node_size;
+    uint32_t size = 0, index = 0, realloc_node_size;
     uint32_t i = 0, v = 0, k = 0, a = 0, w = 0, r = 0;
     uint32_t scc_counter = 0;
     //unsigned int num_of_children[num_nodes];
@@ -124,7 +253,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     parent_stack.last = NULL;
 
     index = 1;
-    scc_counter = 1;
+    scc_counter = 0;
+    size = num_nodes;
 
     for(i = 0 ; i < size ; i++) {
         if(lookup(index_out, i, size_out) == NOT_EXIST) continue;
@@ -138,7 +268,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
         index_out[i].index = index;
         index_out[i].lowlink = index;
-        //index_out[v].all_children_in_scc = 0;
+        index_out[v].all_children_in_scc = 0;
         index++;
         insert(explored, i, HT_BIG, version);
 
@@ -150,7 +280,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
             if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
                 index_out[v].index = index;
                 index_out[v].lowlink = index;
-                //index_out[v].all_children_in_scc = 0;
+                index_out[v].all_children_in_scc = 0;
                 index++;
             }
 
@@ -180,7 +310,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                     /////////////////////////////////////////////////////////////
                     if(search(explored_scc, w, HT_BIG, version) == FOUND){
 
-                        index_out[v].all_children_in_scc++;//de doulevei gia to tarjan.txt giati den metrame pote ta paidia toy 8 giati einai ola sto explored_scc
+                        index_out[v].all_children_in_scc++;
                         k++;
                         if(k >= N && neighbors_out->nextListNode != -1) {
                             neighbors_out = buffer_out + neighbors_out->nextListNode;
@@ -222,7 +352,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                         scc->components[scc_counter].included_nodes_count = 0;
                         scc->components[scc_counter].node_array_size = NODE_IDS_SIZE;
                         scc->components[scc_counter].included_node_ids = malloc(scc->components[scc_counter].node_array_size*sizeof(uint32_t));
-                        for(r = 0 ; r < scc->components[scc_counter].node_array_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
+                        //for(r = 0 ; r < scc->components[scc_counter].node_array_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
+                        scc->components[scc_counter].included_node_ids[0] = DEFAULT;
                         a = 0;
                         printf("SCC: %d\n",scc_counter);
                         do{
@@ -234,8 +365,12 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                             if(a == (scc->components[scc_counter].node_array_size-1)) {
                                 realloc_node_size = 2*scc->components[scc_counter].node_array_size;
                                 scc->components[scc_counter].included_node_ids = realloc(scc->components[scc_counter].included_node_ids, realloc_node_size*sizeof(uint32_t));
-                                for(r = scc->components[scc_counter].node_array_size ; r < realloc_node_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
+                               // for(r = scc->components[scc_counter].node_array_size ; r < realloc_node_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
+                                scc->components[scc_counter].included_node_ids[a] = DEFAULT;
                                 scc->components[scc_counter].node_array_size = realloc_node_size;
+                            }
+                            else{
+                                scc->components[scc_counter].included_node_ids[a+1] = DEFAULT;
                             }
                             scc->components[scc_counter].included_nodes_count++;
                             scc->id_belongs_to_component[w] = scc_counter;
@@ -261,34 +396,36 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 }
             }
             else{
+                if(peek(&scc_stack) == v) pop(&scc_stack);
+                if(peek(&parent_stack) == v) pop(&parent_stack);
                 if(search(explored_scc, v, HT_BIG, version) == NOT_FOUND) {
-                    insert(explored, v, HT_BIG, version);
+                    //insert(explored, v, HT_BIG, version);
                     insert(explored_scc, v, HT_BIG, version);
 
-                    if(peek(&scc_stack) == v) pop(&scc_stack);
-                    if(peek(&parent_stack) == v) pop(&parent_stack);
+
 
                     scc->components[scc_counter].component_id = scc_counter;
                     scc->components[scc_counter].included_nodes_count = 0;
-                    scc->components[scc_counter].node_array_size = NODE_IDS_SIZE;
+                    scc->components[scc_counter].node_array_size = 1;
                     scc->components[scc_counter].included_node_ids = malloc(scc->components[scc_counter].node_array_size*sizeof(uint32_t));
-                    for(r = 0 ; r < scc->components[scc_counter].node_array_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
+                    //for(r = 0 ; r < scc->components[scc_counter].node_array_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
+                    scc->components[scc_counter].included_node_ids[0] = DEFAULT;
                     a = 0;
 
                     scc->components[scc_counter].included_node_ids[a] = v;
 
-                    if(a == (scc->components[scc_counter].node_array_size-1)) {
+                   /* if(a == (scc->components[scc_counter].node_array_size-1)) {
                         realloc_node_size = 2*scc->components[scc_counter].node_array_size;
                         scc->components[scc_counter].included_node_ids = realloc(scc->components[scc_counter].included_node_ids, realloc_node_size*sizeof(uint32_t));
                         for(r = scc->components[scc_counter].node_array_size ; r < realloc_node_size ; r++) scc->components[scc_counter].included_node_ids[r] = DEFAULT;
                         scc->components[scc_counter].node_array_size = realloc_node_size;
-                    }
+                    }*/
                     scc->components[scc_counter].included_nodes_count++;
                     scc->id_belongs_to_component[v] = scc_counter;
 
-                    a++;
-                    printf("SOLO SCC: %d\n",scc_counter);
-                    printf("%d\n", v);
+                    //a++;
+                   // printf("SOLO SCC: %d\n",scc_counter);
+                   // printf("%d\n", v);
 
                     scc_counter++;
                     if(scc_counter == scc->component_size){
@@ -303,6 +440,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                     }
 
                 }
+                else  printf("EXPLORED\n");
+
             }
         }
 
