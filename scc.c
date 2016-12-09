@@ -9,6 +9,70 @@ uint32_t peek(Stack *stack) {
 
 }
 
+Stack_t *createStack() {
+
+    int i = 0;
+    Stack_t *stack = NULL;
+    stack = malloc(sizeof(Stack_t));
+
+    if(stack == NULL) return NULL;
+    else {
+        stack->size = STACK_ARRAY_SIZE;
+        stack->stack_array = malloc(STACK_ARRAY_SIZE*sizeof(uint32_t));
+        for(i = 0 ; i < STACK_ARRAY_SIZE ; i++) stack->stack_array[i] = DEFAULT;
+        stack->first = 0;
+        stack->last = -1;
+        stack->count = 0;
+        return stack;
+    }
+}
+
+int stackisempty(Stack_t *stack) {
+
+    if(stack->count == 0) return 1;
+    else return 0;
+
+}
+
+void pushinstack(Stack_t *stack, uint32_t id) {
+
+    if(stack->count == stack->size) {
+        stack->stack_array = realloc(stack->stack_array, 2*stack->size*sizeof(uint32_t));
+        stack->size = 2*stack->size;
+        int i = 0;
+        for(i = stack->size/2 ; i < stack->size ; i++) stack->stack_array[i] = DEFAULT;
+    }
+    stack->last = (stack->last + 1) % stack->size;
+    stack->stack_array[stack->last] = id;
+    stack->count++;
+}
+
+uint32_t popfromstack(Stack_t *stack) {
+
+    uint32_t id = DEFAULT;
+    if(stack->count == 0) return DEFAULT;
+
+    id = stack->stack_array[stack->last];
+    stack->stack_array[stack->last] = DEFAULT;
+    stack->last = (stack->last - 1) % stack->size;
+    stack->count--;
+    return id;
+}
+
+uint32_t peekfromstack(Stack_t *stack) {
+
+    if(stack->stack_array[stack->last] == DEFAULT) return DEFAULT;
+
+    uint32_t id = DEFAULT;
+    id = stack->stack_array[stack->last];
+    return id;
+}
+
+void deletestack(Stack_t *stack) {
+    free(stack->stack_array);
+    free(stack);
+}
+
 SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node *explored, ht_Node *explored2, ht_Node* explored3, uint32_t version) {
 
 
@@ -19,11 +83,14 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
 
 SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node* explored, ht_Node* explored_twice, ht_Node* explored_scc, uint32_t version) {
 
-    Stack scc_stack;
+    Stack_t* scc_stack = createStack();
+    Stack_t* parent_stack = createStack();
+    Stack_t* next_child = createStack();
     //Stack dfs_stack;
 
-    Stack parent_stack;
-    Stack next_child;
+    //Stack scc_stack;
+    //Stack parent_stack;
+    //Stack next_child;
 
     list_node *neighbors_out;
     ptrdiff_t offset_out;
@@ -52,9 +119,9 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
         scc->id_belongs_to_component[i] = DEFAULT;
     }
 
-    scc_stack.last = NULL;
-    next_child.last = NULL;
-    parent_stack.last = NULL;
+    //scc_stack.last = NULL;
+    //next_child.last = NULL;
+    //parent_stack.last = NULL;
 
     index = 1;
     scc_counter = 1;
@@ -65,13 +132,13 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 //        printf("%d\n",i);
 
 
-        push(&parent_stack, i);
-        push(&scc_stack, i);
+        pushinstack(parent_stack, i);
+        pushinstack(scc_stack, i);
 
-        while(!stackIsEmpty(&scc_stack)){
+        while(!stackisempty(scc_stack)){
 
-            v = pop(&next_child);
-            if(v == DEFAULT) v = peek(&parent_stack);
+            v = popfromstack(next_child);
+            if(v == DEFAULT) v = peekfromstack(parent_stack);
 
             if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
                 index_out[v].index = index;
@@ -83,7 +150,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
             if(index_out[v].num_of_children != 0 && index_out[v].all_children_in_scc != index_out[v].num_of_children){
 
                 if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
-                    push(&parent_stack, v);
+                    pushinstack(parent_stack, v);
                     insert(explored, v, HT_BIG, version);
                 }
 
@@ -115,8 +182,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                     /////////////////////////////////////////////////////////////
 
                     if(search(explored, w, HT_BIG, version) == NOT_FOUND){
-                        push(&next_child, w);
-                        push(&scc_stack, w);
+                        pushinstack(next_child, w);
+                        pushinstack(scc_stack, w);
                         break;
                     }
                     else{
@@ -138,7 +205,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                     }
                 }
                 if(w == DEFAULT){
-                    pop(&parent_stack);
+                    popfromstack(parent_stack);
                     if(index_out[v].lowlink == index_out[v].index){
                         scc->components[scc_counter].component_id = scc_counter;
                         scc->components[scc_counter].included_nodes_count = 0;
@@ -148,7 +215,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                         a = 0;
                         printf("SCC: %d\n",scc_counter);
                         do{
-                            w = pop(&scc_stack);
+                            w = popfromstack(scc_stack);
                             insert(explored_scc, w, HT_BIG, version);
 
                             scc->components[scc_counter].included_node_ids[a] = w;
@@ -187,7 +254,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                     insert(explored, v, HT_BIG, version);
                     insert(explored_scc, v, HT_BIG, version);
 
-                    if(peek(&scc_stack) == v) pop(&scc_stack);
+                    if(peekfromstack(scc_stack) == v) popfromstack(scc_stack);
 
                     scc->components[scc_counter].component_id = scc_counter;
                     scc->components[scc_counter].included_nodes_count = 0;
@@ -428,9 +495,9 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
     scc->components_count = scc_counter;
 
-    deleteStack(&scc_stack);
-    deleteStack(&next_child);
-    deleteStack(&parent_stack);
+    deletestack(scc_stack);
+    deletestack(next_child);
+    deletestack(parent_stack);
 
     return scc;
 }

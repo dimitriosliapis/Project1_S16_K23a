@@ -2,7 +2,15 @@
 
 #define COMPONENT_SIZE 1024
 #define NODE_IDS_SIZE 128
+#define STACK_ARRAY_SIZE 64
 
+typedef struct stack {
+    uint32_t *stack_array;
+    int size;
+    int first;
+    int last;
+    int count;
+} Stack_t;
 
 typedef struct Component_t{
     uint32_t component_id; //current component id
