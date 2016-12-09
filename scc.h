@@ -1,8 +1,8 @@
 #include "cc.h"
 
-#define COMPONENT_SIZE 1024
+#define COMPONENT_SIZE 262144
 #define NODE_IDS_SIZE 128
-#define STACK_ARRAY_SIZE 64
+#define STACK_ARRAY_SIZE 2048
 
 typedef struct stack {
     uint32_t *stack_array;

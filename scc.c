@@ -83,14 +83,14 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
 
 SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node* explored, ht_Node* explored_twice, ht_Node* explored_scc, uint32_t version) {
 
-    Stack_t* scc_stack = createStack();
+/*    Stack_t* scc_stack = createStack();
     Stack_t* parent_stack = createStack();
-    Stack_t* next_child = createStack();
+    Stack_t* next_child = createStack();*/
     //Stack dfs_stack;
 
-    //Stack scc_stack;
-    //Stack parent_stack;
-    //Stack next_child;
+    Stack scc_stack;
+    Stack parent_stack;
+    Stack next_child;
 
     list_node *neighbors_out;
     ptrdiff_t offset_out;
@@ -119,9 +119,9 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
         scc->id_belongs_to_component[i] = DEFAULT;
     }
 
-    //scc_stack.last = NULL;
-    //next_child.last = NULL;
-    //parent_stack.last = NULL;
+    scc_stack.last = NULL;
+    next_child.last = NULL;
+    parent_stack.last = NULL;
 
     index = 1;
     scc_counter = 1;
@@ -129,16 +129,23 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     for(i = 0 ; i < size ; i++) {
         if(lookup(index_out, i, size_out) == NOT_EXIST) continue;
         if(search(explored_scc, i, HT_BIG, version) == FOUND) continue;
+        //if(search(explored, i, HT_BIG, version) == FOUND) continue;
 //        printf("%d\n",i);
 
 
-        pushinstack(parent_stack, i);
-        pushinstack(scc_stack, i);
+        push(&parent_stack, i);
+        push(&scc_stack, i);
 
-        while(!stackisempty(scc_stack)){
+        index_out[i].index = index;
+        index_out[i].lowlink = index;
+        //index_out[v].all_children_in_scc = 0;
+        index++;
+        insert(explored, i, HT_BIG, version);
 
-            v = popfromstack(next_child);
-            if(v == DEFAULT) v = peekfromstack(parent_stack);
+        while(!stackIsEmpty(&scc_stack)){
+
+            v = pop(&next_child);
+            if(v == DEFAULT) v = peek(&parent_stack);
 
             if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
                 index_out[v].index = index;
@@ -150,7 +157,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
             if(index_out[v].num_of_children != 0 && index_out[v].all_children_in_scc != index_out[v].num_of_children){
 
                 if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
-                    pushinstack(parent_stack, v);
+                    push(&parent_stack, v);
                     insert(explored, v, HT_BIG, version);
                 }
 
@@ -165,7 +172,10 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                         break;
                     }
                     w = neighbors_out->neighbor[k];
-                    if(w == DEFAULT) break;
+                    if(w == DEFAULT) {
+                        insert(explored_twice, v, HT_BIG, version);
+                        break;
+                    }
 
                     /////////////////////////////////////////////////////////////
                     if(search(explored_scc, w, HT_BIG, version) == FOUND){
@@ -182,18 +192,18 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                     /////////////////////////////////////////////////////////////
 
                     if(search(explored, w, HT_BIG, version) == NOT_FOUND){
-                        pushinstack(next_child, w);
-                        pushinstack(scc_stack, w);
+                        push(&next_child, w);
+                        push(&scc_stack, w);
                         break;
                     }
                     else{
-                        if(search(explored_twice, w, HT_BIG, version) == NOT_FOUND) {
-                            if(index_out[v].lowlink > index_out[w].index) index_out[v].lowlink = index_out[w].index;
-                            insert(explored_twice, w, HT_BIG, version);
-                        }
-                        else{
+                       // if(search(explored_twice, w, HT_BIG, version) == NOT_FOUND) {
                             if (index_out[v].lowlink > index_out[w].lowlink)
                                 index_out[v].lowlink = index_out[w].lowlink;
+                        //}
+                        if(search(explored_twice, w, HT_BIG, version) == FOUND){
+                            if(index_out[v].lowlink > index_out[w].index) index_out[v].lowlink = index_out[w].index;
+                           // push(&next_child, w);
                             //insert(explored_twice, w, HT_BIG, version);
                         }
                     }
@@ -206,7 +216,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                     }
                 }
                 if(w == DEFAULT){
-                    popfromstack(parent_stack);
+                    pop(&parent_stack);
                     if(index_out[v].lowlink == index_out[v].index){
                         scc->components[scc_counter].component_id = scc_counter;
                         scc->components[scc_counter].included_nodes_count = 0;
@@ -216,7 +226,7 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                         a = 0;
                         printf("SCC: %d\n",scc_counter);
                         do{
-                            w = popfromstack(scc_stack);
+                            w = pop(&scc_stack);
                             insert(explored_scc, w, HT_BIG, version);
 
                             scc->components[scc_counter].included_node_ids[a] = w;
@@ -251,11 +261,12 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                 }
             }
             else{
-                if(search(explored, v, HT_BIG, version) == NOT_FOUND) {
+                if(search(explored_scc, v, HT_BIG, version) == NOT_FOUND) {
                     insert(explored, v, HT_BIG, version);
                     insert(explored_scc, v, HT_BIG, version);
 
-                    if(peekfromstack(scc_stack) == v) popfromstack(scc_stack);
+                    if(peek(&scc_stack) == v) pop(&scc_stack);
+                    if(peek(&parent_stack) == v) pop(&parent_stack);
 
                     scc->components[scc_counter].component_id = scc_counter;
                     scc->components[scc_counter].included_nodes_count = 0;
@@ -496,9 +507,9 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
 
     scc->components_count = scc_counter;
 
-    deletestack(scc_stack);
-    deletestack(next_child);
-    deletestack(parent_stack);
+    deleteStack(&scc_stack);
+    deleteStack(&next_child);
+    deleteStack(&parent_stack);
 
     return scc;
 }
