@@ -187,13 +187,14 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
                         break;
                     }
                     else{
-                        if(search(explored_twice, w, HT_BIG, version) == FOUND) {
+                        if(search(explored_twice, w, HT_BIG, version) == NOT_FOUND) {
                             if(index_out[v].lowlink > index_out[w].index) index_out[v].lowlink = index_out[w].index;
+                            insert(explored_twice, w, HT_BIG, version);
                         }
                         else{
                             if (index_out[v].lowlink > index_out[w].lowlink)
                                 index_out[v].lowlink = index_out[w].lowlink;
-                            insert(explored_twice, w, HT_BIG, version);
+                            //insert(explored_twice, w, HT_BIG, version);
                         }
                     }
 
