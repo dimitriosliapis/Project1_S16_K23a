@@ -23,6 +23,8 @@ int enq(Queue *, uint32_t, int);
 
 uint32_t deq(Queue *, int *);
 
+uint32_t qpeek(Queue *);
+
 int nsteps(Queue *queue, uint32_t id);
 
 void restartQueue(Queue *);

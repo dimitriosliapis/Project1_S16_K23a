@@ -58,7 +58,14 @@ uint32_t deq(Queue *queue, int *steps) {
     queue->first = (queue->first + 1) % queue->size;
     queue->count--;
     return id;
+}
 
+uint32_t qpeek(Queue *queue) {
+
+    if (queue->count == 0)
+        return DEFAULT;
+
+    return queue->entries[queue->first].id;
 }
 
 int nsteps(Queue *queue, uint32_t id) {
@@ -93,28 +100,47 @@ void empty(Queue *queue) {
 }
 
 
-int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t start, uint32_t end, Queue *frontierF, Queue *frontierB, ht_Node *exploredF, ht_Node *exploredB, uint32_t version) {
+int bBFS(ind *index_in,
+         ind *index_out,
+         list_node *buffer_in,
+         list_node *buffer_out,
+         uint32_t start,
+         uint32_t end,
+         Queue *frontierF,
+         Queue *frontierB,
+         ht_Node *exploredF,
+         ht_Node *exploredB,
+         uint32_t version) {
 
     list_node *neighbors = NULL;
-    uint32_t node = DEFAULT, successor = DEFAULT, optimal = DEFAULT;
+    uint32_t node = DEFAULT, successor = DEFAULT, childrenF = 0, childrenB = 0;
     int i = 0, steps = 0, curr_steps = 0, min_steps = -1, path = 0;
     ptrdiff_t offset = 0;
+//    int fprint = 0;
 
     if (start == end)   // an o komvos ekkinhshs einai o komvos stoxos tote steps=0
         return 0;
 
-    insert(exploredF, start, HT_BIG, version);
-    enq(frontierF, start, steps);
+//    if (start == 1180829 && end == 1268954)
+//        fprint = 1;
 
-    insert(exploredB, end, HT_BIG, version);
+    bfs_insert(exploredF, start, HT_BIG, steps, version);
+    enq(frontierF, start, steps);
+    childrenF = index_out[start].num_of_children;
+
+    bfs_insert(exploredB, end, HT_BIG, steps, version);
     enq(frontierB, end, steps);
+    childrenB = index_in[end].num_of_children;
 
     while (!isEmpty(frontierF) && !isEmpty(frontierB)) {    // oso ta 2 synora den einai adeia
 
-        if (!isEmpty(frontierF)) {
+        if (!isEmpty(frontierF) && childrenF <= childrenB) {
 
             node = deq(frontierF, &steps);  // dequeue
             steps++;
+
+//            if (fprint == 1)
+//                printf("Forward BFS expanded %d\n", node);
 
             offset = getListHead(index_out, node);
             if (offset != -1) {     // mporei na mhn exei geitones
@@ -125,27 +151,30 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     successor = neighbors->neighbor[i];
                     if (successor != DEFAULT) {
 
+                        // an den ton exei epispeftei o idios
                         if (search(exploredF, successor, HT_BIG, version) == NOT_FOUND) {
-                            insert(exploredF, successor, HT_BIG, version);
+                            bfs_insert(exploredF, successor, HT_BIG, steps, version);   // ton episkeptetai
 
+                            // goal afou ton exei episkeptei o allos
                             if (search(exploredB, successor, HT_BIG, version) == FOUND) {
 
-                                curr_steps = nsteps(frontierB, successor);
+                                curr_steps = num_steps(exploredB, successor, HT_BIG, version);
                                 if (min_steps == -1) {
                                     min_steps = curr_steps;
-                                    optimal = successor;
-                                } else if (curr_steps < min_steps) {
+                                }else if (curr_steps < min_steps) {
                                     min_steps = curr_steps;
-                                    optimal = successor;
                                 }
 
-                            } else      // alliws eisagwgh sto synoro
+                            } else    // alliws eisagetai sto synoro
                                 enq(frontierF, successor, steps);
+
                         }
+
                     } else
                         break;
 
                     i++;
+
                     if (i == N &&
                         neighbors->nextListNode != -1) {  // an exei ki allous geitones se epomeno listnode synexizei
                         neighbors = buffer_out + neighbors->nextListNode;
@@ -164,12 +193,19 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
             }
         }
 
+        if (!isEmpty(frontierF))
+            childrenF = index_out[qpeek(frontierF)].num_of_children;
+        else
+            childrenF = DEFAULT;
         min_steps = -1;
 
-        if (!isEmpty(frontierB)) {
+        if (!isEmpty(frontierB) && childrenB < childrenF) {
 
             node = deq(frontierB, &steps);  // dequeue
             steps++;
+
+//            if (fprint == 1)
+//                printf("Backward BFS expanded %d\n", node);
 
             offset = getListHead(index_in, node);
             if (offset != -1) { // mporei na mhn exei geitones
@@ -180,27 +216,30 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
                     successor = neighbors->neighbor[i];
                     if (successor != DEFAULT) {
 
+                        // an den ton exei episkeptei o idios
                         if (search(exploredB, successor, HT_BIG, version) == NOT_FOUND) {
-                            insert(exploredB, successor, HT_BIG, version);
+                            bfs_insert(exploredB, successor, HT_BIG, steps, version);   // ton episkeptetai
 
+                            // goal afou ton exei episkeptei o allos
                             if (search(exploredF, successor, HT_BIG, version) == FOUND) {
 
-                                curr_steps = nsteps(frontierF, successor);
+                                curr_steps = num_steps(exploredF, successor, HT_BIG, version);
                                 if (min_steps == -1) {
                                     min_steps = curr_steps;
-                                    optimal = successor;
                                 } else if (curr_steps < min_steps) {
                                     min_steps = curr_steps;
-                                    optimal = successor;
                                 }
 
-                            } else      // alliws eisagwgh sto synoro
+                            } else    // alliws eisagetai sto synoro
                                 enq(frontierB, successor, steps);
+
                         }
+
                     } else
                         break;
 
                     i++;
+
                     if (i == N &&
                         neighbors->nextListNode != -1) {  // an exei ki allous geitones se epomeno listnode synexizei
                         neighbors = buffer_in + neighbors->nextListNode;
@@ -219,10 +258,15 @@ int bBFS(ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_
             }
         }
 
+        if (!isEmpty(frontierB))
+            childrenB = index_in[qpeek(frontierB)].num_of_children;
+        else
+            childrenB = DEFAULT;
         min_steps = -1;
     }
 
     restartQueue(frontierF);
     restartQueue(frontierB);
+
     return -1;  // an den vrethei monopati epistrefei -1
 }
