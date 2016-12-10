@@ -176,6 +176,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
         }
     }
     if(index_out[v].lowlink == index_out[v].index) {
+        scc_counter = (*scc)->components_count;
         (*scc)->components[scc_counter].component_id = scc_counter;
         (*scc)->components[scc_counter].included_nodes_count = 0;
         (*scc)->components[scc_counter].node_array_size = NODE_IDS_SIZE;
@@ -183,7 +184,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
         //for(r = 0 ; r < (*scc)->components[scc_counter].node_array_size ; r++) (*scc)->components[scc_counter].included_node_ids[r] = DEFAULT;
         (*scc)->components[scc_counter].included_node_ids[0] = DEFAULT;
         a = 0;
-        //printf("SCC: %d\n", scc_counter);
+        printf("SCC: %d\n", scc_counter);
         do {
             w = pop(scc_stack);
             index_out[w].onStack = 0;
@@ -202,7 +203,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
             a++;
 
 
-            //printf("%d\n", w);
+            printf("%d\n", w);
         } while (w != v);
         (*scc)->components_count++;
     }
