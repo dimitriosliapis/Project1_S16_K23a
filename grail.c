@@ -2,7 +2,7 @@
 
 GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in, list_node *buffer_in, SCC* scc, ht_Node *explored, uint32_t version){
 
-    uint32_t i = 0, j = 0, k = 0, v = 0;
+    uint32_t i = 0, j = 0, k = 0, v = 0, w = 0;
     ptrdiff_t available_in = 0;
     ptrdiff_t available_out = 0;
     ptrdiff_t offset_in;
@@ -105,31 +105,68 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
         push(&stack, i);
         while(!stackIsEmpty(&dfs_stack)) {
 
-            v = pop(&dfs_stack);
-            insert(explored, v, HT_BIG, version);
-            //offset_in = getListHead(grail->hyper_index_in, v);
-            offset_out = getListHead(grail->hyper_index_out, v);
-            //neighbors_in = grail->hyper_buffer_in + offset_in;
-            neighbors_out = grail->hyper_buffer_out + offset_out;
+            v = peek(&dfs_stack);
 
-            if (offset_out >= 0 && neighbors_out->neighbor[0] != DEFAULT) {
+            if (search(explored, v, HT_BIG, version) == NOT_FOUND) {
+                insert(explored, v, HT_BIG, version);
+            }
+            else{
+                grail->hyper_index_out[v].min_rank = rank;
+                grail->hyper_index_out[v].rank = rank;
+                rank++;
+                if (grail->hyper_index_out[v].num_of_children == 0) pop(&dfs_stack);
+
+
+            }
+
+
+
+
+
+            if (grail->hyper_index_out[v].num_of_children != 0) {
+
+                //offset_in = getListHead(grail->hyper_index_in, v);
+                offset_out = getListHead(grail->hyper_index_out, v);
+                //neighbors_in = grail->hyper_buffer_in + offset_in;
+                neighbors_out = grail->hyper_buffer_out + offset_out;
+
                 k = 0;
                 while (k < N) {
-                    if (neighbors_out->neighbor[k] == DEFAULT) break;
-                    if (search(explored, neighbors_out->neighbor[k], HT_BIG, version) == NOT_FOUND) {
-                        push(&stack, neighbors_out->neighbor[k]);
-                        push(&dfs_stack, neighbors_out->neighbor[k]);
+
+                    w = neighbors_out->neighbor[k];
+
+                    if (w == DEFAULT) {
+                        pop(&dfs_stack);
+                        break;
+                    }
+                    if (search(explored, w, HT_BIG, version) == NOT_FOUND) {
+                      //  push(&stack, w);
+                        push(&dfs_stack, w);
+                        break;
+                    }
+                    else{
+                        grail->hyper_index_out[v].rank = rank;
+                        if(grail->hyper_index_out[v].min_rank > grail->hyper_index_out[w].min_rank)
+                            grail->hyper_index_out[v].min_rank = grail->hyper_index_out[w].min_rank;
                     }
                     k++;
                     if (k == N && neighbors_out->nextListNode != -1) {
                         neighbors_out = grail->hyper_buffer_out + neighbors_out->nextListNode;
                         k = 0;
                     }
-                }
+                    else pop(&dfs_stack);
 
+                }
+                rank++;
             }
+
+            /*else{
+                grail->hyper_index_out[v].min_rank = rank;
+                grail->hyper_index_out[v].rank = rank;
+                rank++;
+            }*/
         }
-        while (!stackIsEmpty(&stack)) {
+        /*while (!stackIsEmpty(&stack)) {
 
             v = pop(&stack);
 
@@ -164,7 +201,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, ind *index_in
                 insert(explored, v, HT_BIG, version);
             }
 
-        }
+        }*/
     }
 
     deleteStack(&stack);
@@ -180,6 +217,7 @@ int isReachableGrailIndex(GrailIndex* index, uint32_t source_node, uint32_t targ
     scc_target = scc->id_belongs_to_component[target_node];
 
     if(scc_source == DEFAULT || scc_target == DEFAULT) return NO;
+    if(scc_source == scc_target) return MAYBE;
     if((index->hyper_index_out[scc_source].min_rank <= index->hyper_index_out[scc_target].min_rank) && (index->hyper_index_out[scc_source].rank > index->hyper_index_out[scc_target].rank)) return MAYBE;
     return NO;
 }
