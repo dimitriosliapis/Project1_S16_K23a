@@ -12,7 +12,7 @@
 typedef struct index_t{
     ptrdiff_t first;
     ptrdiff_t last;
-    uint32_t max;
+    uint32_t visited;
     uint32_t lowlink;
     uint32_t index;
     uint32_t rank;

@@ -19,9 +19,9 @@ Queue *createQueue();
 
 int isEmpty(Queue *);
 
-int enq(Queue *, uint32_t, int);
+int enq(Queue *, uint32_t);
 
-uint32_t deq(Queue *, int *);
+uint32_t deq(Queue *);
 
 uint32_t qpeek(Queue *);
 
@@ -31,4 +31,4 @@ void restartQueue(Queue *);
 
 void empty(Queue *);
 
-int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, Queue *, Queue *, ht_Node *, ht_Node *, uint32_t);
+int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, Queue *, Queue *, uint32_t);
