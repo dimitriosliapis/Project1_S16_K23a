@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
         else scc_size = index_size_out;
 
         version++;
-        scc = estimateStronglyConnectedComponents(index_out, buffer_out, buffer_size_out, scc_size, exploredA, exploredB, exploredF, version);
+        scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, exploredA, version);
 
         version++;
         grail = buildGrailIndex(index_out, buffer_out,index_in, buffer_in, scc, exploredA, exploredB, version);
@@ -178,10 +178,6 @@ int main(int argc, char *argv[]) {
 
                         version++;
                     }
-                    /*version++;
-                    steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
-
-                    printf("%d\n", steps);*/
                 } else
                     printf("-1\n");
 
@@ -203,7 +199,6 @@ int main(int argc, char *argv[]) {
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
 
-   // printf("DEBUG-> %d\n", debug);
 
     empty(frontierF);
     empty(frontierB);
@@ -217,12 +212,6 @@ int main(int argc, char *argv[]) {
     if(cc != NULL) destroyCCIndex(cc);
     if(scc != NULL) destroyStronglyConnectedComponents(scc);
     if(grail != NULL) destroyGrailIndex(grail);
-/*    free(cc_index);
-    for(a = 0; a < update_index_size; a++ ){
-        free(update_index[a].cc_array);
-    }
-    free(update_index);
-    */
 
     return 0;
 }
