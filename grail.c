@@ -59,7 +59,8 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, ht_
 
     for(i = 0; i < scc->components_count; i++){
 
-        if (search(explored, i, HT_BIG, version) == FOUND) continue;
+        //if (search(explored, i, HT_BIG, version) == FOUND) continue;
+        if(grail->hyper_index_out[i].visited == version) continue;
 
         push(&dfs_stack, i);
         while(!stackIsEmpty(&dfs_stack)) {
@@ -75,7 +76,8 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, ht_
                 grail->hyper_index_out[v].min_rank = rank;
                 grail->hyper_index_out[v].rank = rank;
                 pop(&dfs_stack);
-                insert(explored, v, HT_BIG, version);
+                //insert(explored, v, HT_BIG, version);
+                grail->hyper_index_out[v].visited = version;
             }
 
             if (grail->hyper_index_out[v].num_of_children != 0) {
@@ -89,7 +91,8 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, ht_
                     w = neighbors_out->neighbor[k];
 
                     if (w == DEFAULT) break;
-                    if (search(explored, w, HT_BIG, version) == NOT_FOUND) {
+                    //if (search(explored, w, HT_BIG, version) == NOT_FOUND) {
+                    if(grail->hyper_index_out[w].visited != version) {
                         push(&dfs_stack, w);
                         break;
                     }
@@ -112,7 +115,8 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, ht_
                 if (grail->hyper_index_out[v].num_of_children != 0 && grail->hyper_index_out[v].all_children_in_scc == grail->hyper_index_out[v].num_of_children) {
                     rank++;
                     grail->hyper_index_out[v].rank = rank;
-                    insert(explored, v, HT_BIG, version);
+                    //insert(explored, v, HT_BIG, version);
+                    grail->hyper_index_out[v].visited = version;
                     pop(&dfs_stack);
                 }
             }
