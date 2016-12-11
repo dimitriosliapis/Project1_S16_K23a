@@ -81,9 +81,8 @@ void deletestack(Stack_t *stack) {
     return scc;
 }*/
 SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node *explored, ht_Node *explored2, ht_Node* explored3, uint32_t version) {
+
     Stack scc_stack;
-
-
     uint32_t size = 0, index = 0, realloc_node_size;
     uint32_t i = 0, r = 0;
 
@@ -116,13 +115,13 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
     for(i = 0; i < num_nodes; i++) {
         if(lookup(index_out, i, size_out) == NOT_EXIST) continue;
         if(search(explored, i, HT_BIG, version) == FOUND) continue;
-        scc = tarjanRecursive(&scc, index_out, buffer_out, size_out, num_nodes, explored, version, i, index, &scc_stack);
+        scc = tarjanRecursive(&scc, index_out, buffer_out, size_out, num_nodes, explored, version, i, &index, &scc_stack);
     }
     return scc;
 }
 
 
-SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node* explored, uint32_t version, uint32_t v, uint32_t index, Stack *scc_stack){
+SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node* explored, uint32_t version, uint32_t v, uint32_t *index, Stack *scc_stack){
 
     uint32_t k = 0, w = 0, a = 0, r = 0, realloc_node_size;
     ptrdiff_t offset_out;
@@ -130,6 +129,10 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
     uint32_t scc_counter = (*scc)->components_count;
 
     insert(explored, v, HT_BIG, version);
+
+/*    if(scc_counter == 67964){
+        printf("asads\n");
+    }*/
 
     if(scc_counter == (*scc)->component_size){
         (*scc)->component_size *= 2;
@@ -142,13 +145,14 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
         }
     }
 
-    index_out[v].index = index;
-    index_out[v].lowlink = index;
-    index++;
+
+    index_out[v].index = *index;
+    index_out[v].lowlink = *index;
+    (*index)++;
     push(scc_stack, v);
     index_out[v].onStack = 1;
 
-    if(index_out[v].num_of_children != 0 && index_out[v].all_children_in_scc != index_out[v].num_of_children) {
+    if(index_out[v].num_of_children != 0 /*&& index_out[v].all_children_in_scc != index_out[v].num_of_children*/) {
 
         offset_out = getListHead(index_out, v);
         neighbors_out = buffer_out + offset_out;
@@ -184,7 +188,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
         //for(r = 0 ; r < (*scc)->components[scc_counter].node_array_size ; r++) (*scc)->components[scc_counter].included_node_ids[r] = DEFAULT;
         (*scc)->components[scc_counter].included_node_ids[0] = DEFAULT;
         a = 0;
-        //printf("SCC: %d\n", scc_counter);
+      //  printf("SCC: %d\n", scc_counter);
         do {
             w = pop(scc_stack);
             index_out[w].onStack = 0;

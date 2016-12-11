@@ -28,7 +28,7 @@ typedef struct SCC_t{
 
 uint32_t peek(Stack *);
 SCC* tarjan(ind*, list_node*, uint32_t, uint32_t, ht_Node*, ht_Node*, ht_Node*, uint32_t);
-SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node* explored, uint32_t version, uint32_t v, uint32_t index, Stack *scc_stack);
+SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node* explored, uint32_t version, uint32_t v, uint32_t *index, Stack *scc_stack);
 
 
 SCC* estimateStronglyConnectedComponents(ind *, list_node *, uint32_t, uint32_t, ht_Node*, ht_Node*, ht_Node*, uint32_t);
