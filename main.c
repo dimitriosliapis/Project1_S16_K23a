@@ -114,6 +114,8 @@ int main(int argc, char *argv[]) {
         fclose(Queries);
     }
     else{
+        //to megethos tou cc tha einai osoi einai oi komvoi sinolika diladi
+        //to max twn komvwn tou index_in kai index_out
         if(index_size_in > index_size_out) cc_size = index_size_in;
         else cc_size = index_size_out;
 
@@ -166,7 +168,7 @@ int main(int argc, char *argv[]) {
                             if(cc->metricVal == 0){
                                 if(index_size_in > index_size_out) cc_size = index_size_in;
                                 else cc_size = index_size_out;
-                                cc->cc_max = updateCCIndex(cc,exploredA,exploredB, version, cc_size);
+                                cc->cc_max = updateCCIndex(cc,exploredA, version, cc_size);
                                 version++;
                                 cc->metricVal = METRIC;
                             }

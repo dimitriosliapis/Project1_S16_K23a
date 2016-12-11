@@ -14,11 +14,11 @@ typedef struct stack_t{
 }Stack;
 
 typedef struct u_unode_t{
-    uint32_t *cc_array;
-    uint32_t size;
-    uint32_t *new_nodes;
-    uint32_t n_size;
-    char state;
+    uint32_t *cc_array;// pinakas me CC pou sindeetai
+    uint32_t size;//megethos cc_array
+    uint32_t *new_nodes;//pinakas me kanourious komvous pou tha prostethoun se auto to CC kai den uphrxan prin se kanena
+    uint32_t n_size;//megethos new_nodes
+    char state;//o -> old, e -> empty, n -> new
 }u_node;
 
 
@@ -28,11 +28,11 @@ int stackIsEmpty(Stack*);
 void deleteStack(Stack*);
 
 typedef struct CC_t{
-    uint32_t *cc_index; //CCInde
-    uint32_t cc_size;
+    uint32_t *cc_index;
+    uint32_t cc_size; //megethos cc_index
     uint32_t cc_max;
     u_node * updateIndex;
-    uint32_t u_size;
+    uint32_t u_size;//megethos updateIndex
     uint32_t metricVal;
 }CC;
 
@@ -40,5 +40,5 @@ CC* createCCIndex(uint32_t, ind*, ind*, list_node*, list_node*, uint32_t, uint32
 void initUpdateIndex(CC *);
 void refreshUpdateIndex(CC *, uint32_t, uint32_t);
 int searchUpdateIndex(CC, uint32_t, uint32_t, ht_Node*, uint32_t);
-uint32_t updateCCIndex(CC *, ht_Node*, ht_Node*, uint32_t, uint32_t);
+uint32_t updateCCIndex(CC *, ht_Node*, uint32_t, uint32_t);
 void destroyCCIndex(CC*);
