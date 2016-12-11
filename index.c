@@ -17,8 +17,6 @@ ind *createNodeIndex(uint32_t index_size) {
         index[i].all_children_in_scc = 0;
         index[i].rank = DEFAULT;
         index[i].min_rank = DEFAULT;
-        index[i].neighbors = NULL;
-        index[i].all_children_in_scc = 0;
         index[i].num_of_children = 0;
     }
 
@@ -73,8 +71,6 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
         (*index)[i].all_children_in_scc = 0;
         (*index)[i].rank = DEFAULT;
         (*index)[i].min_rank = DEFAULT;
-        (*index)[i].neighbors = NULL;
-        (*index)[i].all_children_in_scc = 0;
         (*index)[i].num_of_children = 0;
 
     }

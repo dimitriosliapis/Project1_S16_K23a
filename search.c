@@ -100,28 +100,26 @@ int bBFS(ind *index_in,
 
     while (!isEmpty(frontierF) && !isEmpty(frontierB)) {    // oso ta 2 synora den einai adeia
 
-        if (childrenF <= childrenB) {
+        if (childrenF <= childrenB) {   // epilogh bfs analoga me ton arithmo ton komvwn pros epektash
 
             stepsF++;
-            while (counterF != 0) {
+            while (counterF != 0) {     // epanalhpsh gia olous tous komvous tou epipedou
 
-                node = deq(frontierF);  // dequeue
+                node = deq(frontierF);  // exagwgh tou prwtou komvou apo to synoro
 
                 offset = getListHead(index_out, node);
-                if (offset != -1) {     // mporei na mhn exei geitones
+                if (offset != -1) {     // elegxos gia ton an exei geitones
 
                     neighbors = buffer_out + offset;
-                    while (i < N) { // gia kathe geitona
+                    while (i < N) {     // gia kathe geitona
 
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (index_out[successor].visited != version) {  // an den ton exei epispeftei o idios
-                                index_out[successor].visited = version; // ton episkeptetai
+                            if (index_out[successor].visited != version) {      // an den ton exei epispeftei o idios
+                                index_out[successor].visited = version;         // ton episkeptetai
 
-                                // goal afou ton exei episkeptei o allos
-                                if (index_in[successor].visited == version) {
-
+                                if (index_in[successor].visited == version) {   // goal afou ton exei episkeptei o allos
                                     restartQueue(frontierF);
                                     restartQueue(frontierB);
                                     return stepsB + stepsF;
@@ -156,27 +154,26 @@ int bBFS(ind *index_in,
             counterFS = 0;
         }
 
-        if (childrenB < childrenF) {
+        if (childrenB < childrenF) {    // epilogh bfs analoga me ton arithmo ton komvwn pros epektash
 
             stepsB++;
             while (counterB != 0) {
 
-                node = deq(frontierB);  // dequeue
+                node = deq(frontierB);  // exagwgh tou prwtou komvou apo to synoro
 
                 offset = getListHead(index_in, node);
-                if (offset != -1) { // mporei na mhn exei geitones
+                if (offset != -1) {     // elegxos gia ton an exei geitones
 
                     neighbors = buffer_in + offset;
-                    while (i < N) { // gia kathe geitona
+                    while (i < N) {     // gia kathe geitona
 
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (index_in[successor].visited != version) {   // an den ton exei episkeptei o idios
-                                index_in[successor].visited = version;  // ton episkeptetai
+                            if (index_in[successor].visited != version) {       // an den ton exei episkeptei o idios
+                                index_in[successor].visited = version;          // ton episkeptetai
 
-                                // goal afou ton exei episkeptei o allos
-                                if (index_out[successor].visited == version) {
+                                if (index_out[successor].visited == version) {  // goal afou ton exei episkeptei o allos
 
                                     restartQueue(frontierB);
                                     restartQueue(frontierF);
