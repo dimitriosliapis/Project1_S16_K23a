@@ -14,7 +14,7 @@ typedef struct stack {
 
 typedef struct Component_t{
     uint32_t included_nodes_count; //number of nodes in component
-    uint32_t *included_node_ids;
+    uint32_t *included_node_ids;    //pinakas me ta IDs twn komvwn pou periexei to SCC
     uint32_t node_array_size;
 }Component;
 

@@ -80,6 +80,8 @@ void deletestack(Stack_t *stack) {
 
     return scc;
 }*/
+
+//dimiourgia SCC
 SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version) {
 
     Stack scc_stack;
@@ -107,6 +109,7 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
 
     index = 1;
 
+    //gia kathe komvo tou grafou an den einai visited kalei ton tarjan
     for(i = 0; i < num_nodes; i++) {
         if(lookup(index_out, i, num_nodes) == NOT_EXIST) continue;
         //if(search(explored, i, HT_BIG, version) == FOUND) continue;
@@ -127,6 +130,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
     //insert(explored, v, HT_BIG, version);
     index_out[v].visited = version;
 
+    //an den xwraei to kainourio SCC kanei realloc
     if(scc_counter == (*scc)->component_size){
         (*scc)->component_size *= 2;
         (*scc)->components = realloc((*scc)->components, (*scc)->component_size * sizeof(Component));
@@ -137,13 +141,14 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
         }
     }
 
-
+    //o komvos pou episkeftetai auti tin stigmi
     index_out[v].index = *index;
     index_out[v].lowlink = *index;
     (*index)++;
     push(scc_stack, v);
-    index_out[v].onStack = 1;
+    index_out[v].onStack = 1;//einai sto scc stack
 
+    //an exei paidia
     if(index_out[v].num_of_children != 0) {
 
         offset_out = getListHead(index_out, v);
@@ -153,14 +158,17 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
 
             w = neighbors_out->neighbor[k];
 
+            //an den exei alla paidia
             if(w == DEFAULT) break;
             //if(search(explored, w, HT_BIG, version) == NOT_FOUND){
+
+            //an to paidi tou den einai visited
             if(index_out[w].visited != version) {
                 *scc = tarjanRecursive(scc, index_out, buffer_out, num_nodes, version, w, index, scc_stack);
                 if (index_out[v].lowlink > index_out[w].lowlink)
                     index_out[v].lowlink = index_out[w].lowlink;
             }
-            else if(index_out[w].onStack){
+            else if(index_out[w].onStack){ // alliws an einai sto scc stack
                 if(index_out[v].lowlink > index_out[w].index)
                     index_out[v].lowlink = index_out[w].index;
             }
@@ -180,7 +188,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
         (*scc)->components[scc_counter].included_node_ids[0] = DEFAULT;
 
         a = 0;
-
+        //ftiakse to SCC
         do {
             w = pop(scc_stack);
             index_out[w].onStack = 0;
@@ -200,12 +208,14 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
 
 
         } while (w != v);
-        (*scc)->components_count++;
+        (*scc)->components_count++;//gia to epomeno SCC
     }
     return *scc;
 
 }
 
+
+// epanaliptikos tarjan
 /*
 SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node* explored, ht_Node* explored_twice, ht_Node* explored_scc, uint32_t version) {
 
@@ -456,6 +466,8 @@ SCC* tarjan(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t n
     return scc;
 }
 */
+
+//free SCC
 void destroyStronglyConnectedComponents(SCC* scc){
 
     uint32_t i = 0;
