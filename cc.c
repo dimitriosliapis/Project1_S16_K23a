@@ -34,16 +34,6 @@ int stackIsEmpty(Stack *stack) {
 
 void deleteStack(Stack *stack) {
 
-/*    if (stack == NULL) return;
-    if (stack->last == NULL) {
-        free(stack);
-        return;
-    }
-    if (current->next == NULL) {
-        free(current);
-        return;
-    }
-    deleteStack(stack, current->next);*/
     sNode *cur = NULL;
     sNode *prev = NULL;
 
@@ -379,7 +369,6 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                 else cc->updateIndex[cur_cc].cc_array[i] = cc1;
                 for (i = cc->updateIndex[cur_cc].size + 1; i < realloc_size; i++) cc->updateIndex[cur_cc].cc_array[i] = DEFAULT;
                 cc->updateIndex[cur_cc].size = realloc_size;
-               // cc->updateIndex[cur_cc].cc_array = new;
             }
         }
         j++;
@@ -446,9 +435,8 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
                 if (search(explored, v, HT_BIG, version) == NOT_FOUND) {
                     insert(explored, v, HT_BIG, version);
 
-                    //temp = cc.updateIndex[v].cc_array;
                     if(cc.updateIndex[v].cc_array == NULL) {
-                        continue;//de tha prepe na nai NULL
+                        continue;
                     }
 
                     i = 0;
@@ -480,7 +468,6 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_
     Stack stack;
     uint32_t k;
     uint32_t parent_cc = 0;
-    //uint32_t version_new = 0;
     uint32_t new_cc[cc->u_size];
     uint32_t old_cc = 0;
 
@@ -509,7 +496,6 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_
         if(cc->updateIndex[i].state == 'e') break;
         if(search(explored, i, HT_BIG, version) == FOUND) continue;
         push(&stack, i);
-        //insert(explored_new, i, HT_BIG, version_new);
         new_cc[i] = parent_cc;
         insert(explored, i, HT_BIG, version);
         while(!stackIsEmpty(&stack)) {
@@ -520,9 +506,7 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, ht_Node* explored_new, uint32_
                     w = cc->updateIndex[v].cc_array[k];
                     if(w == DEFAULT) break;
                     if(new_cc[w] != DEFAULT) continue;
-                   // if(search(explored_new, w, HT_BIG, version_new) == FOUND) continue;
                     push(&stack, w);
-                    //insert(explored_new, w, HT_BIG, version_new);
                     new_cc[w] = parent_cc;
                     insert(explored, w, HT_BIG, version);
                 }
@@ -565,5 +549,4 @@ void destroyCCIndex(CC *cc){
     free(cc->updateIndex);
     free(cc->cc_index);
     free(cc);
-    cc = NULL;
 }
