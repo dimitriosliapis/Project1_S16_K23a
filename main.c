@@ -14,7 +14,6 @@ int main(int argc, char *argv[]) {
     ht_Node *exploredF = NULL, *exploredB = NULL, *exploredA = NULL;
     uint32_t version = 0;
     int steps = 0;
-    uint32_t debug = 0;
 
 
     CC *cc = NULL;
@@ -86,20 +85,19 @@ int main(int argc, char *argv[]) {
         else scc_size = index_size_out;
 
         version++;
-        scc = estimateStronglyConnectedComponents(index_out, buffer_out, buffer_size_out, scc_size, exploredA, exploredB, exploredF, version);
+        scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, exploredA, version);
 
         version++;
-        grail = buildGrailIndex(index_out, buffer_out,index_in, buffer_in, scc, exploredA, exploredB, version);
+        grail = buildGrailIndex(index_out, buffer_out, scc, exploredA, version);
         version++;
 
         fgets(str, sizeof(str), Queries);
 
         while (!feof(Queries)) {
             if (str[0] == 'Q') {
-                debug++;
+
                 toID(str, &N1, &N2);
-                if (debug == 28877)
-                    printf("%d %d\n", N1, N2);
+
                 if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && isReachableGrailIndex(grail,N1,N2,scc) == MAYBE) {
                     version++;
                     steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, version);
@@ -116,6 +114,8 @@ int main(int argc, char *argv[]) {
         fclose(Queries);
     }
     else{
+        //to megethos tou cc tha einai osoi einai oi komvoi sinolika diladi
+        //to max twn komvwn tou index_in kai index_out
         if(index_size_in > index_size_out) cc_size = index_size_in;
         else cc_size = index_size_out;
 
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
                             if(cc->metricVal == 0){
                                 if(index_size_in > index_size_out) cc_size = index_size_in;
                                 else cc_size = index_size_out;
-                                cc->cc_max = updateCCIndex(cc,exploredA,exploredB, version, cc_size);
+                                cc->cc_max = updateCCIndex(cc,exploredA, version, cc_size);
                                 version++;
                                 cc->metricVal = METRIC;
                             }
@@ -180,10 +180,6 @@ int main(int argc, char *argv[]) {
 
                         version++;
                     }
-                    /*version++;
-                    steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
-
-                    printf("%d\n", steps);*/
                 } else
                     printf("-1\n");
 
@@ -205,7 +201,6 @@ int main(int argc, char *argv[]) {
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
 
-   // printf("DEBUG-> %d\n", debug);
 
     empty(frontierF);
     empty(frontierB);
@@ -219,12 +214,6 @@ int main(int argc, char *argv[]) {
     if(cc != NULL) destroyCCIndex(cc);
     if(scc != NULL) destroyStronglyConnectedComponents(scc);
     if(grail != NULL) destroyGrailIndex(grail);
-/*    free(cc_index);
-    for(a = 0; a < update_index_size; a++ ){
-        free(update_index[a].cc_array);
-    }
-    free(update_index);
-    */
 
     return 0;
 }
