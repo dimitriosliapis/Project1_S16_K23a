@@ -10,11 +10,7 @@ Queue *createQueue() {
         return NULL;
     else {
         queue->size = QUEUE_SIZE;
-        queue->entries = malloc(QUEUE_SIZE * sizeof(qEntry));
-        for (i = 0; i < queue->size; i++) {
-            queue->entries[i].id = DEFAULT;
-            queue->entries[i].steps = -1;
-        }
+        queue->ids = malloc(QUEUE_SIZE * sizeof(uint32_t));
         queue->first = 0;
         queue->last = -1;
         queue->count = 0;
@@ -29,16 +25,13 @@ int isEmpty(Queue *queue) {
 
 int enq(Queue *queue, uint32_t id) {
 
-    qEntry *new = NULL;
-
     if (queue->count >= queue->size) {
-        new = realloc(queue->entries, queue->size * 2 * sizeof(qEntry));
-        queue->entries = new;
+        queue->ids = realloc(queue->ids, queue->size * 2 * sizeof(uint32_t));
         queue->size *= 2;
     }
 
     queue->last = (queue->last + 1) % queue->size;
-    queue->entries[queue->last].id = id;
+    queue->ids[queue->last] = id;
     queue->count++;
 
     return 0;
@@ -51,39 +44,18 @@ uint32_t deq(Queue *queue) {
     if (queue->count == 0)
         return DEFAULT;
 
-    id = queue->entries[queue->first].id;
+    id = queue->ids[queue->first];
     queue->first = (queue->first + 1) % queue->size;
     queue->count--;
     return id;
-}
-
-uint32_t qpeek(Queue *queue) {
-
-    if (queue->count == 0)
-        return DEFAULT;
-
-    return queue->entries[queue->first].id;
-}
-
-int nsteps(Queue *queue, uint32_t id) {
-
-    int i = 0;
-
-    for (i = 0; i < queue->size; i++) {
-        if (queue->entries[i].id == id)
-            return queue->entries[i].steps;
-    }
-    return -1;
 }
 
 void restartQueue(Queue *queue) {
 
     int i = 0;
 
-    for (i = 0; i < queue->size; i++) {
-        queue->entries[i].id = DEFAULT;
-        queue->entries[i].steps = -1;
-    }
+    for (i = 0; i < queue->size; i++)
+        queue->ids[i] = DEFAULT;
 
     queue->first = 0;
     queue->last = -1;
@@ -92,7 +64,7 @@ void restartQueue(Queue *queue) {
 
 void empty(Queue *queue) {
 
-    free(queue->entries);
+    free(queue->ids);
     free(queue);
 }
 
@@ -117,13 +89,11 @@ int bBFS(ind *index_in,
         return 0;
 
     index_out[start].visited = version;
-    index_out[start].steps = steps;
     enq(frontierF, start);
     childrenF = index_out[start].num_of_children;
     counterF++;
 
     index_in[end].visited = version;
-    index_in[end].steps = steps;
     enq(frontierB, end);
     childrenB = index_in[end].num_of_children;
     counterB++;
