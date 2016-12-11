@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
         scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, exploredA, version);
 
         version++;
-        grail = buildGrailIndex(index_out, buffer_out,index_in, buffer_in, scc, exploredA, exploredB, version);
+        grail = buildGrailIndex(index_out, buffer_out, scc, exploredA, version);
         version++;
 
         fgets(str, sizeof(str), Queries);
