@@ -113,7 +113,7 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
     index = 1;
 
     for(i = 0; i < num_nodes; i++) {
-        if(lookup(index_out, i, size_out) == NOT_EXIST) continue;
+        if(lookup(index_out, i, num_nodes) == NOT_EXIST) continue;
         if(search(explored, i, HT_BIG, version) == FOUND) continue;
         scc = tarjanRecursive(&scc, index_out, buffer_out, size_out, num_nodes, explored, version, i, &index, &scc_stack);
     }

@@ -14,7 +14,6 @@ int main(int argc, char *argv[]) {
     ht_Node *exploredF = NULL, *exploredB = NULL, *exploredA = NULL;
     uint32_t version = 0;
     int steps = 0;
-    //uint32_t debug = 0;
 
 
     CC *cc = NULL;
@@ -101,7 +100,7 @@ int main(int argc, char *argv[]) {
 
                 if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS && isReachableGrailIndex(grail,N1,N2,scc) == MAYBE) {
                     version++;
-                    steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
+                    steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, version);
 
                     printf("%d\n", steps);
                 } else
@@ -153,13 +152,13 @@ int main(int argc, char *argv[]) {
                 if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS /*&& (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND)*/) {
                     if(cc->cc_index[N1] == cc->cc_index[N2]){
                         version++;
-                        steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
+                        steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, version);
                         printf("%d\n", steps);
                     }
                     else{
                         if(searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND){
                             version++;
-                            steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, exploredF, exploredB, version);
+                            steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, version);
                             printf("%d\n", steps);
 
                             version++;
