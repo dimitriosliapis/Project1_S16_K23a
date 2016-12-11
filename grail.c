@@ -1,6 +1,6 @@
 #include "grail.h"
 
-GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, ht_Node *explored, uint32_t version){
+GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uint32_t version){
 
     uint32_t i = 0, j = 0, k = 0, v = 0, w = 0;
     ptrdiff_t available_out = 0;

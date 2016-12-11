@@ -85,10 +85,10 @@ int main(int argc, char *argv[]) {
         else scc_size = index_size_out;
 
         version++;
-        scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, exploredA, version);
+        scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, version);
 
         version++;
-        grail = buildGrailIndex(index_out, buffer_out, scc, exploredA, version);
+        grail = buildGrailIndex(index_out, buffer_out, scc, version);
         version++;
 
         fgets(str, sizeof(str), Queries);
