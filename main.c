@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     uint32_t N1, N2, buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
     ptrdiff_t available_in = 0, available_out = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
-    ht_Node *exploredF = NULL, *exploredB = NULL, *exploredA = NULL;
+    ht_Node *explored = NULL;
     uint32_t version = 0;
     int steps = 0;
 
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     buffer_out = createBuffer(buffer_size_out);
     index_out = createNodeIndex(index_size_out);
 
-    exploredA = createHashtable(HT_BIG);
+    explored = createHashtable(HT_BIG);
 
 
     struct timeval tv1, tv2;
@@ -74,8 +74,8 @@ int main(int argc, char *argv[]) {
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
 
-    exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
-    exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh
+    /*exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
+    exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh*/
 
     fgets(str, sizeof(str), Queries);
 
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
         if(index_size_in > index_size_out) cc_size = index_size_in;
         else cc_size = index_size_out;
 
-        cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, exploredA, version);
+        cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, explored, version);
         version++;
 
         cc->u_size = cc->cc_max;
@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
                         printf("%d\n", steps);
                     }
                     else{
-                        if(searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND){
+                        if(searchUpdateIndex(*cc,N1,N2,explored, version) == FOUND){
                             version++;
                             steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, version);
                             printf("%d\n", steps);
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
                             if(cc->metricVal == 0){
                                 if(index_size_in > index_size_out) cc_size = index_size_in;
                                 else cc_size = index_size_out;
-                                cc->cc_max = updateCCIndex(cc,exploredA, version, cc_size);
+                                cc->cc_max = updateCCIndex(cc,explored, version, cc_size);
                                 version++;
                                 cc->metricVal = METRIC;
                             }
@@ -204,9 +204,9 @@ int main(int argc, char *argv[]) {
 
     empty(frontierF);
     empty(frontierB);
-    delete(exploredF, HT_BIG);
-    delete(exploredB, HT_BIG);
-    delete(exploredA, HT_BIG);
+    delete(explored, HT_BIG);
+/*    delete(exploredB, HT_BIG);
+    delete(exploredA, HT_BIG);*/
     destroyBuffer(buffer_in);
     destroyBuffer(buffer_out);
     destroyNodeIndex(index_in, index_size_in);

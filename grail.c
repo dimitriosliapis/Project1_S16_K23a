@@ -8,9 +8,9 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uin
     list_node *neighbors_out;
     uint32_t neigh_scc = 0;
     uint32_t rank = 1, min_rank = 1;
-    Stack dfs_stack;
+    Stack_t *dfs_stack = createStack();
 
-    dfs_stack.last = NULL;
+    //dfs_stack.last = NULL;
 
     GrailIndex *grail = malloc(sizeof(GrailIndex));
 
@@ -66,10 +66,10 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uin
         //an einai visited sinexise sto epomeno
         if(grail->hyper_index_out[i].visited == version) continue;
 
-        push(&dfs_stack, i);
-        while(!stackIsEmpty(&dfs_stack)) {
+        pushinstack(dfs_stack, i);
+        while(!stackisempty(dfs_stack)) {
 
-            v = peek(&dfs_stack);
+            v = peekfromstack(dfs_stack);
 
             //dimiourgia hashtable gia na tsekarei an exei perasei apo ola ta paidia tou
             if(grail->hyper_index_out[v].neighbors == NULL){
@@ -81,7 +81,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uin
                 rank++;
                 grail->hyper_index_out[v].min_rank = rank;
                 grail->hyper_index_out[v].rank = rank;
-                pop(&dfs_stack);
+                popfromstack(dfs_stack);
                 //insert(explored, v, HT_BIG, version);
                 grail->hyper_index_out[v].visited = version;
             }
@@ -103,7 +103,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uin
 
                     //an den einai visited to paidi push kai break gia na ginei DFS sta paidia tou
                     if(grail->hyper_index_out[w].visited != version) {
-                        push(&dfs_stack, w);
+                        pushinstack(dfs_stack, w);
                         break;
                     }
                     else if (search(grail->hyper_index_out[v].neighbors, w, HT_SMALL, 1) == NOT_FOUND) { //alliws an einai visited
@@ -130,13 +130,13 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uin
                     grail->hyper_index_out[v].rank = rank;
                     //insert(explored, v, HT_BIG, version);
                     grail->hyper_index_out[v].visited = version;
-                    pop(&dfs_stack);
+                    popfromstack(dfs_stack);
                 }
             }
         }
     }
 
-    deleteStack(&dfs_stack);
+    deletestack(dfs_stack);
 
     return grail;
 }

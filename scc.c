@@ -1,77 +1,14 @@
 #include "scc.h"
 
-uint32_t peek(Stack *stack) {
+/*uint32_t peek(Stack *stack) {
 
     if(stack == NULL) return DEFAULT;
     if(stack->last == NULL) return DEFAULT;
 
     return stack->last->id;
 
-}
+}*/
 
-Stack_t *createStack() {
-
-    int i = 0;
-    Stack_t *stack = NULL;
-    stack = malloc(sizeof(Stack_t));
-
-    if(stack == NULL) return NULL;
-    else {
-        stack->size = STACK_ARRAY_SIZE;
-        stack->stack_array = malloc(STACK_ARRAY_SIZE*sizeof(uint32_t));
-        for(i = 0 ; i < STACK_ARRAY_SIZE ; i++) stack->stack_array[i] = DEFAULT;
-        stack->first = 0;
-        stack->last = -1;
-        stack->count = 0;
-        return stack;
-    }
-}
-
-int stackisempty(Stack_t *stack) {
-
-    if(stack->count == 0) return 1;
-    else return 0;
-
-}
-
-void pushinstack(Stack_t *stack, uint32_t id) {
-
-    if(stack->count == stack->size) {
-        stack->stack_array = realloc(stack->stack_array, 2*stack->size*sizeof(uint32_t));
-        stack->size = 2*stack->size;
-        int i = 0;
-        for(i = stack->size/2 ; i < stack->size ; i++) stack->stack_array[i] = DEFAULT;
-    }
-    stack->last = (stack->last + 1) % stack->size;
-    stack->stack_array[stack->last] = id;
-    stack->count++;
-}
-
-uint32_t popfromstack(Stack_t *stack) {
-
-    uint32_t id = DEFAULT;
-    if(stack->count == 0) return DEFAULT;
-
-    id = stack->stack_array[stack->last];
-    stack->stack_array[stack->last] = DEFAULT;
-    stack->last = (stack->last - 1) % stack->size;
-    stack->count--;
-    return id;
-}
-
-uint32_t peekfromstack(Stack_t *stack) {
-
-    if(stack->stack_array[stack->last] == DEFAULT) return DEFAULT;
-
-    uint32_t id = DEFAULT;
-    id = stack->stack_array[stack->last];
-    return id;
-}
-
-void deletestack(Stack_t *stack) {
-    free(stack->stack_array);
-    free(stack);
-}
 
 /*SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node *explored, ht_Node *explored2, ht_Node* explored3, uint32_t version) {
 
@@ -84,7 +21,7 @@ void deletestack(Stack_t *stack) {
 //dimiourgia SCC
 SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version) {
 
-    Stack scc_stack;
+    Stack_t *scc_stack = createStack();
     uint32_t index = 0;
     uint32_t i = 0, r = 0;
 
@@ -105,7 +42,7 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
         scc->id_belongs_to_component[i] = DEFAULT;
     }
 
-    scc_stack.last = NULL;
+    //scc_stack.last = NULL;
 
     index = 1;
 
@@ -114,13 +51,13 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
         if(lookup(index_out, i, num_nodes) == NOT_EXIST) continue;
         //if(search(explored, i, HT_BIG, version) == FOUND) continue;
         if(index_out[i].visited == version) continue;
-        scc = tarjanRecursive(&scc, index_out, buffer_out, num_nodes, version, i, &index, &scc_stack);
+        scc = tarjanRecursive(&scc, index_out, buffer_out, num_nodes, version, i, &index, scc_stack);
     }
     return scc;
 }
 
 
-SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t *index, Stack *scc_stack){
+SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t *index, Stack_t *scc_stack){
 
     uint32_t k = 0, w = 0, a = 0, r = 0, realloc_node_size;
     ptrdiff_t offset_out;
@@ -145,7 +82,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
     index_out[v].index = *index;
     index_out[v].lowlink = *index;
     (*index)++;
-    push(scc_stack, v);
+    pushinstack(scc_stack, v);
     index_out[v].onStack = 1;//einai sto scc stack
 
     //an exei paidia
@@ -190,7 +127,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
         a = 0;
         //ftiakse to SCC
         do {
-            w = pop(scc_stack);
+            w = popfromstack(scc_stack);
             index_out[w].onStack = 0;
 
             (*scc)->components[scc_counter].included_node_ids[a] = w;

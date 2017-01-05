@@ -2,15 +2,7 @@
 
 #define COMPONENT_SIZE 270000
 #define NODE_IDS_SIZE 16
-#define STACK_ARRAY_SIZE 2048
 
-typedef struct stack {
-    uint32_t *stack_array;
-    int size;
-    int first;
-    int last;
-    int count;
-} Stack_t;
 
 typedef struct Component_t{
     uint32_t included_nodes_count; //number of nodes in component
@@ -25,9 +17,9 @@ typedef struct SCC_t{
     uint32_t *id_belongs_to_component; //inverted index
 }SCC;
 
-uint32_t peek(Stack *);
+//uint32_t peek(Stack *);
 //SCC* tarjan(ind*, list_node*, uint32_t, uint32_t, ht_Node*, ht_Node*, ht_Node*, uint32_t);
-SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t *index, Stack *scc_stack);
+SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t *index, Stack_t *scc_stack);
 
 
 SCC* estimateStronglyConnectedComponents(ind *, list_node *, uint32_t, uint32_t);
