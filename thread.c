@@ -28,11 +28,11 @@ char remove_from_buffer(Buffer_t *buffer) {
     return *query;
 }
 
-void *master_thread_function(void *q, Buffer_t *buffer) {
-    FILE *queries = q;
+void *master_thread_function(void *ptr) {
+    arg *local = ptr;
     char str[64];
-    fgets(str,sizeof(str), queries);
-    while (!feof(queries) || str[0] == 'F') {
-        place_to_buffer(*str, buffer);
+    fgets(str,sizeof(str), local->file);
+    while (!feof(local->file) || str[0] == 'F') {
+        place_to_buffer(*str, local->buffer);
     }
 }

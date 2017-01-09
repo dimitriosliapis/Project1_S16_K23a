@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <stdio.h>
 
 #define QUERY_SIZE 5
 #define THREAD_POOL_SIZE 2
@@ -22,7 +23,12 @@ typedef struct Buffer_t {
     char *querry;
 } Buffer_t;
 
+typedef struct arg_t {
+    FILE *file;
+    Buffer_t *buffer;
+} arg;
+
 void place_to_buffer(char query, Buffer_t *buffer);
 char remove_from_buffer(Buffer_t *buffer);
 
-void *master_thread_function(void *q, Buffer_t *buffer);
+void *master_thread_function(void *ptr);
