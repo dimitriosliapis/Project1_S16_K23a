@@ -4,17 +4,6 @@
 
 int toID(char *, uint32_t *, uint32_t *);
 
-//Buffer
-typedef struct Buffer_t {
-    int start;
-    int end;
-    int count;
-    char *querry;
-} Buffer_t;
-
-pthread_mutex_t mutex;
-pthread_cond_t cond_nonempty;
-pthread_cond_t cond_nonfull;
 Buffer_t buffer;
 
 int main(int argc, char *argv[]) {
@@ -47,7 +36,7 @@ int main(int argc, char *argv[]) {
     buffer.start = 0;
     buffer.end = -1;
     buffer.count = 0;
-    buffer.querry = (char *)malloc(5*sizeof(char));
+    buffer.querry = (char *)malloc(QUERY_SIZE*sizeof(char));
 
     //Thread pool
     pthread_t *worker_threads = (pthread_t *)malloc(5*sizeof(pthread_t));
