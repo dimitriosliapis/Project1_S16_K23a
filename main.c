@@ -1,5 +1,6 @@
 #include <sys/time.h>
 #include "grail.h"
+#include "thread.h"
 
 int toID(char *, uint32_t *, uint32_t *);
 
