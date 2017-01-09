@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     buffer.querry = (char *)malloc(QUERY_SIZE*sizeof(char));
 
     //Thread pool
-    pthread_t *worker_threads = (pthread_t *)malloc(5*sizeof(pthread_t));
+    pthread_t *worker_threads = (pthread_t *)malloc(THREAD_POOL_SIZE*sizeof(pthread_t));
 
     int a = 0;
     for(a = 0 ; a < 5 ; a++) pthread_create(&worker_threads[a], 0, worker_function, 0);
@@ -55,8 +55,6 @@ int main(int argc, char *argv[]) {
         printf("Datasets missing");
         return 0;
     }
-
-
 
     // zeugh indexes kai buffers
     buffer_in = createBuffer(buffer_size_in);

@@ -1,6 +1,7 @@
 #include <pthread.h>
 
 #define QUERY_SIZE 5
+#define THREAD_POOL_SIZE 2
 
 pthread_mutex_t mutex;
 pthread_cond_t cond_nonempty;
@@ -23,3 +24,5 @@ typedef struct Buffer_t {
 
 void place_to_buffer(char *query, Buffer_t *buffer);
 char remove_from_buffer(Buffer_t *buffer);
+
+void *master_thread_function(void *ptr);
