@@ -1,8 +1,6 @@
 #include <sys/time.h>
-#include "grail.h"
 #include "thread.h"
 
-int toID(char *, uint32_t *, uint32_t *);
 
 Buffer_t buffer;
 
@@ -239,25 +237,3 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-int toID(char *str, uint32_t *N1, uint32_t *N2) {
-    uint32_t i, j, id;
-    if (str == NULL)
-        return 0;
-    if ((str[0] < '0') || (str[0] > '9'))
-        i = 2;
-    else
-        i = 0;
-    for (j = 0; j < 2; j++) {
-        id = 0;
-        while ((str[i] >= '0') && (str[i] <= '9')) {
-            id = 10 * id + (str[i] - '0');
-            i++;
-        }
-        if (j == 0)
-            *N1 = id;
-        else
-            *N2 = id;
-        i++;
-    }
-    return 1;
-}
