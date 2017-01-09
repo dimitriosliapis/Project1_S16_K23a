@@ -22,7 +22,7 @@ typedef struct Buffer_t {
     char *querry;
 } Buffer_t;
 
-void place_to_buffer(char *query, Buffer_t *buffer);
+void place_to_buffer(char query, Buffer_t *buffer);
 char remove_from_buffer(Buffer_t *buffer);
 
-void *master_thread_function(void *ptr);
+void *master_thread_function(void *q, Buffer_t *buffer);
