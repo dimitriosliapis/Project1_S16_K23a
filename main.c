@@ -3,6 +3,19 @@
 
 int toID(char *, uint32_t *, uint32_t *);
 
+//Buffer
+typedef struct Buffer_t {
+    int start;
+    int end;
+    int count;
+    char *querry;
+} Buffer_t;
+
+pthread_mutex_t mutex;
+pthread_cond_t cond_nonempty;
+pthread_cond_t cond_nonfull;
+Buffer_t buffer;
+
 int main(int argc, char *argv[]) {
 
     FILE *Graph = NULL, *Queries = NULL;
@@ -23,6 +36,26 @@ int main(int argc, char *argv[]) {
     SCC *scc = NULL;
     GrailIndex *grail = NULL;
 
+    pthread_mutex_init(&mutex, 0);
+    pthread_cond_init(&cond_nonempty, 0);
+    pthread_cond_init(&cond_nonfull, 0);
+
+    pthread_t master_thread;
+
+    //Initialize buffer
+    buffer.start = 0;
+    buffer.end = -1;
+    buffer.count = 0;
+    buffer.querry = (char *)malloc(5*sizeof(char));
+
+    //Thread pool
+    pthread_t *worker_threads = (pthread_t *)malloc(5*sizeof(pthread_t));
+
+    int a = 0;
+    for(a = 0 ; a < 5 ; a++) pthread_create(&worker_threads[a], 0, worker_function, 0);
+
+    pthread_create(&master_thread, 0, master_thread_function, 0);
+    pthread_join(master_thread, 0);
 
     // orismata
     if (argc == 3) {
