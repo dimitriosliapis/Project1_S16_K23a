@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     uint32_t version = 0;
     int steps = 0;
 
-
+//thread
     CC *cc = NULL;
     uint32_t cc_size = 0;
     uint32_t scc_size = 0;
