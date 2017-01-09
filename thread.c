@@ -1,5 +1,4 @@
 #include "thread.h"
-#include <stdio.h>
 #include <string.h>
 
 void place_to_buffer(char query, Buffer_t *buffer) {
