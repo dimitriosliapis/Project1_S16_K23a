@@ -2,27 +2,33 @@
 #include <stdio.h>
 #include "grail.h"
 
-#define QUERY_SIZE 5
-#define THREAD_POOL_SIZE 2
+#define QUERY_SIZE 8
+#define THREAD_POOL_SIZE 4
+#define EMPTY -2
+#define RES_INIT 8192
+#define START -1
+#define FINISHED 1
+#define CONTINUE 0
+#define WAIT 2
 
 pthread_mutex_t mutex;
-pthread_cond_t cond_nonempty;
-pthread_cond_t cond_nonfull;
+pthread_mutex_t vmutex;
+pthread_cond_t cond_start;
+pthread_cond_t cond_next;
 
-struct JobScheduler{
-    int execution_threads; // number of execution threads
-    jobQueue* q; // a queue that holds submitted jobs / tasks
-    p_thread_t* tids; // execution threads
-// mutex, condition variable, ...
-};
+int status;
+int finished;
 
 //Buffer
+typedef struct B_Node_t{
+    char query[64];
+    int line;
+    struct B_Node_t *next;
+}B_Node;
 typedef struct Buffer_t {
-    int start;
-    int end;
-    int count;
-    char *querry;
-} Buffer_t;
+    B_Node *first;
+    B_Node *last;
+} Buffer;
 
 typedef struct work_data_t{
 
@@ -39,18 +45,21 @@ typedef struct work_data_t{
     ht_Node *explored;
     uint32_t version;
     int steps;
+    int current_job;
 }work_data;
 
 typedef struct arg_t {
     FILE *file;
-    Buffer_t *buffer;
+    Buffer *buffer;
     work_data *data;
+    int *results;
+    int res_size;
 } arg;
 
 int toID(char *, uint32_t *, uint32_t *);
 
-void place_to_buffer(char query, Buffer_t *buffer);
-char* remove_from_buffer(Buffer_t *buffer);
+void place_to_buffer(char *query, Buffer *buffer, int line);
+char* remove_from_buffer(Buffer *buffer, int *line);
 
 void *master_thread_function(void *ptr);
 void *worker_thread_function(void *ptr);

@@ -2,65 +2,58 @@
 #include "thread.h"
 
 
-Buffer_t buffer;
+arg *thread_args;
+
 
 int main(int argc, char *argv[]) {
 
-    FILE *Graph = NULL, *Queries = NULL;
-    list_node *buffer_in = NULL, *buffer_out = NULL;
-    ind *index_in = NULL, *index_out = NULL;
-    uint32_t N1, N2, buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
-    ptrdiff_t available_in = 0, available_out = 0;
-    Queue *frontierF = NULL, *frontierB = NULL;
-    ht_Node *explored = NULL;
-    uint32_t version = 0;
-    int steps = 0;
+    FILE *Graph = NULL;//, *Queries = NULL;
+    //list_node *buffer_in = NULL, *buffer_out = NULL;
+    //ind *index_in = NULL, *index_out = NULL;
+    uint32_t N1, N2;//, buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
+    //ptrdiff_t available_in = 0, available_out = 0;
+    //Queue *frontierF = NULL, *frontierB = NULL;
+    //ht_Node *explored = NULL;
+    //uint32_t version = 0;
+    //int steps = 0;
 
 //thread
-    CC *cc = NULL;
+   /* CC *cc = NULL;
     uint32_t cc_size = 0;
     uint32_t scc_size = 0;
 
     SCC *scc = NULL;
-    GrailIndex *grail = NULL;
+    GrailIndex *grail = NULL;*/
 
-    pthread_mutex_init(&mutex, 0);
-    pthread_cond_init(&cond_nonempty, 0);
-    pthread_cond_init(&cond_nonfull, 0);
+    int i = 0;
 
-    pthread_t master_thread;
+    thread_args = malloc(sizeof(arg));
+    thread_args->data = malloc(sizeof(work_data));
 
-    //Initialize buffer
-    buffer.start = 0;
-    buffer.end = -1;
-    buffer.count = 0;
-    buffer.querry = (char *)malloc(QUERY_SIZE*sizeof(char));
+    thread_args->data->buffer_size_in = BUFF_SIZE;
+    thread_args->data->buffer_size_out = BUFF_SIZE;
+    thread_args->data->index_size_in = IND_SIZE;
+    thread_args->data->index_size_out = IND_SIZE;
 
-    //Thread pool
-    pthread_t *worker_threads = (pthread_t *)malloc(THREAD_POOL_SIZE*sizeof(pthread_t));
 
-    int a = 0;
-    for(a = 0 ; a < 5 ; a++) pthread_create(&worker_threads[a], 0, worker_function, 0);
 
-    pthread_create(&master_thread, 0, master_thread_function, 0);
-    pthread_join(master_thread, 0);
 
     // orismata
     if (argc == 3) {
         Graph = fopen(argv[1], "r");
-        Queries = fopen(argv[2], "r");
+        thread_args->file = fopen(argv[2], "r");
     } else {
         printf("Datasets missing");
         return 0;
     }
 
     // zeugh indexes kai buffers
-    buffer_in = createBuffer(buffer_size_in);
-    index_in = createNodeIndex(index_size_in);
-    buffer_out = createBuffer(buffer_size_out);
-    index_out = createNodeIndex(index_size_out);
+    thread_args->data->buffer_in = createBuffer(thread_args->data->buffer_size_in);
+    thread_args->data->index_in = createNodeIndex(thread_args->data->index_size_in);
+    thread_args->data->buffer_out = createBuffer(thread_args->data->buffer_size_out);
+    thread_args->data->index_out = createNodeIndex(thread_args->data->index_size_out);
 
-    explored = createHashtable(HT_BIG);
+    thread_args->data->explored = createHashtable(HT_BIG);
 
 
     struct timeval tv1, tv2;
@@ -75,28 +68,75 @@ int main(int argc, char *argv[]) {
 
         toID(str, &N1, &N2);
 
-        if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
-            insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out);
+        if (lookup(thread_args->data->index_out, N1, thread_args->data->index_size_out) == NOT_EXIST)
+            insertNode(&thread_args->data->index_out, N1, &thread_args->data->buffer_out, &thread_args->data->index_size_out, &thread_args->data->buffer_size_out, &thread_args->data->available_out);
 
-        if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
-            insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
+        if (lookup(thread_args->data->index_in, N2, thread_args->data->index_size_in) == NOT_EXIST)
+            insertNode(&thread_args->data->index_in, N2, &thread_args->data->buffer_in, &thread_args->data->index_size_in, &thread_args->data->buffer_size_in, &thread_args->data->available_in);
 
-        addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out);
+        addEdge(&thread_args->data->index_out, N1, N2, &thread_args->data->buffer_out, &thread_args->data->buffer_size_out, &thread_args->data->available_out);
 
-        addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in);
+        addEdge(&thread_args->data->index_in, N2, N1, &thread_args->data->buffer_in, &thread_args->data->buffer_size_in, &thread_args->data->available_in);
 
         fgets(str, sizeof(str), Graph);
     }
 
     fclose(Graph);
 
-    frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
-    frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
+    thread_args->data->version = 0;
+
+    if(thread_args->data->index_size_in > thread_args->data->index_size_out) thread_args->data->scc_size = thread_args->data->index_size_in;
+    else thread_args->data->scc_size = thread_args->data->index_size_out;
+
+    thread_args->data->version++;
+    thread_args->data->scc = estimateStronglyConnectedComponents(thread_args->data->index_out, thread_args->data->buffer_out, thread_args->data->scc_size, thread_args->data->version);
+
+    thread_args->data->version++;
+    thread_args->data->grail = buildGrailIndex(thread_args->data->index_out, thread_args->data->buffer_out, thread_args->data->scc, thread_args->data->version);
+    thread_args->data->version++;
+
+    thread_args->data->frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
+    thread_args->data->frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
 
     /*exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
     exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh*/
 
-    fgets(str, sizeof(str), Queries);
+    pthread_mutex_init(&mutex, 0);
+    pthread_mutex_init(&vmutex, 0);
+    pthread_cond_init(&cond_start, 0);
+    pthread_cond_init(&cond_next, 0);
+
+    pthread_t master_thread;
+
+    //Initialize buffer
+    /*thread_args->buffer = malloc(sizeof(Buffer_t));
+    thread_args->buffer->start = 0;
+    thread_args->buffer->end = -1;
+    thread_args->buffer->count = 0;
+    thread_args->buffer->size = QUERY_SIZE;
+    thread_args->buffer->query = malloc(QUERY_SIZE * sizeof(char *));
+    for(i = 0; i < QUERY_SIZE; i++){
+        thread_args->buffer->query[i] = malloc(64*sizeof(char));
+    }*/
+    thread_args->buffer = malloc(sizeof(Buffer));
+    thread_args->buffer->first = NULL;
+    thread_args->buffer->last = NULL;
+
+    //Thread pool
+
+    int a = 1;
+
+    pthread_create(&master_thread, 0, master_thread_function, thread_args);
+    pthread_join(master_thread, 0);
+
+    while(a < thread_args->res_size){
+
+        if(thread_args->results[a] == EMPTY) break;
+        printf("%d\n", thread_args->results[a]);
+        a++;
+    }
+
+    /*fgets(str, sizeof(str), Queries);
 
     if(strncmp(str, "STATIC", 6) == 0){
 
@@ -170,7 +210,7 @@ int main(int argc, char *argv[]) {
 
                 toID(str, &N1, &N2);
 
-                if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS /*&& (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND)*/) {
+                if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS *//*&& (cc->cc_index[N1] == cc->cc_index[N2] || searchUpdateIndex(*cc,N1,N2,exploredA, version) == FOUND)*//*) {
                     if(cc->cc_index[N1] == cc->cc_index[N2]){
                         version++;
                         steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB, version);
@@ -212,7 +252,7 @@ int main(int argc, char *argv[]) {
 
 
     if(index_size_in > index_size_out) scc_size = index_size_in;
-    else scc_size = index_size_out;
+    else scc_size = index_size_out;*/
 
 
     gettimeofday(&tv2, NULL);
@@ -221,18 +261,18 @@ int main(int argc, char *argv[]) {
            (double) (tv2.tv_sec - tv1.tv_sec));
 
 
-    empty(frontierF);
-    empty(frontierB);
-    delete(explored, HT_BIG);
+    empty(thread_args->data->frontierF);
+    empty(thread_args->data->frontierB);
+    delete(thread_args->data->explored, HT_BIG);
 /*    delete(exploredB, HT_BIG);
     delete(exploredA, HT_BIG);*/
-    destroyBuffer(buffer_in);
-    destroyBuffer(buffer_out);
-    destroyNodeIndex(index_in, index_size_in);
-    destroyNodeIndex(index_out, index_size_out);
-    if(cc != NULL) destroyCCIndex(cc);
-    if(scc != NULL) destroyStronglyConnectedComponents(scc);
-    if(grail != NULL) destroyGrailIndex(grail);
+    destroyBuffer(thread_args->data->buffer_in);
+    destroyBuffer(thread_args->data->buffer_out);
+    destroyNodeIndex(thread_args->data->index_in, thread_args->data->index_size_in);
+    destroyNodeIndex(thread_args->data->index_out, thread_args->data->index_size_out);
+    //if(thread_args->data->cc != NULL) destroyCCIndex(cc);
+    if(thread_args->data->scc != NULL) destroyStronglyConnectedComponents(thread_args->data->scc);
+    if(thread_args->data->grail != NULL) destroyGrailIndex(thread_args->data->grail);
 
     return 0;
 }
