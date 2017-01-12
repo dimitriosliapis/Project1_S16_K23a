@@ -101,10 +101,10 @@ int main(int argc, char *argv[]) {
     /*exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
     exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh*/
 
-    pthread_mutex_init(&mutex, 0);
-    pthread_mutex_init(&vmutex, 0);
-    pthread_cond_init(&cond_start, 0);
-    pthread_cond_init(&cond_next, 0);
+    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&vmutex, NULL);
+    pthread_cond_init(&cond_start, NULL);
+    pthread_cond_init(&cond_next, NULL);
 
     pthread_t master_thread;
 

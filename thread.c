@@ -110,6 +110,7 @@ void *master_thread_function(void *ptr) {
     pthread_t *worker_threads = (pthread_t *)malloc(THREAD_POOL_SIZE*sizeof(pthread_t));
 
 
+    local->res_size = 0;
     finished = 0;
     status = START;
     max_id = 0;
@@ -137,9 +138,10 @@ void *master_thread_function(void *ptr) {
         fgets(str,sizeof(str), local->file);
 
     }
+    finished = 1;
     pthread_mutex_unlock(&mutex);
 
-    finished = 1;
+
     for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_join(worker_threads[a], 0);
 
 
@@ -181,7 +183,7 @@ void *worker_thread_function(void *ptr){
 
         if(query == NULL){
             status = START;
-            pthread_cond_broadcast(&cond_next);
+            pthread_cond_signal(&cond_next);
             pthread_mutex_unlock(&mutex);
             if(finished) break;
             continue;
