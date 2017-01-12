@@ -122,6 +122,11 @@ int main(int argc, char *argv[]) {
     thread_args->buffer->first = NULL;
     thread_args->buffer->last = NULL;
 
+    thread_args->res_size = RES_INIT;
+    thread_args->results = malloc(RES_INIT*sizeof(int));
+    for(i = 0; i < thread_args->res_size; i++) thread_args->results[i] = EMPTY;
+
+
     //Thread pool
 
     int a = 1;
@@ -131,7 +136,10 @@ int main(int argc, char *argv[]) {
 
     while(a < thread_args->res_size){
 
-        if(thread_args->results[a] == EMPTY) break;
+        if(thread_args->results[a] == EMPTY){
+            a++;
+            continue;
+        }
         printf("%d\n", thread_args->results[a]);
         a++;
     }

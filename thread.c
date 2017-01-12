@@ -107,13 +107,18 @@ void *master_thread_function(void *ptr) {
     arg *local = ptr;
     char str[64];
     int line = 1, a;
+    int realloc_size = 0;
+
     pthread_t *worker_threads = (pthread_t *)malloc(THREAD_POOL_SIZE*sizeof(pthread_t));
 
 
-    local->res_size = 0;
+    //local->res_size = 0;
     finished = 0;
     status = START;
     max_id = 0;
+
+
+
     for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_create(&worker_threads[a], 0, worker_thread_function, local);
 
     fgets(str,sizeof(str), local->file);
@@ -127,11 +132,20 @@ void *master_thread_function(void *ptr) {
         while(str[0] != 'F'){
 
             place_to_buffer(str, local->buffer, line);
-            if(status == START) status = CONTINUE;
+            //if(status == START) status = CONTINUE;
             line++;
+            if(line == local->res_size){
+
+                realloc_size = 2*local->res_size;
+                //while(line >= realloc_size) realloc_size *=2;
+                local->results = realloc(local->results, realloc_size*sizeof(int));
+                for(a = local->res_size; a < realloc_size; a++) local->results[a] = EMPTY;
+                local->res_size = realloc_size;
+            }
+
             fgets(str,sizeof(str), local->file);
         }
-
+        status = CONTINUE;
         while(status != START) {
             pthread_cond_wait(&cond_next, &mutex);
         }
@@ -153,7 +167,6 @@ void *worker_thread_function(void *ptr){
     char *query;
     uint32_t N1, N2;
     int line, i;
-    int realloc_size;
     uint32_t local_version = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
     int thread_id;
@@ -190,23 +203,7 @@ void *worker_thread_function(void *ptr){
         }
         pthread_mutex_unlock(&mutex);
 
-        pthread_mutex_lock(&vmutex);
 
-        if(local->res_size == 0){
-            local->res_size = RES_INIT;
-            local->results = malloc(local->res_size*sizeof(int));
-            for(i = 0; i < local->res_size; i++) local->results[i] = EMPTY;
-        }
-        else if(line >= local->res_size){
-
-            realloc_size = local->res_size;
-            while(line >= realloc_size) realloc_size *=2;
-            local->results = realloc(local->results, realloc_size*sizeof(int));
-            for(i = local->res_size; i < realloc_size; i++) local->results[i] = EMPTY;
-            local->res_size = realloc_size;
-        }
-
-        pthread_mutex_unlock(&vmutex);
         toID(query, &N1, &N2);
 
 
@@ -236,4 +233,8 @@ void *worker_thread_function(void *ptr){
     }
     empty(frontierB);
     empty(frontierF);
+
+    i = 0;
+
+    pthread_exit(&i);
 }

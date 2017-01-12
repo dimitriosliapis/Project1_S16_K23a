@@ -4,7 +4,7 @@
 #define HT_SMALL 67
 #define HT_N 7
 
-#define THREAD_POOL_SIZE 8
+#define THREAD_POOL_SIZE 4
 
 
 #define DEFAULT 16777216
