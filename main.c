@@ -95,8 +95,8 @@ int main(int argc, char *argv[]) {
     thread_args->data->grail = buildGrailIndex(thread_args->data->index_out, thread_args->data->buffer_out, thread_args->data->scc, thread_args->data->version);
     thread_args->data->version++;
 
-    thread_args->data->frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
-    thread_args->data->frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
+    /*thread_args->data->frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
+    thread_args->data->frontierB = createQueue();*/  // synoro tou bfs apo ton stoxo pros thn arxh
 
     /*exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
     exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh*/
@@ -261,8 +261,8 @@ int main(int argc, char *argv[]) {
            (double) (tv2.tv_sec - tv1.tv_sec));
 
 
-    empty(thread_args->data->frontierF);
-    empty(thread_args->data->frontierB);
+/*    empty(thread_args->data->frontierF);
+    empty(thread_args->data->frontierB);*/
     delete(thread_args->data->explored, HT_BIG);
 /*    delete(exploredB, HT_BIG);
     delete(exploredA, HT_BIG);*/

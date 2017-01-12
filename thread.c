@@ -151,14 +151,19 @@ void *worker_thread_function(void *ptr){
     uint32_t N1, N2;
     int line, i;
     int realloc_size;
+    uint32_t local_version;
+    Queue *frontierF = NULL, *frontierB = NULL;
 
+
+    frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
+    frontierB = createQueue();
 
 
     while(1) {
 
         while(status == START){
             if(finished) break;
-        };
+        }
 
         if(finished) break;
         pthread_mutex_lock(&mutex);
@@ -171,7 +176,7 @@ void *worker_thread_function(void *ptr){
             status = START;
             pthread_cond_broadcast(&cond_next);
             pthread_mutex_unlock(&mutex);
-            if(status == FINISHED) break;
+            if(finished) break;
             continue;
         }
         pthread_mutex_unlock(&mutex);
@@ -200,19 +205,25 @@ void *worker_thread_function(void *ptr){
             lookup(local->data->index_in, N2, local->data->index_size_in) == ALR_EXISTS &&
             isReachableGrailIndex(local->data->grail, N1, N2, local->data->scc) == MAYBE) {
             local->data->version++;
+            local_version = local->data->version;
+            pthread_mutex_unlock(&vmutex);
             local->results[line] = bBFS(local->data->index_in, local->data->index_out, local->data->buffer_in,
-                                      local->data->buffer_out, N1, N2, local->data->frontierF, local->data->frontierB,
-                                      local->data->version);
+                                      local->data->buffer_out, N1, N2, frontierF, frontierB,
+                                        local_version);
 
             //printf("%d\n", local->data->steps);//den tupwnei ta vazei ston pinaka me ta apotelesmata
             //local->results[i] = local->data->steps;
-        } else
+        } else {
+            pthread_mutex_unlock(&vmutex);
             local->results[line] = -1;
-            //printf("-1\n");//den tupwnei ta vazei ston pinaka me ta apotelesmata
+        }//printf("-1\n");//den tupwnei ta vazei ston pinaka me ta apotelesmata
 
+        pthread_mutex_lock(&vmutex);
         local->data->version++;
-        free(query);
         pthread_mutex_unlock(&vmutex);
+        free(query);
 
     }
+    empty(frontierB);
+    empty(frontierF);
 }
