@@ -5,12 +5,15 @@ ind *createNodeIndex(uint32_t index_size) {
 
     ind *index = NULL;
     int i = 0;
+    int j = 0;
 
     index = malloc(sizeof(ind) * index_size);
     for (i = 0; i < index_size; i++) {
         index[i].first = -1;
         index[i].last = -1;
-        index[i].visited = DEFAULT;
+        for(j = 0; j < THREAD_POOL_SIZE; j++) {
+            index[i].visited[j] = DEFAULT;
+        }
         index[i].lowlink = DEFAULT;
         index[i].index = DEFAULT;
         index[i].neighbors = NULL;
@@ -55,6 +58,7 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
 
     uint32_t realloc_size = *index_size;
     uint32_t i = 0;
+    int j = 0;
     ind *new = NULL;
 
     while (id >= realloc_size) realloc_size = realloc_size * 2; // diplasiasmos tou size mexri na xwraei to id
@@ -64,7 +68,9 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
     for (i = *index_size; i < realloc_size; i++) {  // arxikopoihsh twn newn index nodes
         (*index)[i].first = -1;
         (*index)[i].last = -1;
-        (*index)[i].visited = DEFAULT;
+        for(j = 0; j < THREAD_POOL_SIZE; j++) {
+            (*index)[i].visited[j] = DEFAULT;
+        }
         (*index)[i].lowlink = DEFAULT;
         (*index)[i].index = DEFAULT;
         (*index)[i].neighbors = NULL;
@@ -78,7 +84,7 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
     return OK_SUCCESS;
 }
 
-ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, ptrdiff_t *available) {
+ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, ptrdiff_t *available, int thread_id) {
 
     int i = 0;
     uint32_t version = 0;
@@ -90,10 +96,10 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
     if ((*index)[id].neighbors == NULL)
         (*index)[id].neighbors = createHashtable(HT_SMALL);
 
-    if (search((*index)[id].neighbors, neighbor, HT_SMALL, version) == FOUND)
+    if (search((*index)[id].neighbors, neighbor, HT_SMALL, version, thread_id) == FOUND)
         return ALR_CONNECTED;
     else
-        insert((*index)[id].neighbors, neighbor, HT_SMALL, version);
+        insert((*index)[id].neighbors, neighbor, HT_SMALL, version, thread_id);
 
     while (i < N) { // psaxnei stous geitones (max N ana komvo)
 //        if (current->neighbor[i] == neighbor) return ALR_CONNECTED; // gia na dei an uparxei

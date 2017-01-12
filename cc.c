@@ -112,7 +112,7 @@ void deleteStack(Stack *stack) {
     }
 }*/
 
-CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in, uint32_t size_out, ht_Node *explored, uint32_t version) {
+CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in, uint32_t size_out, ht_Node *explored, uint32_t version, int thread_id) {
 
     //dimiourgia CCIndex
 
@@ -144,7 +144,7 @@ CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
 
     for (cur = 0; cur < cc_size; cur++) {
         if((lookup(index_in, cur, size_in) == NOT_EXIST)  && (lookup(index_out, cur, size_out) == NOT_EXIST)) continue;//an o komvos den uparxei sinexise ston epomeno
-        if (search(explored, cur, HT_BIG, version) == FOUND) continue; // to idio an einai visited
+        if (search(explored, cur, HT_BIG, version, thread_id) == FOUND) continue; // to idio an einai visited
 
 
         //vale sto stack ton komvo kai olous tous geitones tou kai kane to idio gia tous geitones tous klp...
@@ -153,9 +153,9 @@ CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
         while (!stackisempty(stack)) {
             v = popfromstack(stack);
 
-            if (search(explored, v, HT_BIG, version) == NOT_FOUND) {
+            if (search(explored, v, HT_BIG, version, thread_id) == NOT_FOUND) {
                 cc_index[v] = cc_counter;
-                insert(explored, v, HT_BIG, version);
+                insert(explored, v, HT_BIG, version, thread_id);
 
                 offset_in = getListHead(index_in, v);
                 offset_out = getListHead(index_out, v);
@@ -465,7 +465,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     }
 }
 //Anazitisi sto UpdateIndex
-int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32_t version) {
+int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32_t version, int thread_id) {
 
     uint32_t cc1 = 0;
     uint32_t cc2 = 0;
@@ -525,8 +525,8 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
         while(!stackisempty(stack)) {
             v = popfromstack(stack);
             if(v != cc2) {
-                if (search(explored, v, HT_BIG, version) == NOT_FOUND) {
-                    insert(explored, v, HT_BIG, version);
+                if (search(explored, v, HT_BIG, version, thread_id) == NOT_FOUND) {
+                    insert(explored, v, HT_BIG, version, thread_id);
 
                     if(cc.updateIndex[v].cc_array == NULL) {
                         continue;
@@ -554,7 +554,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
     }
 }
 
-uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new_size) {
+uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new_size, int thread_id) {
 
     uint32_t v = 0, w = 0;
     uint32_t i = 0, j = 0;
@@ -591,10 +591,10 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new
     //vres gia kathe CC poio tha einai to kainourio pou tha tou antistoixei
     for(i = 0 ; i < cc->u_size ; i++) {
         if(cc->updateIndex[i].state == 'e') break;
-        if(search(explored, i, HT_BIG, version) == FOUND) continue;
+        if(search(explored, i, HT_BIG, version, thread_id) == FOUND) continue;
         pushinstack(stack, i);
         new_cc[i] = parent_cc;
-        insert(explored, i, HT_BIG, version);
+        insert(explored, i, HT_BIG, version, thread_id);
         while(!stackisempty(stack)) {
             v = popfromstack(stack);
 
@@ -605,7 +605,7 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new
                     if(new_cc[w] != DEFAULT) continue;
                     pushinstack(stack, w);
                     new_cc[w] = parent_cc;
-                    insert(explored, w, HT_BIG, version);
+                    insert(explored, w, HT_BIG, version, thread_id);
                 }
             }
 

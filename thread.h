@@ -3,7 +3,6 @@
 #include "grail.h"
 
 #define QUERY_SIZE 8
-#define THREAD_POOL_SIZE 4
 #define EMPTY -2
 #define RES_INIT 8192
 #define START -1
@@ -18,6 +17,7 @@ pthread_cond_t cond_next;
 
 int status;
 int finished;
+int max_id;
 
 //Buffer
 typedef struct B_Node_t{

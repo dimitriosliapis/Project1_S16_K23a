@@ -4,6 +4,9 @@
 #define HT_SMALL 67
 #define HT_N 7
 
+#define THREAD_POOL_SIZE 4
+
+
 #define DEFAULT 16777216
 
 #define FOUND 1
@@ -11,7 +14,7 @@
 
 typedef struct htEntry_t{
     uint32_t id;
-    uint32_t version;
+    uint32_t version[THREAD_POOL_SIZE+1];
 }ht_Entry;
 
 typedef struct htNode_t {
@@ -21,8 +24,8 @@ typedef struct htNode_t {
 
 ht_Node *createHashtable(uint32_t);
 
-int search(ht_Node *, uint32_t, uint32_t, uint32_t);
+int search(ht_Node *, uint32_t, uint32_t, uint32_t, int);
 
-void insert(ht_Node *, uint32_t, uint32_t, uint32_t);
+void insert(ht_Node *, uint32_t, uint32_t, uint32_t, int);
 
 void delete(ht_Node *, uint32_t);

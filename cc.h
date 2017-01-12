@@ -52,9 +52,9 @@ typedef struct CC_t{
     uint32_t metricVal;
 }CC;
 
-CC* createCCIndex(uint32_t, ind*, ind*, list_node*, list_node*, uint32_t, uint32_t, ht_Node*, uint32_t);
+CC* createCCIndex(uint32_t, ind*, ind*, list_node*, list_node*, uint32_t, uint32_t, ht_Node*, uint32_t, int);
 void initUpdateIndex(CC *);
 void refreshUpdateIndex(CC *, uint32_t, uint32_t);
-int searchUpdateIndex(CC, uint32_t, uint32_t, ht_Node*, uint32_t);
-uint32_t updateCCIndex(CC *, ht_Node*, uint32_t, uint32_t);
+int searchUpdateIndex(CC, uint32_t, uint32_t, ht_Node*, uint32_t, int);
+uint32_t updateCCIndex(CC *, ht_Node*, uint32_t, uint32_t, int);
 void destroyCCIndex(CC*);

@@ -1,6 +1,6 @@
 #include "grail.h"
 
-GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uint32_t version){
+GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uint32_t version, int thread_id){
 
     uint32_t i = 0, j = 0, k = 0, v = 0, w = 0;
     ptrdiff_t available_out = 0;
@@ -42,7 +42,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uin
 
                     if (neigh_scc != i) {
                         addEdge(&grail->hyper_index_out, i, neigh_scc, &grail->hyper_buffer_out, &grail->buf_size_out,
-                                &available_out);
+                                &available_out, thread_id);
                     }
 
                     k++;
@@ -64,7 +64,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uin
 
         //if (search(explored, i, HT_BIG, version) == FOUND) continue;
         //an einai visited sinexise sto epomeno
-        if(grail->hyper_index_out[i].visited == version) continue;
+        if(grail->hyper_index_out[i].visited[thread_id] == version) continue;
 
         pushinstack(dfs_stack, i);
         while(!stackisempty(dfs_stack)) {
@@ -83,7 +83,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uin
                 grail->hyper_index_out[v].rank = rank;
                 popfromstack(dfs_stack);
                 //insert(explored, v, HT_BIG, version);
-                grail->hyper_index_out[v].visited = version;
+                grail->hyper_index_out[v].visited[thread_id] = version;
             }
 
             //an exei paidia
@@ -102,15 +102,15 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uin
                     //if (search(explored, w, HT_BIG, version) == NOT_FOUND) {
 
                     //an den einai visited to paidi push kai break gia na ginei DFS sta paidia tou
-                    if(grail->hyper_index_out[w].visited != version) {
+                    if(grail->hyper_index_out[w].visited[thread_id] != version) {
                         pushinstack(dfs_stack, w);
                         break;
                     }
-                    else if (search(grail->hyper_index_out[v].neighbors, w, HT_SMALL, 1) == NOT_FOUND) { //alliws an einai visited
+                    else if (search(grail->hyper_index_out[v].neighbors, w, HT_SMALL, 1, thread_id) == NOT_FOUND) { //alliws an einai visited
                         // tin prwti fora pou tha ksanaperasei tha auksithei o metritis all_children
 
                         grail->hyper_index_out[v].all_children_in_scc++;
-                        insert(grail->hyper_index_out[v].neighbors, w, HT_SMALL, 1);
+                        insert(grail->hyper_index_out[v].neighbors, w, HT_SMALL, 1, thread_id);
 
                         //pairnei to min_rank apo kathe paidi pou exei termatisei
                         if (grail->hyper_index_out[v].min_rank > grail->hyper_index_out[w].min_rank)
@@ -129,7 +129,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uin
                     rank++;
                     grail->hyper_index_out[v].rank = rank;
                     //insert(explored, v, HT_BIG, version);
-                    grail->hyper_index_out[v].visited = version;
+                    grail->hyper_index_out[v].visited[thread_id] = version;
                     popfromstack(dfs_stack);
                 }
             }

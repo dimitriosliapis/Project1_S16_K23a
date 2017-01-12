@@ -12,7 +12,7 @@
 typedef struct index_t{
     ptrdiff_t first;
     ptrdiff_t last;
-    uint32_t visited;
+    uint32_t visited[THREAD_POOL_SIZE+1];
     uint32_t lowlink;
     uint32_t index;
     uint32_t rank;
@@ -31,7 +31,7 @@ ptrdiff_t insertNode(ind**, uint32_t, list_node**, uint32_t*, uint32_t*, ptrdiff
 
 int reallocNodeIndex(ind**, int, uint32_t*);
 
-ptrdiff_t addEdge(ind**, uint32_t, uint32_t, list_node**, uint32_t*, ptrdiff_t*);
+ptrdiff_t addEdge(ind**, uint32_t, uint32_t, list_node**, uint32_t*, ptrdiff_t*, int);
 
 ptrdiff_t getListHead(ind*, uint32_t);
 

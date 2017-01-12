@@ -74,9 +74,9 @@ int main(int argc, char *argv[]) {
         if (lookup(thread_args->data->index_in, N2, thread_args->data->index_size_in) == NOT_EXIST)
             insertNode(&thread_args->data->index_in, N2, &thread_args->data->buffer_in, &thread_args->data->index_size_in, &thread_args->data->buffer_size_in, &thread_args->data->available_in);
 
-        addEdge(&thread_args->data->index_out, N1, N2, &thread_args->data->buffer_out, &thread_args->data->buffer_size_out, &thread_args->data->available_out);
+        addEdge(&thread_args->data->index_out, N1, N2, &thread_args->data->buffer_out, &thread_args->data->buffer_size_out, &thread_args->data->available_out, THREAD_POOL_SIZE);
 
-        addEdge(&thread_args->data->index_in, N2, N1, &thread_args->data->buffer_in, &thread_args->data->buffer_size_in, &thread_args->data->available_in);
+        addEdge(&thread_args->data->index_in, N2, N1, &thread_args->data->buffer_in, &thread_args->data->buffer_size_in, &thread_args->data->available_in, THREAD_POOL_SIZE);
 
         fgets(str, sizeof(str), Graph);
     }
@@ -89,10 +89,10 @@ int main(int argc, char *argv[]) {
     else thread_args->data->scc_size = thread_args->data->index_size_out;
 
     thread_args->data->version++;
-    thread_args->data->scc = estimateStronglyConnectedComponents(thread_args->data->index_out, thread_args->data->buffer_out, thread_args->data->scc_size, thread_args->data->version);
+    thread_args->data->scc = estimateStronglyConnectedComponents(thread_args->data->index_out, thread_args->data->buffer_out, thread_args->data->scc_size, thread_args->data->version, THREAD_POOL_SIZE);
 
     thread_args->data->version++;
-    thread_args->data->grail = buildGrailIndex(thread_args->data->index_out, thread_args->data->buffer_out, thread_args->data->scc, thread_args->data->version);
+    thread_args->data->grail = buildGrailIndex(thread_args->data->index_out, thread_args->data->buffer_out, thread_args->data->scc, thread_args->data->version, THREAD_POOL_SIZE);
     thread_args->data->version++;
 
     /*thread_args->data->frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo

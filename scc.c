@@ -19,7 +19,7 @@
 }*/
 
 //dimiourgia SCC
-SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version) {
+SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, int thread_id) {
 
     Stack_t *scc_stack = createStack();
     uint32_t index = 0;
@@ -50,14 +50,14 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
     for(i = 0; i < num_nodes; i++) {
         if(lookup(index_out, i, num_nodes) == NOT_EXIST) continue;
         //if(search(explored, i, HT_BIG, version) == FOUND) continue;
-        if(index_out[i].visited == version) continue;
-        scc = tarjanRecursive(&scc, index_out, buffer_out, num_nodes, version, i, &index, scc_stack);
+        if(index_out[i].visited[thread_id] == version) continue;
+        scc = tarjanRecursive(&scc, index_out, buffer_out, num_nodes, version, i, &index, scc_stack, thread_id);
     }
     return scc;
 }
 
 
-SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t *index, Stack_t *scc_stack){
+SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t *index, Stack_t *scc_stack, int thread_id){
 
     uint32_t k = 0, w = 0, a = 0, r = 0, realloc_node_size;
     ptrdiff_t offset_out;
@@ -65,7 +65,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
     uint32_t scc_counter = (*scc)->components_count;
 
     //insert(explored, v, HT_BIG, version);
-    index_out[v].visited = version;
+    index_out[v].visited[thread_id] = version;
 
     //an den xwraei to kainourio SCC kanei realloc
     if(scc_counter == (*scc)->component_size){
@@ -100,8 +100,8 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
             //if(search(explored, w, HT_BIG, version) == NOT_FOUND){
 
             //an to paidi tou den einai visited
-            if(index_out[w].visited != version) {
-                *scc = tarjanRecursive(scc, index_out, buffer_out, num_nodes, version, w, index, scc_stack);
+            if(index_out[w].visited[thread_id] != version) {
+                *scc = tarjanRecursive(scc, index_out, buffer_out, num_nodes, version, w, index, scc_stack, thread_id);
                 if (index_out[v].lowlink > index_out[w].lowlink)
                     index_out[v].lowlink = index_out[w].lowlink;
             }

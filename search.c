@@ -77,7 +77,8 @@ int bBFS(ind *index_in,
          uint32_t end,
          Queue *frontierF,
          Queue *frontierB,
-         uint32_t version) {
+         uint32_t version,
+         int thread_id) {
 
     list_node *neighbors = NULL;
     uint32_t node = DEFAULT, successor = DEFAULT, childrenF = 0, childrenB = 0;
@@ -88,12 +89,12 @@ int bBFS(ind *index_in,
     if (start == end)   // an o komvos ekkinhshs einai o komvos stoxos tote steps=0
         return 0;
 
-    index_out[start].visited = version;
+    index_out[start].visited[thread_id] = version;
     enq(frontierF, start);
     childrenF = index_out[start].num_of_children;
     counterF++;
 
-    index_in[end].visited = version;
+    index_in[end].visited[thread_id] = version;
     enq(frontierB, end);
     childrenB = index_in[end].num_of_children;
     counterB++;
@@ -116,10 +117,10 @@ int bBFS(ind *index_in,
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (index_out[successor].visited != version) {      // an den ton exei epispeftei o idios
-                                index_out[successor].visited = version;         // ton episkeptetai
+                            if (index_out[successor].visited[thread_id] != version) {      // an den ton exei epispeftei o idios
+                                index_out[successor].visited[thread_id] = version;         // ton episkeptetai
 
-                                if (index_in[successor].visited == version) {   // goal afou ton exei episkeptei o allos
+                                if (index_in[successor].visited[thread_id] == version) {   // goal afou ton exei episkeptei o allos
                                     restartQueue(frontierF);
                                     restartQueue(frontierB);
                                     return stepsB + stepsF;
@@ -170,10 +171,10 @@ int bBFS(ind *index_in,
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (index_in[successor].visited != version) {       // an den ton exei episkeptei o idios
-                                index_in[successor].visited = version;          // ton episkeptetai
+                            if (index_in[successor].visited[thread_id] != version) {       // an den ton exei episkeptei o idios
+                                index_in[successor].visited[thread_id] = version;          // ton episkeptetai
 
-                                if (index_out[successor].visited == version) {  // goal afou ton exei episkeptei o allos
+                                if (index_out[successor].visited[thread_id] == version) {  // goal afou ton exei episkeptei o allos
 
                                     restartQueue(frontierB);
                                     restartQueue(frontierF);

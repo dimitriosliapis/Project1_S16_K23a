@@ -112,6 +112,7 @@ void *master_thread_function(void *ptr) {
 
     finished = 0;
     status = START;
+    max_id = 0;
     for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_create(&worker_threads[a], 0, worker_thread_function, local);
 
     fgets(str,sizeof(str), local->file);
@@ -151,8 +152,14 @@ void *worker_thread_function(void *ptr){
     uint32_t N1, N2;
     int line, i;
     int realloc_size;
-    uint32_t local_version;
+    uint32_t local_version = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
+    int thread_id;
+
+    pthread_mutex_lock(&vmutex);
+    thread_id = max_id;
+    max_id++;
+    pthread_mutex_unlock(&vmutex);
 
 
     frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
@@ -197,30 +204,31 @@ void *worker_thread_function(void *ptr){
             local->res_size = realloc_size;
         }
 
-
+        pthread_mutex_unlock(&vmutex);
         toID(query, &N1, &N2);
 
 
         if (lookup(local->data->index_out, N1, local->data->index_size_out) == ALR_EXISTS &&
             lookup(local->data->index_in, N2, local->data->index_size_in) == ALR_EXISTS &&
             isReachableGrailIndex(local->data->grail, N1, N2, local->data->scc) == MAYBE) {
-            local->data->version++;
-            local_version = local->data->version;
-            pthread_mutex_unlock(&vmutex);
+            /*local->data->version++;
+            local_version = local->data->version;*/
+            local_version++;
+            //pthread_mutex_unlock(&vmutex);
             local->results[line] = bBFS(local->data->index_in, local->data->index_out, local->data->buffer_in,
                                       local->data->buffer_out, N1, N2, frontierF, frontierB,
-                                        local_version);
+                                        local_version,thread_id);
 
             //printf("%d\n", local->data->steps);//den tupwnei ta vazei ston pinaka me ta apotelesmata
             //local->results[i] = local->data->steps;
         } else {
-            pthread_mutex_unlock(&vmutex);
             local->results[line] = -1;
+           // pthread_mutex_unlock(&vmutex);
         }//printf("-1\n");//den tupwnei ta vazei ston pinaka me ta apotelesmata
 
-        pthread_mutex_lock(&vmutex);
-        local->data->version++;
-        pthread_mutex_unlock(&vmutex);
+        //pthread_mutex_lock(&vmutex);
+       // local->data->version++;
+        //pthread_mutex_unlock(&vmutex);
         free(query);
 
     }

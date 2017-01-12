@@ -10,6 +10,6 @@ typedef struct GrailIndex_t{
     uint32_t ind_size_out;
 }GrailIndex;
 
-GrailIndex* buildGrailIndex(ind *, list_node *, SCC*, uint32_t);
+GrailIndex* buildGrailIndex(ind *, list_node *, SCC*, uint32_t, int);
 int isReachableGrailIndex(GrailIndex*, uint32_t, uint32_t, SCC*);
 void destroyGrailIndex(GrailIndex*);
