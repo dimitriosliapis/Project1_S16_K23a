@@ -9,6 +9,8 @@
 #define NOT_EXIST -24
 #define ALR_CONNECTED -25
 
+
+
 typedef struct index_t{
     ptrdiff_t first;
     ptrdiff_t last;

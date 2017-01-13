@@ -68,16 +68,15 @@ void place_to_buffer(char *query, Buffer *buffer, int line) {
     buffer->line = line;*/
 }
 
-char* remove_from_buffer(Buffer *buffer, int *line) {
+int remove_from_buffer(Buffer *buffer, int *line, char **query) {
 
-    char *query = NULL;
     B_Node *tmp = NULL;
 
-    query = malloc(64*sizeof(char));
-    memset(query, '\0', 64);
+    //query = malloc(64*sizeof(char));
+    memset(*query, '\0', 64);
 
     if(buffer->first != NULL){
-        strcpy(query,buffer->first->query);
+        strcpy(*query,buffer->first->query);
         *line = buffer->first->line;
 
        // printf("GOT QUERY: %s\n", query);
@@ -85,9 +84,9 @@ char* remove_from_buffer(Buffer *buffer, int *line) {
         tmp = buffer->first;
         buffer->first = tmp->next;
         free(tmp);
-        return query;
+        return 1;
     }
-    else return NULL;
+    else return -1;
 
     /*query = malloc(64*sizeof(char));
     memset(query, '\0', 64);
@@ -108,6 +107,7 @@ void *master_thread_function(void *ptr) {
     char str[64];
     int line = 1, a;
     int realloc_size = 0;
+    int start = 1;
 
     pthread_t *worker_threads = (pthread_t *)malloc(THREAD_POOL_SIZE*sizeof(pthread_t));
 
@@ -118,22 +118,35 @@ void *master_thread_function(void *ptr) {
     max_id = 0;
 
 
+    pthread_mutex_lock(&vmutex);
 
     for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_create(&worker_threads[a], 0, worker_thread_function, local);
 
     fgets(str,sizeof(str), local->file);
     fgets(str,sizeof(str), local->file);
 
-    pthread_mutex_lock(&mutex);
+
+
+    pthread_mutex_unlock(&vmutex);
 
     while (!feof(local->file)) {
 
+        pthread_mutex_lock(&mutex);
 
         while(str[0] != 'F'){
 
             place_to_buffer(str, local->buffer, line);
+
+            if(start) {
+                pthread_mutex_unlock(&mutex);
+                start = 0;
+            }
+
             //if(status == START) status = CONTINUE;
             line++;
+ /*           if(line == 32708){
+                printf("Asgaeg\n");
+            }*/
             if(line == local->res_size){
 
                 realloc_size = 2*local->res_size;
@@ -145,20 +158,29 @@ void *master_thread_function(void *ptr) {
 
             fgets(str,sizeof(str), local->file);
         }
-        status = CONTINUE;
-        while(status != START) {
-            pthread_cond_wait(&cond_next, &mutex);
-        }
+        // status = CONTINUE;
+        //while(status != START) {
+        pthread_mutex_lock(&mutex);
+        pthread_cond_wait(&cond_next, &mutex);
+        pthread_mutex_unlock(&mutex);
+        start = 1;
+
+        //pthread_cond_broadcast(&cond_start);
+
+
+
+
+        //}
         fgets(str,sizeof(str), local->file);
 
     }
     finished = 1;
-    pthread_mutex_unlock(&mutex);
+    local->res_size = line;
 
 
     for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_join(worker_threads[a], 0);
 
-
+    pthread_exit(&finished);
 }
 
 void *worker_thread_function(void *ptr){
@@ -166,12 +188,14 @@ void *worker_thread_function(void *ptr){
     arg *local = ptr;
     char *query;
     uint32_t N1, N2;
-    int line, i;
+    int line, i, ret;
     uint32_t local_version = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
     int thread_id;
 
     pthread_mutex_lock(&vmutex);
+    query = malloc(64*sizeof(char));
+
     thread_id = max_id;
     max_id++;
     pthread_mutex_unlock(&vmutex);
@@ -183,20 +207,28 @@ void *worker_thread_function(void *ptr){
 
     while(1) {
 
-        while(status == START){
+        if(finished) break;
+
+        pthread_mutex_lock(&mutex);
+        //pthread_cond_wait(&cond_start, &mutex);
+
+/*        while(status == START){
             if(finished) break;
         }
 
         if(finished) break;
+
         pthread_mutex_lock(&mutex);
 
-        query = remove_from_buffer(local->buffer, &line);
+        if(status == START){
+            pthread_mutex_unlock(&mutex);
+            continue;
+        }*/
+        ret = remove_from_buffer(local->buffer, &line, &query);
 
-
-
-        if(query == NULL){
-            status = START;
-            pthread_cond_signal(&cond_next);
+        if(ret == -1){
+            //status = START;
+            pthread_cond_broadcast(&cond_next);
             pthread_mutex_unlock(&mutex);
             if(finished) break;
             continue;
@@ -204,18 +236,19 @@ void *worker_thread_function(void *ptr){
         pthread_mutex_unlock(&mutex);
 
 
+
         toID(query, &N1, &N2);
 
 
-        if (lookup(local->data->index_out, N1, local->data->index_size_out) == ALR_EXISTS &&
-            lookup(local->data->index_in, N2, local->data->index_size_in) == ALR_EXISTS &&
-            isReachableGrailIndex(local->data->grail, N1, N2, local->data->scc) == MAYBE) {
+        if (lookup(global_index_out, N1, global_index_size_out) == ALR_EXISTS &&
+            lookup(global_index_in, N2, global_index_size_in) == ALR_EXISTS &&
+            isReachableGrailIndex(global_grail, N1, N2, global_scc) == MAYBE) {
             /*local->data->version++;
             local_version = local->data->version;*/
             local_version++;
             //pthread_mutex_unlock(&vmutex);
-            local->results[line] = bBFS(local->data->index_in, local->data->index_out, local->data->buffer_in,
-                                      local->data->buffer_out, N1, N2, frontierF, frontierB,
+            local->results[line] = bBFS(global_index_in, global_index_out, global_buffer_in,
+                                        global_buffer_out, N1, N2, frontierF, frontierB,
                                         local_version,thread_id);
 
             //printf("%d\n", local->data->steps);//den tupwnei ta vazei ston pinaka me ta apotelesmata
@@ -228,9 +261,11 @@ void *worker_thread_function(void *ptr){
         //pthread_mutex_lock(&vmutex);
        // local->data->version++;
         //pthread_mutex_unlock(&vmutex);
-        free(query);
+
 
     }
+    free(query);
+
     empty(frontierB);
     empty(frontierF);
 

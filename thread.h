@@ -1,16 +1,21 @@
+#ifndef PROJECT1_S16_K23A_THREAD_H
+#define PROJECT1_S16_K23A_THREAD_H
+
+
 #include <pthread.h>
 #include <stdio.h>
-#include "grail.h"
+#include "globals.h"
 
 #define QUERY_SIZE 8
 #define EMPTY -2
-#define RES_INIT 8192
+#define RES_INIT 70000
 #define START -1
 #define FINISHED 1
 #define CONTINUE 0
 #define WAIT 2
 
 pthread_mutex_t mutex;
+//pthread_mutex_t mutexb;
 pthread_mutex_t vmutex;
 pthread_cond_t cond_start;
 pthread_cond_t cond_next;
@@ -18,6 +23,7 @@ pthread_cond_t cond_next;
 int status;
 int finished;
 int max_id;
+
 
 //Buffer
 typedef struct B_Node_t{
@@ -51,7 +57,7 @@ typedef struct work_data_t{
 typedef struct arg_t {
     FILE *file;
     Buffer *buffer;
-    work_data *data;
+   // work_data *data;
     int *results;
     int res_size;
 } arg;
@@ -59,7 +65,9 @@ typedef struct arg_t {
 int toID(char *, uint32_t *, uint32_t *);
 
 void place_to_buffer(char *query, Buffer *buffer, int line);
-char* remove_from_buffer(Buffer *buffer, int *line);
+int remove_from_buffer(Buffer *buffer, int *line, char **query);
 
 void *master_thread_function(void *ptr);
 void *worker_thread_function(void *ptr);
+
+#endif //PROJECT1_S16_K23A_THREAD_H

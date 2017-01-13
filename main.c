@@ -5,6 +5,8 @@
 arg *thread_args;
 
 
+
+
 int main(int argc, char *argv[]) {
 
     FILE *Graph = NULL;//, *Queries = NULL;
@@ -28,12 +30,16 @@ int main(int argc, char *argv[]) {
     int i = 0;
 
     thread_args = malloc(sizeof(arg));
-    thread_args->data = malloc(sizeof(work_data));
+    //thread_args->data = malloc(sizeof(work_data));
 
-    thread_args->data->buffer_size_in = BUFF_SIZE;
-    thread_args->data->buffer_size_out = BUFF_SIZE;
-    thread_args->data->index_size_in = IND_SIZE;
-    thread_args->data->index_size_out = IND_SIZE;
+    global_buffer_size_in = BUFF_SIZE;
+    global_buffer_size_out = BUFF_SIZE;
+    global_index_size_in = IND_SIZE;
+    global_index_size_out = IND_SIZE;
+
+    global_available_in = 0;
+    global_available_out = 0;
+
 
 
 
@@ -48,12 +54,12 @@ int main(int argc, char *argv[]) {
     }
 
     // zeugh indexes kai buffers
-    thread_args->data->buffer_in = createBuffer(thread_args->data->buffer_size_in);
-    thread_args->data->index_in = createNodeIndex(thread_args->data->index_size_in);
-    thread_args->data->buffer_out = createBuffer(thread_args->data->buffer_size_out);
-    thread_args->data->index_out = createNodeIndex(thread_args->data->index_size_out);
+    global_buffer_in = createBuffer(global_buffer_size_in);
+    global_index_in = createNodeIndex(global_index_size_in);
+    global_buffer_out = createBuffer(global_buffer_size_out);
+    global_index_out = createNodeIndex(global_index_size_out);
 
-    thread_args->data->explored = createHashtable(HT_BIG);
+    global_explored = createHashtable(HT_BIG);
 
 
     struct timeval tv1, tv2;
@@ -68,40 +74,45 @@ int main(int argc, char *argv[]) {
 
         toID(str, &N1, &N2);
 
-        if (lookup(thread_args->data->index_out, N1, thread_args->data->index_size_out) == NOT_EXIST)
-            insertNode(&thread_args->data->index_out, N1, &thread_args->data->buffer_out, &thread_args->data->index_size_out, &thread_args->data->buffer_size_out, &thread_args->data->available_out);
+        if (lookup(global_index_out, N1, global_index_size_out) == NOT_EXIST)
+            insertNode(&global_index_out, N1, &global_buffer_out, &global_index_size_out, &global_buffer_size_out, &global_available_out);
 
-        if (lookup(thread_args->data->index_in, N2, thread_args->data->index_size_in) == NOT_EXIST)
-            insertNode(&thread_args->data->index_in, N2, &thread_args->data->buffer_in, &thread_args->data->index_size_in, &thread_args->data->buffer_size_in, &thread_args->data->available_in);
+        if (lookup(global_index_in, N2, global_index_size_in) == NOT_EXIST)
+            insertNode(&global_index_in, N2, &global_buffer_in, &global_index_size_in, &global_buffer_size_in, &global_available_in);
 
-        addEdge(&thread_args->data->index_out, N1, N2, &thread_args->data->buffer_out, &thread_args->data->buffer_size_out, &thread_args->data->available_out, THREAD_POOL_SIZE);
+        addEdge(&global_index_out, N1, N2, &global_buffer_out, &global_buffer_size_out, &global_available_out, THREAD_POOL_SIZE);
 
-        addEdge(&thread_args->data->index_in, N2, N1, &thread_args->data->buffer_in, &thread_args->data->buffer_size_in, &thread_args->data->available_in, THREAD_POOL_SIZE);
+        addEdge(&global_index_in, N2, N1, &global_buffer_in, &global_buffer_size_in, &global_available_in, THREAD_POOL_SIZE);
 
         fgets(str, sizeof(str), Graph);
     }
 
     fclose(Graph);
 
-    thread_args->data->version = 0;
+    global_version = 0;
 
-    if(thread_args->data->index_size_in > thread_args->data->index_size_out) thread_args->data->scc_size = thread_args->data->index_size_in;
-    else thread_args->data->scc_size = thread_args->data->index_size_out;
+    if(global_index_size_in > global_index_size_out) global_scc_size = global_index_size_in;
+    else global_scc_size = global_index_size_out;
 
-    thread_args->data->version++;
-    thread_args->data->scc = estimateStronglyConnectedComponents(thread_args->data->index_out, thread_args->data->buffer_out, thread_args->data->scc_size, thread_args->data->version, THREAD_POOL_SIZE);
+    global_version++;
+    global_scc = estimateStronglyConnectedComponents(global_index_out, global_buffer_out, global_scc_size, global_version, THREAD_POOL_SIZE);
 
-    thread_args->data->version++;
-    thread_args->data->grail = buildGrailIndex(thread_args->data->index_out, thread_args->data->buffer_out, thread_args->data->scc, thread_args->data->version, THREAD_POOL_SIZE);
-    thread_args->data->version++;
+    global_version++;
+    global_grail = buildGrailIndex(global_index_out, global_buffer_out, global_scc, global_version, THREAD_POOL_SIZE);
+    global_version++;
 
     /*thread_args->data->frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     thread_args->data->frontierB = createQueue();*/  // synoro tou bfs apo ton stoxo pros thn arxh
 
     /*exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
     exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh*/
+    gettimeofday(&tv2, NULL);
+    printf("Total time = %f seconds\n",
+           (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+           (double) (tv2.tv_sec - tv1.tv_sec));
 
     pthread_mutex_init(&mutex, NULL);
+    //pthread_mutex_init(&mutexb, NULL);
     pthread_mutex_init(&vmutex, NULL);
     pthread_cond_init(&cond_start, NULL);
     pthread_cond_init(&cond_next, NULL);
@@ -136,10 +147,10 @@ int main(int argc, char *argv[]) {
 
     while(a < thread_args->res_size){
 
-        if(thread_args->results[a] == EMPTY){
+        /*if(thread_args->results[a] == EMPTY){
             a++;
             continue;
-        }
+        }*/
         printf("%d\n", thread_args->results[a]);
         a++;
     }
@@ -263,24 +274,24 @@ int main(int argc, char *argv[]) {
     else scc_size = index_size_out;*/
 
 
-    gettimeofday(&tv2, NULL);
-    printf("Total time = %f seconds\n",
-           (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
-           (double) (tv2.tv_sec - tv1.tv_sec));
+
 
 
 /*    empty(thread_args->data->frontierF);
     empty(thread_args->data->frontierB);*/
-    delete(thread_args->data->explored, HT_BIG);
+    delete(global_explored, HT_BIG);
 /*    delete(exploredB, HT_BIG);
     delete(exploredA, HT_BIG);*/
-    destroyBuffer(thread_args->data->buffer_in);
-    destroyBuffer(thread_args->data->buffer_out);
-    destroyNodeIndex(thread_args->data->index_in, thread_args->data->index_size_in);
-    destroyNodeIndex(thread_args->data->index_out, thread_args->data->index_size_out);
+    destroyBuffer(global_buffer_in);
+    destroyBuffer(global_buffer_out);
+    destroyNodeIndex(global_index_in, global_index_size_in);
+    destroyNodeIndex(global_index_out,global_index_size_out);
     //if(thread_args->data->cc != NULL) destroyCCIndex(cc);
-    if(thread_args->data->scc != NULL) destroyStronglyConnectedComponents(thread_args->data->scc);
-    if(thread_args->data->grail != NULL) destroyGrailIndex(thread_args->data->grail);
+    if(global_scc != NULL) destroyStronglyConnectedComponents(global_scc);
+    if(global_grail != NULL) destroyGrailIndex(global_grail);
+    free(thread_args->results);
+    free(thread_args->buffer);
+    //free(thread_args->data);
 
     return 0;
 }
