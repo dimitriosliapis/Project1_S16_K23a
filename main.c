@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
     //ht_Node *explored = NULL;
     //uint32_t version = 0;
     //int steps = 0;
+    uint32_t max = 0;
 
 //thread
    /* CC *cc = NULL;
@@ -28,6 +29,9 @@ int main(int argc, char *argv[]) {
     GrailIndex *grail = NULL;*/
 
     int i = 0;
+    struct timeval tv1, tv2;
+
+    gettimeofday(&tv1, NULL);
 
     thread_args = malloc(sizeof(arg));
     //thread_args->data = malloc(sizeof(work_data));
@@ -62,8 +66,6 @@ int main(int argc, char *argv[]) {
     global_explored = createHashtable(HT_BIG);
 
 
-    struct timeval tv1, tv2;
-    gettimeofday(&tv1, NULL);
 
     char str[64];
     fgets(str, sizeof(str), Graph);
@@ -74,42 +76,47 @@ int main(int argc, char *argv[]) {
 
         toID(str, &N1, &N2);
 
-        if (lookup(global_index_out, N1, global_index_size_out) == NOT_EXIST)
-            insertNode(&global_index_out, N1, &global_buffer_out, &global_index_size_out, &global_buffer_size_out, &global_available_out);
+        if (lookup(global_index_out, N1, global_index_size_out) == NOT_EXIST) {
+            insertNode(&global_index_out, N1, &global_buffer_out, &global_index_size_out, &global_buffer_size_out,
+                       &global_available_out);
+            if(max < N1) max = N1;
+        }
+        if (lookup(global_index_in, N2, global_index_size_in) == NOT_EXIST) {
+            insertNode(&global_index_in, N2, &global_buffer_in, &global_index_size_in, &global_buffer_size_in,
+                       &global_available_in);
+            if(max < N2) max = N2;
+        }
+        addEdge(&global_index_out, N1, N2, &global_buffer_out, &global_buffer_size_out, &global_available_out, 0);
 
-        if (lookup(global_index_in, N2, global_index_size_in) == NOT_EXIST)
-            insertNode(&global_index_in, N2, &global_buffer_in, &global_index_size_in, &global_buffer_size_in, &global_available_in);
-
-        addEdge(&global_index_out, N1, N2, &global_buffer_out, &global_buffer_size_out, &global_available_out, THREAD_POOL_SIZE);
-
-        addEdge(&global_index_in, N2, N1, &global_buffer_in, &global_buffer_size_in, &global_available_in, THREAD_POOL_SIZE);
+        addEdge(&global_index_in, N2, N1, &global_buffer_in, &global_buffer_size_in, &global_available_in, 0);
 
         fgets(str, sizeof(str), Graph);
     }
 
     fclose(Graph);
 
+
+    /*if(global_index_size_in > global_index_size_out) global_scc_size = global_index_size_in;
+    else global_scc_size = global_index_size_out;*/
+
+    global_scc_size = max;
+
+    global_version++;
+    global_scc = estimateStronglyConnectedComponents(global_index_out, global_buffer_out, global_scc_size, global_version, 0);
+
+
     global_version = 0;
-
-    if(global_index_size_in > global_index_size_out) global_scc_size = global_index_size_in;
-    else global_scc_size = global_index_size_out;
-
     global_version++;
-    global_scc = estimateStronglyConnectedComponents(global_index_out, global_buffer_out, global_scc_size, global_version, THREAD_POOL_SIZE);
+    global_grail = buildGrailIndex(global_index_out, global_buffer_out, global_scc, global_version, 0);
+    global_version++;
 
-    global_version++;
-    global_grail = buildGrailIndex(global_index_out, global_buffer_out, global_scc, global_version, THREAD_POOL_SIZE);
-    global_version++;
 
     /*thread_args->data->frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
     thread_args->data->frontierB = createQueue();*/  // synoro tou bfs apo ton stoxo pros thn arxh
 
     /*exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
     exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh*/
-    gettimeofday(&tv2, NULL);
-    printf("Total time = %f seconds\n",
-           (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
-           (double) (tv2.tv_sec - tv1.tv_sec));
+
 
     pthread_mutex_init(&mutex, NULL);
     //pthread_mutex_init(&mutexb, NULL);
@@ -142,8 +149,8 @@ int main(int argc, char *argv[]) {
 
     int a = 1;
 
-    pthread_create(&master_thread, 0, master_thread_function, thread_args);
-    pthread_join(master_thread, 0);
+    pthread_create(&master_thread, NULL, master_thread_function, thread_args);
+    pthread_join(master_thread, NULL);
 
     while(a < thread_args->res_size){
 
@@ -155,6 +162,11 @@ int main(int argc, char *argv[]) {
         a++;
     }
 
+    gettimeofday(&tv2, NULL);
+
+    printf("Total time = %f seconds\n",
+           (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+           (double) (tv2.tv_sec - tv1.tv_sec));
     /*fgets(str, sizeof(str), Queries);
 
     if(strncmp(str, "STATIC", 6) == 0){

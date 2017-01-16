@@ -115,12 +115,12 @@ void *master_thread_function(void *ptr) {
     //local->res_size = 0;
     finished = 0;
     status = START;
-    max_id = 0;
+    max_id = 1;
 
 
     pthread_mutex_lock(&vmutex);
 
-    for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_create(&worker_threads[a], 0, worker_thread_function, local);
+    for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_create(&worker_threads[a], NULL, worker_thread_function, local);
 
     fgets(str,sizeof(str), local->file);
     fgets(str,sizeof(str), local->file);
@@ -178,7 +178,7 @@ void *master_thread_function(void *ptr) {
     local->res_size = line;
 
 
-    for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_join(worker_threads[a], 0);
+    for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_join(worker_threads[a], NULL);
 
     pthread_exit(&finished);
 }

@@ -5,7 +5,7 @@
 #define METRIC 1250
 #define STACK_ARRAY_SIZE 2048
 
-typedef struct stack {
+/*typedef struct stack {
     uint32_t *stack_array;
     int size;
     int first;
@@ -18,16 +18,16 @@ int stackisempty(Stack_t *stack);
 void pushinstack(Stack_t *stack, uint32_t id);
 uint32_t popfromstack(Stack_t *stack);
 uint32_t peekfromstack(Stack_t *stack);
-void deletestack(Stack_t *stack);
+void deletestack(Stack_t *stack);*/
 
-/*typedef struct sNode_t{
+typedef struct sNode_t{
     uint32_t id;
     struct sNode_t *next;
-}sNode;*/
+}sNode;
 
-/*typedef struct stack_t{
+typedef struct stack_t{
     sNode *last;
-}Stack;*/
+}Stack;
 
 typedef struct u_unode_t{
     uint32_t *cc_array;// pinakas me CC pou sindeetai
@@ -38,10 +38,10 @@ typedef struct u_unode_t{
 }u_node;
 
 
-/*void push(Stack*, uint32_t);
+void push(Stack*, uint32_t);
 uint32_t pop(Stack*);
 int stackIsEmpty(Stack*);
-void deleteStack(Stack*);*/
+void deleteStack(Stack*);
 
 typedef struct CC_t{
     uint32_t *cc_index;

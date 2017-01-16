@@ -12,6 +12,9 @@
 #define FOUND 1
 #define NOT_FOUND -1
 
+uint32_t hash( uint32_t a);
+
+
 typedef struct htEntry_t{
     uint32_t id;
     uint32_t version[THREAD_POOL_SIZE+1];

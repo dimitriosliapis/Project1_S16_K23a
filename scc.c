@@ -1,13 +1,13 @@
 #include "scc.h"
 
-/*uint32_t peek(Stack *stack) {
+uint32_t peek(Stack *stack) {
 
     if(stack == NULL) return DEFAULT;
     if(stack->last == NULL) return DEFAULT;
 
     return stack->last->id;
 
-}*/
+}
 
 
 /*SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t size_out, uint32_t num_nodes, ht_Node *explored, ht_Node *explored2, ht_Node* explored3, uint32_t version) {
@@ -21,7 +21,7 @@
 //dimiourgia SCC
 SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, int thread_id) {
 
-    Stack_t *scc_stack = createStack();
+    Stack scc_stack;
     uint32_t index = 0;
     uint32_t i = 0, r = 0;
 
@@ -42,7 +42,7 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
         scc->id_belongs_to_component[i] = DEFAULT;
     }
 
-    //scc_stack.last = NULL;
+    scc_stack.last = NULL;
 
     index = 1;
 
@@ -51,13 +51,13 @@ SCC* estimateStronglyConnectedComponents(ind *index_out, list_node *buffer_out, 
         if(lookup(index_out, i, num_nodes) == NOT_EXIST) continue;
         //if(search(explored, i, HT_BIG, version) == FOUND) continue;
         if(index_out[i].visited[thread_id] == version) continue;
-        scc = tarjanRecursive(&scc, index_out, buffer_out, num_nodes, version, i, &index, scc_stack, thread_id);
+        scc = tarjanRecursive(&scc, index_out, buffer_out, num_nodes, version, i, &index, &scc_stack, thread_id);
     }
     return scc;
 }
 
 
-SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t *index, Stack_t *scc_stack, int thread_id){
+SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t *index, Stack *scc_stack, int thread_id){
 
     uint32_t k = 0, w = 0, a = 0, r = 0, realloc_node_size;
     ptrdiff_t offset_out;
@@ -82,7 +82,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
     index_out[v].index = *index;
     index_out[v].lowlink = *index;
     (*index)++;
-    pushinstack(scc_stack, v);
+    push(scc_stack, v);
     index_out[v].onStack = 1;//einai sto scc stack
 
     //an exei paidia
@@ -127,7 +127,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
         a = 0;
         //ftiakse to SCC
         do {
-            w = popfromstack(scc_stack);
+            w = pop(scc_stack);
             index_out[w].onStack = 0;
 
             (*scc)->components[scc_counter].included_node_ids[a] = w;

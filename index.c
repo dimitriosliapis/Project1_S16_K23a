@@ -11,9 +11,9 @@ ind *createNodeIndex(uint32_t index_size) {
     for (i = 0; i < index_size; i++) {
         index[i].first = -1;
         index[i].last = -1;
-        for(j = 0; j < THREAD_POOL_SIZE; j++) {
+/*        for(j = 0; j < THREAD_POOL_SIZE; j++) {
             index[i].visited[j] = DEFAULT;
-        }
+        }*/
         index[i].lowlink = DEFAULT;
         index[i].index = DEFAULT;
         index[i].neighbors = NULL;
@@ -68,9 +68,9 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
     for (i = *index_size; i < realloc_size; i++) {  // arxikopoihsh twn newn index nodes
         (*index)[i].first = -1;
         (*index)[i].last = -1;
-        for(j = 0; j < THREAD_POOL_SIZE; j++) {
+        /*for(j = 0; j < THREAD_POOL_SIZE; j++) {
             (*index)[i].visited[j] = DEFAULT;
-        }
+        }*/
         (*index)[i].lowlink = DEFAULT;
         (*index)[i].index = DEFAULT;
         (*index)[i].neighbors = NULL;
@@ -93,14 +93,16 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
     offset = getListHead(*index, id);   // offset 1ou komvou sto buffer gia to id
     list_node *current = *buffer + (*index)[id].last;
 
-    if ((*index)[id].neighbors == NULL)
+    if ((*index)[id].neighbors == NULL) {
         (*index)[id].neighbors = createHashtable(HT_SMALL);
-
-    if (search((*index)[id].neighbors, neighbor, HT_SMALL, version, thread_id) == FOUND)
-        return ALR_CONNECTED;
-    else
         insert((*index)[id].neighbors, neighbor, HT_SMALL, version, thread_id);
-
+    }
+    else {
+        if (search((*index)[id].neighbors, neighbor, HT_SMALL, version, thread_id) == FOUND)
+            return ALR_CONNECTED;
+        else
+            insert((*index)[id].neighbors, neighbor, HT_SMALL, version, thread_id);
+    }
     while (i < N) { // psaxnei stous geitones (max N ana komvo)
 //        if (current->neighbor[i] == neighbor) return ALR_CONNECTED; // gia na dei an uparxei
         if (current->neighbor[i] == DEFAULT) {  // alliws vriskei tin thesi tou 1ou diathesimou
