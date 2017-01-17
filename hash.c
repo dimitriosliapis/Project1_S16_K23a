@@ -103,10 +103,6 @@ void insert(ht_Node *hashTable, int id, int size, int version, int thread_id) {
             hashTable[offset].bucket[i].id = DEFAULT;
             hashTable[offset].bucket[i].version[thread_id] = DEFAULT;
         }*/
-        if(size == HT_SMALL) {
-            totalReallocs++;
-            average = (average+hashTable[offset].size)/2;
-        }
     }
 }
 
