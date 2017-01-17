@@ -14,6 +14,9 @@ int global_version;
 int global_steps;
 int global_scc_size;
 
+CC *global_cc;
+int global_cc_size;
+
 SCC *global_scc;
 GrailIndex *global_grail;
 

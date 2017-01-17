@@ -266,8 +266,6 @@ void *master_thread_function_dynamic(void *ptr) {
     arg *local = ptr;
     int line = 1, a, start = 1, realloc_size = 0;
     char str[64];
-    int cc_size;
-    CC *cc = NULL;
 
     pthread_t *worker_threads = (pthread_t*)malloc(THREAD_POOL_SIZE*sizeof(pthread_t));
 
@@ -279,16 +277,16 @@ void *master_thread_function_dynamic(void *ptr) {
 
     for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_create(&worker_threads[a], NULL, worker_thread_function_dynamic, local);
 
-    if(global_index_size_in > global_index_size_out) cc_size = global_index_size_in;
-    else cc_size = global_index_size_out;
+    if(global_index_size_in > global_index_size_out) global_cc_size = global_index_size_in;
+    else global_cc_size = global_index_size_out;
 
-    cc = createCCIndex(cc_size, global_index_in, global_index_out, global_buffer_in, global_buffer_out,
+    global_cc = createCCIndex(global_cc_size, global_index_in, global_index_out, global_buffer_in, global_buffer_out,
                        global_index_size_in, global_index_size_out, global_explored, global_version, 0);
 
-    cc->u_size = cc->cc_max;
-    cc->metricVal = METRIC;
+    global_cc->u_size = global_cc->cc_max;
+    global_cc->metricVal = METRIC;
 
-    initUpdateIndex(cc);
+    initUpdateIndex(global_cc);
 
     fgets(str, sizeof(str), local->file);
     fgets(str, sizeof(str), local->file);
@@ -381,14 +379,56 @@ void *worker_thread_function_dynamic(void *ptr) {
 
         toID(query, &N1, &N2);
 
-        if(lookup(global_index_in, N1, global_index_size_in) == ALR_EXISTS &&
-           lookup(global_index_out, N2, global_index_size_out) == ALR_EXISTS) {
+        if(lookup(global_index_out, N1, global_index_size_out) == ALR_EXISTS && lookup(global_index_in, N2, global_index_size_in) == ALR_EXISTS) {
 
+            if(global_cc->cc_index[N1] == global_cc->cc_index[N2]) {
 
+                local_version++;
+                local->results[line] = bBFS(global_index_in, global_index_out, global_buffer_in,
+                                            global_buffer_out, N1, N2, frontierF, frontierB,
+                                            local_version, thread_id);
+            }
+
+            else {
+                if(searchUpdateIndex(*global_cc, N1, N2, global_explored, local_version, thread_id) == FOUND) {
+
+                    local_version++;
+                    local->results[line] = bBFS(global_index_in, global_index_out, global_buffer_in,
+                                                global_buffer_out, N1, N2, frontierF, frontierB,
+                                                local_version,thread_id);
+
+                    pthread_mutex_lock(&mutex);
+                    global_cc->metricVal--;
+                    pthread_mutex_unlock(&mutex);
+
+                    if(global_cc->metricVal == 0) {
+
+                        if(global_index_size_in > global_index_size_out) global_cc_size = global_index_size_in;
+                        else global_cc_size = global_index_size_out;
+
+                        pthread_mutex_lock(&mutex);
+                        global_cc->cc_max = updateCCIndex(global_cc, global_explored, local_version, global_cc_size, thread_id);
+                        local_version++;
+                        global_cc->metricVal = METRIC;
+                        pthread_mutex_unlock(&mutex);
+                    }
+                }
+
+                else local->results[line] = -1;
+
+            }
         }
 
+        else local->results[line] = -1;
 
     }
 
+    free(query);
 
+    empty(frontierB);
+    empty(frontierF);
+
+    a = 0;
+
+    pthread_exit(&a);
 }

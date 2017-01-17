@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
                 toID(str, &N1, &N2);
 
                 if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
-                    insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out);
+                       insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out);
 
                 if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
                     insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
