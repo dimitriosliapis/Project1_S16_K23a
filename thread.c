@@ -1,8 +1,8 @@
 #include "thread.h"
 #include <string.h>
 
-int toID(char *str, uint32_t *N1, uint32_t *N2) {
-    uint32_t i, j, id;
+int toID(char *str, int *N1, int *N2) {
+    int i, j, id;
     if (str == NULL)
         return 0;
     if ((str[0] < '0') || (str[0] > '9'))
@@ -187,9 +187,9 @@ void *worker_thread_function(void *ptr){
 
     arg *local = ptr;
     char *query;
-    uint32_t N1, N2;
+    int N1, N2;
     int line, i, ret;
-    uint32_t local_version = 0;
+    int local_version = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
     int thread_id;
 

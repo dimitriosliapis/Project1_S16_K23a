@@ -1,6 +1,6 @@
 #include "buffer.h"
 
-list_node *createBuffer(uint32_t buffer_size) {
+list_node *createBuffer(int buffer_size) {
 
     int pos = 0, n = 0;
     list_node *buffer = NULL;
@@ -15,7 +15,7 @@ list_node *createBuffer(uint32_t buffer_size) {
     return buffer;
 }
 
-ptrdiff_t allocNewNode(list_node **buffer, uint32_t *buffer_size, ptrdiff_t available) {
+ptrdiff_t allocNewNode(list_node **buffer, int *buffer_size, ptrdiff_t available) {
 
     if (*buffer == NULL) return -1; // return error
     if (available >= (*buffer_size)) {  // tsekarei an o epomenos komvos xwraei sto buffer
@@ -25,7 +25,7 @@ ptrdiff_t allocNewNode(list_node **buffer, uint32_t *buffer_size, ptrdiff_t avai
 
 }
 
-int reallocBuffer(list_node **buffer, uint32_t *buffer_size) {
+int reallocBuffer(list_node **buffer, int *buffer_size) {
 
     int pos = 0, n = 0;
     void *new = NULL;

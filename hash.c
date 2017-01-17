@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "hash.h"
 
-uint32_t hash( uint32_t a){
+int hash( int a){
     a = (a ^ 61) ^ (a >> 16);
     a = a + (a << 3);
     a = a ^ (a >> 4);
@@ -9,9 +9,9 @@ uint32_t hash( uint32_t a){
     a = a ^ (a >> 15);
     return a;
 }
-ht_Node *createHashtable(uint32_t size) {
+ht_Node *createHashtable(int size) {
 
-    uint32_t i = 0;
+    int i = 0;
     ht_Node *hashTable = NULL;
     hashTable = malloc(sizeof(ht_Node) * size);
     if (hashTable == NULL)
@@ -25,10 +25,10 @@ ht_Node *createHashtable(uint32_t size) {
     }
 }
 
-int search(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version, int thread_id) {
+int search(ht_Node *hashTable, int id, int size, int version, int thread_id) {
 
-    uint32_t i = 0;
-    uint32_t offset = hash(id) % size;
+    int i = 0;
+    int offset = hash(id) % size;
     ht_Entry *bucket = NULL;
 
     if (hashTable == NULL)
@@ -49,11 +49,11 @@ int search(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version, int
     return NOT_FOUND;
 }
 
-void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version, int thread_id) {
+void insert(ht_Node *hashTable, int id, int size, int version, int thread_id) {
 
-    uint32_t i = 0;
-    uint32_t offset = hash(id) % size;
-    uint32_t prev_size = hashTable[offset].size;
+    int i = 0;
+    int offset = hash(id) % size;
+    int prev_size = hashTable[offset].size;
 
     if (hashTable[offset].bucket == NULL) {    // this bucket doesn't exist yet - create it and insert id
         hashTable[offset].bucket = malloc(HT_N * sizeof(ht_Entry));
@@ -93,6 +93,7 @@ void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version, in
             offset = 66;
         }*/
         // duplicate bucket and insert id
+
         hashTable[offset].bucket = realloc(hashTable[offset].bucket, prev_size * 2 * sizeof(ht_Entry));
         hashTable[offset].size *= 2;
         hashTable[offset].bucket[prev_size].id = id;
@@ -102,12 +103,16 @@ void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version, in
             hashTable[offset].bucket[i].id = DEFAULT;
             hashTable[offset].bucket[i].version[thread_id] = DEFAULT;
         }*/
+        if(size == HT_SMALL) {
+            totalReallocs++;
+            average = (average+hashTable[offset].size)/2;
+        }
     }
 }
 
-void delete(ht_Node *hashTable, uint32_t size) {
+void delete(ht_Node *hashTable, int size) {
 
-    uint32_t i = 0;
+    int i = 0;
 
     if (hashTable == NULL)
         return;

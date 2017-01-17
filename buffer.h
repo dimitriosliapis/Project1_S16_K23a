@@ -12,15 +12,15 @@
 #define ERROR -1
 
 typedef struct list_node_t {
-    uint32_t neighbor[N];
-    //uint32_t edgeProperty[N];
+    int neighbor[N];
+    //int edgeProperty[N];
     ptrdiff_t nextListNode;
 }list_node;
 
-list_node *createBuffer(uint32_t);
+list_node *createBuffer(int);
 
-ptrdiff_t allocNewNode(list_node**, uint32_t*, ptrdiff_t);
+ptrdiff_t allocNewNode(list_node**, int*, ptrdiff_t);
 
-int reallocBuffer(list_node**, uint32_t*);
+int reallocBuffer(list_node**, int*);
 
 int destroyBuffer(list_node*);

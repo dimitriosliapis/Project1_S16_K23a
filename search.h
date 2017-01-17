@@ -4,7 +4,7 @@
 
 typedef struct queue_t {
     int size;
-    uint32_t * ids;
+    int * ids;
     int first;
     int last;
     int count;
@@ -14,12 +14,12 @@ Queue *createQueue();
 
 int isEmpty(Queue *);
 
-int enq(Queue *, uint32_t);
+int enq(Queue *, int);
 
-uint32_t deq(Queue *);
+int deq(Queue *);
 
 void restartQueue(Queue *);
 
 void empty(Queue *);
 
-int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, Queue *, Queue *, uint32_t, int);
+int bBFS(ind *, ind *, list_node *, list_node *, int, int, Queue *, Queue *, int, int);

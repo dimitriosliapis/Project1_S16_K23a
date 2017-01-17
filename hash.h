@@ -1,8 +1,8 @@
 #include <stdint.h>
 
 #define HT_BIG 148201
-#define HT_SMALL 67
-#define HT_N 7
+#define HT_SMALL 157
+#define HT_N 3
 
 #define THREAD_POOL_SIZE 2
 
@@ -12,23 +12,22 @@
 #define FOUND 1
 #define NOT_FOUND -1
 
-uint32_t hash( uint32_t a);
-
+int hash( int a);
 
 typedef struct htEntry_t{
-    uint32_t id;
-    uint32_t version[THREAD_POOL_SIZE+1];
+    int id;
+    int version[THREAD_POOL_SIZE+1];
 }ht_Entry;
 
 typedef struct htNode_t {
     ht_Entry *bucket;
-    uint32_t size;
+    int size;
 } ht_Node;
 
-ht_Node *createHashtable(uint32_t);
+ht_Node *createHashtable(int);
 
-int search(ht_Node *, uint32_t, uint32_t, uint32_t, int);
+int search(ht_Node *, int, int, int, int);
 
-void insert(ht_Node *, uint32_t, uint32_t, uint32_t, int);
+void insert(ht_Node *, int, int, int, int);
 
-void delete(ht_Node *, uint32_t);
+void delete(ht_Node *, int);

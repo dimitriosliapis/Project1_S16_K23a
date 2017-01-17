@@ -9,7 +9,7 @@
     if(stack == NULL) return NULL;
     else {
         stack->size = STACK_ARRAY_SIZE;
-        stack->stack_array = malloc(STACK_ARRAY_SIZE*sizeof(uint32_t));
+        stack->stack_array = malloc(STACK_ARRAY_SIZE*sizeof(int));
         for(i = 0 ; i < STACK_ARRAY_SIZE ; i++) stack->stack_array[i] = DEFAULT;
         stack->first = 0;
         stack->last = -1;
@@ -25,10 +25,10 @@ int stackisempty(Stack_t *stack) {
 
 }
 
-void pushinstack(Stack_t *stack, uint32_t id) {
+void pushinstack(Stack_t *stack, int id) {
 
     if(stack->count == stack->size) {
-        stack->stack_array = realloc(stack->stack_array, 2*stack->size*sizeof(uint32_t));
+        stack->stack_array = realloc(stack->stack_array, 2*stack->size*sizeof(int));
         stack->size = 2*stack->size;
         int i = 0;
         for(i = stack->size/2 ; i < stack->size ; i++) stack->stack_array[i] = DEFAULT;
@@ -38,9 +38,9 @@ void pushinstack(Stack_t *stack, uint32_t id) {
     stack->count++;
 }
 
-uint32_t popfromstack(Stack_t *stack) {
+int popfromstack(Stack_t *stack) {
 
-    uint32_t id = DEFAULT;
+    int id = DEFAULT;
     if(stack->count == 0) return DEFAULT;
 
     id = stack->stack_array[stack->last];
@@ -50,11 +50,11 @@ uint32_t popfromstack(Stack_t *stack) {
     return id;
 }
 
-uint32_t peekfromstack(Stack_t *stack) {
+int peekfromstack(Stack_t *stack) {
 
     if(stack->stack_array[stack->last] == DEFAULT) return DEFAULT;
 
-    uint32_t id = DEFAULT;
+    int id = DEFAULT;
     id = stack->stack_array[stack->last];
     return id;
 }
@@ -66,7 +66,7 @@ void deletestack(Stack_t *stack) {
 
 //////////////////////////////////////////////////////////////////////////
 
-void push(Stack *stack, uint32_t id) {
+void push(Stack *stack, int id) {
 
     sNode *new = malloc(sizeof(sNode));
 
@@ -77,10 +77,10 @@ void push(Stack *stack, uint32_t id) {
     stack->last = new;
 }
 
-uint32_t pop(Stack *stack) {
+int pop(Stack *stack) {
 
     sNode *rem = stack->last;
-    uint32_t id;
+    int id;
 
     if (stack->last == NULL) return DEFAULT;
 
@@ -112,22 +112,22 @@ void deleteStack(Stack *stack) {
     }
 }
 
-CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in, uint32_t size_out, ht_Node *explored, uint32_t version, int thread_id) {
+CC* createCCIndex(int cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, int size_in, int size_out, ht_Node *explored, int version, int thread_id) {
 
     //dimiourgia CCIndex
 
     Stack stack;
-    uint32_t cur = 0;
-    uint32_t v = 0;
+    int cur = 0;
+    int v = 0;
     list_node *neighbors_in, *neighbors_out;
-    uint32_t cc_counter = 0;
+    int cc_counter = 0;
     ptrdiff_t offset_in, offset_out;
-    uint32_t i = 0;
+    int i = 0;
 
 
     //memory allocation + initialise
     CC *cc = malloc(sizeof(CC));
-    uint32_t *cc_index = malloc(sizeof(uint32_t) * cc_size);
+    int *cc_index = malloc(sizeof(int) * cc_size);
 
     for(i = 0; i < cc_size; i++){
         cc_index[i] = DEFAULT;
@@ -202,7 +202,7 @@ void initUpdateIndex(CC *cc){
 
     u_node *update_index = malloc(cc->u_size * sizeof(u_node));
 
-    uint32_t a = 0;
+    int a = 0;
     while(a < cc->u_size) {
         update_index[a].cc_array = NULL;
         update_index[a].new_nodes = NULL;
@@ -217,13 +217,13 @@ void initUpdateIndex(CC *cc){
 }
 
 //kathe fora pou prostithetai mia akmi ananewnei to Update Index
-void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
+void refreshUpdateIndex(CC *cc, int N1, int N2) {
 
-    uint32_t cc1, cc2;
+    int cc1, cc2;
     int found = 0;
-    uint32_t new_cc = 0;
-    uint32_t i = 0, realloc_size = 0, realloc_update_index_size = cc->u_size, k = 0, l = 0;
-    uint32_t *temp = NULL;
+    int new_cc = 0;
+    int i = 0, realloc_size = 0, realloc_update_index_size = cc->u_size, k = 0, l = 0;
+    int *temp = NULL;
 
 
     //an kapoio ap ta N1 N2 den uparxei tote kanto DEFAULT
@@ -289,7 +289,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                 //kai eisagei tous komvous sto neo CC
                 cc->updateIndex[new_cc].state = 'n'; // ( n - > new )
                 cc->updateIndex[new_cc].n_size = INIT_NEWNODE_SIZE;
-                cc->updateIndex[new_cc].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
+                cc->updateIndex[new_cc].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(int));
                 cc->updateIndex[new_cc].new_nodes[0] = N1;
                 cc->updateIndex[new_cc].new_nodes[1] = N2;
                 for(k = 2; k < INIT_NEWNODE_SIZE; k++) cc->updateIndex[new_cc].new_nodes[k] = DEFAULT;
@@ -307,7 +307,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
             new_cc = cc->u_size;
             cc->updateIndex[new_cc].state = 'n'; // ( n - > new )
             cc->updateIndex[new_cc].n_size = INIT_NEWNODE_SIZE;
-            cc->updateIndex[new_cc].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
+            cc->updateIndex[new_cc].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(int));
             cc->updateIndex[new_cc].new_nodes[0] = N1;
             cc->updateIndex[new_cc].new_nodes[1] = N2;
             for(k = 2; k < INIT_NEWNODE_SIZE; k++) cc->updateIndex[new_cc].new_nodes[k] = DEFAULT;
@@ -358,7 +358,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
             //alliws vriskei tin prwti keni thesi ston pinaka auton kai ton vazei ekei
             if (cc->updateIndex[cc2].new_nodes == NULL) {
                 cc->updateIndex[cc2].n_size = INIT_NEWNODE_SIZE;
-                cc->updateIndex[cc2].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
+                cc->updateIndex[cc2].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(int));
                 cc->updateIndex[cc2].new_nodes[0] = N1;
                 for (k = 1; k < INIT_NEWNODE_SIZE; k++) cc->updateIndex[cc2].new_nodes[k] = DEFAULT;
             }
@@ -368,7 +368,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                 if (k == cc->updateIndex[cc2].n_size) {
                     realloc_size = 2 * cc->updateIndex[cc2].n_size;
                     cc->updateIndex[cc2].new_nodes = realloc(cc->updateIndex[cc2].new_nodes,
-                                                              realloc_size * sizeof(uint32_t));
+                                                              realloc_size * sizeof(int));
                     for (l = cc->updateIndex[cc2].n_size + 1; l < realloc_size; l++)
                         cc->updateIndex[cc2].new_nodes[l] = DEFAULT;
                 }
@@ -405,7 +405,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
         if(!found) {
             if (cc->updateIndex[cc1].new_nodes == NULL) {
                 cc->updateIndex[cc1].n_size = INIT_NEWNODE_SIZE;
-                cc->updateIndex[cc1].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
+                cc->updateIndex[cc1].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(int));
                 cc->updateIndex[cc1].new_nodes[0] = N2;
                 for (k = 1; k < INIT_NEWNODE_SIZE; k++) cc->updateIndex[cc1].new_nodes[k] = DEFAULT;
             }
@@ -415,7 +415,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                 if (k == cc->updateIndex[cc1].n_size) {
                     realloc_size = 2 * cc->updateIndex[cc1].n_size;
                     cc->updateIndex[cc1].new_nodes = realloc(cc->updateIndex[cc1].new_nodes,
-                                                              realloc_size * sizeof(uint32_t));
+                                                              realloc_size * sizeof(int));
                     for (l = cc->updateIndex[cc1].n_size + 1; l < realloc_size; l++)
                         cc->updateIndex[cc1].new_nodes[l] = DEFAULT;
                 }
@@ -428,12 +428,12 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     //an uparxoun kai ta 2 sto CCIndex tote prepei na ta sindesei
 
     int j = 0;
-    uint32_t cur_cc = cc1;
+    int cur_cc = cc1;
 
     while(j < 2) {
 
         if (cc->updateIndex[cur_cc].cc_array == NULL) {       //an den exei sindethei me alla cc (o pinakas twn cc einai kenos)
-            cc->updateIndex[cur_cc].cc_array = malloc(INIT_UNODE_SIZE * sizeof(uint32_t));
+            cc->updateIndex[cur_cc].cc_array = malloc(INIT_UNODE_SIZE * sizeof(int));
             temp = cc->updateIndex[cur_cc].cc_array;
             if(j == 0) temp[0] = cc2;             //elegxos se poio apo ta 2 vriskomaste
             else temp[0] = cc1;
@@ -453,7 +453,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
             }
             else if (i == cc->updateIndex[cur_cc].size) {
                 realloc_size = 2 * cc->updateIndex[cur_cc].size;
-                cc->updateIndex[cur_cc].cc_array = realloc(cc->updateIndex[cur_cc].cc_array, realloc_size * sizeof(uint32_t));
+                cc->updateIndex[cur_cc].cc_array = realloc(cc->updateIndex[cur_cc].cc_array, realloc_size * sizeof(int));
                 if(j == 0) cc->updateIndex[cur_cc].cc_array[i] = cc2;
                 else cc->updateIndex[cur_cc].cc_array[i] = cc1;
                 for (i = cc->updateIndex[cur_cc].size + 1; i < realloc_size; i++) cc->updateIndex[cur_cc].cc_array[i] = DEFAULT;
@@ -465,12 +465,12 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     }
 }
 //Anazitisi sto UpdateIndex
-int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32_t version, int thread_id) {
+int searchUpdateIndex(CC cc, int N1, int N2, ht_Node *explored, int version, int thread_id) {
 
-    uint32_t cc1 = 0;
-    uint32_t cc2 = 0;
-    uint32_t v = 0;
-    uint32_t i = 0, j = 0;
+    int cc1 = 0;
+    int cc2 = 0;
+    int v = 0;
+    int i = 0, j = 0;
     Stack stack;
     stack.last = NULL;
 
@@ -554,15 +554,15 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
     }
 }
 
-uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new_size, int thread_id) {
+int updateCCIndex(CC *cc, ht_Node* explored, int version, int new_size, int thread_id) {
 
-    uint32_t v = 0, w = 0;
-    uint32_t i = 0, j = 0;
+    int v = 0, w = 0;
+    int i = 0, j = 0;
     Stack stack;
-    uint32_t k;
-    uint32_t parent_cc = 0;
-    uint32_t new_cc[cc->u_size];
-    uint32_t old_cc = 0;
+    int k;
+    int parent_cc = 0;
+    int new_cc[cc->u_size];
+    int old_cc = 0;
 
     //arxikopoisi tou pinaka gia tis allages sta CC
     for(i = 0; i < cc->u_size; i++) new_cc[i] = DEFAULT;
@@ -571,7 +571,7 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new
 
     // an de xwraei ta kanouria CC kane realloc
     if(new_size > cc->cc_size){
-        cc->cc_index = realloc(cc->cc_index, new_size*sizeof(uint32_t));
+        cc->cc_index = realloc(cc->cc_index, new_size*sizeof(int));
         for(j = cc->cc_size; j < new_size; j++){
             cc->cc_index[j] = DEFAULT;
         }
@@ -640,7 +640,7 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new
 //free CC Index
 void destroyCCIndex(CC *cc){
 
-    uint32_t i = 0;
+    int i = 0;
 
     for(i = 0; i < cc->u_size; i++){
         free(cc->updateIndex[i].cc_array);

@@ -43,13 +43,13 @@ typedef struct work_data_t{
     SCC *scc;
     GrailIndex *grail;
 
-    uint32_t buffer_size_in, buffer_size_out, index_size_in, index_size_out;
-    uint32_t scc_size;
+    int buffer_size_in, buffer_size_out, index_size_in, index_size_out;
+    int scc_size;
 
     ptrdiff_t available_in, available_out;
     Queue *frontierF, *frontierB;
     ht_Node *explored;
-    uint32_t version;
+    int version;
     int steps;
     int current_job;
 }work_data;
@@ -62,7 +62,7 @@ typedef struct arg_t {
     int res_size;
 } arg;
 
-int toID(char *, uint32_t *, uint32_t *);
+int toID(char *, int *, int *);
 
 void place_to_buffer(char *query, Buffer *buffer, int line);
 int remove_from_buffer(Buffer *buffer, int *line, char **query);

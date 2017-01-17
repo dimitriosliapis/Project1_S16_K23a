@@ -1,14 +1,14 @@
 #include "grail.h"
 #include <sys/time.h>
 
-GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uint32_t version, int thread_id){
+GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, int version, int thread_id){
 
-    uint32_t i = 0, j = 0, k = 0, v = 0, w = 0;
+    int i = 0, j = 0, k = 0, v = 0, w = 0;
     ptrdiff_t available_out = 0;
     ptrdiff_t offset_out;
     list_node *neighbors_out;
-    uint32_t neigh_scc = 0;
-    uint32_t rank = 1, min_rank = 1;
+    int neigh_scc = 0;
+    int rank = 1, min_rank = 1;
     Stack dfs_stack;
     struct timeval tv1, tv2;
 
@@ -144,16 +144,16 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, uin
     printf("Grail time = %f seconds\n",
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
-    rank = 0;
+    //rank = 0;
     //deletestack(dfs_stack);
 
     return grail;
 }
 
 //sinartisi pou epistrefei tin pithanotita na uparxei monopati ap ton source ston target
-int isReachableGrailIndex(GrailIndex* index, uint32_t source_node, uint32_t target_node, SCC *scc){
+int isReachableGrailIndex(GrailIndex* index, int source_node, int target_node, SCC *scc){
 
-    uint32_t scc_source, scc_target;
+    int scc_source, scc_target;
 
     scc_source = scc->id_belongs_to_component[source_node];
     scc_target = scc->id_belongs_to_component[target_node];

@@ -13,27 +13,30 @@
 typedef struct index_t{
     ptrdiff_t first;
     ptrdiff_t last;
-    uint32_t visited[THREAD_POOL_SIZE+1];
-    uint32_t lowlink;
-    uint32_t index;
-    uint32_t rank;
-    uint32_t min_rank;
+    int visited[THREAD_POOL_SIZE+1];
+    int lowlink;
+    int index;
+    int rank;
+    int min_rank;
     ht_Node *neighbors;
-    uint32_t all_children_in_scc;
-    uint32_t num_of_children;
-    uint32_t onStack;
+    int all_children_in_scc;
+    int num_of_children;
+    int onStack;
 }ind;
 
-ind *createNodeIndex(uint32_t);
+ind *createNodeIndex(int);
 
-int lookup(ind*, uint32_t, uint32_t);
+int lookup(ind*, int, int);
 
-ptrdiff_t insertNode(ind**, uint32_t, list_node**, uint32_t*, uint32_t*, ptrdiff_t*);
+ptrdiff_t insertNode(ind**, int, list_node**, int*, int*, ptrdiff_t*);
 
-int reallocNodeIndex(ind**, int, uint32_t*);
+int reallocNodeIndex(ind**, int, int*);
 
-ptrdiff_t addEdge(ind**, uint32_t, uint32_t, list_node**, uint32_t*, ptrdiff_t*, int);
+ptrdiff_t addEdge(ind**, int, int, list_node**, int*, ptrdiff_t*, int);
 
-ptrdiff_t getListHead(ind*, uint32_t);
+ptrdiff_t getListHead(ind*, int);
 
-int destroyNodeIndex(ind*, uint32_t index_size);
+int freeNeighbors(ind *index, int index_size);
+
+int destroyNodeIndex(ind*, int index_size);
+

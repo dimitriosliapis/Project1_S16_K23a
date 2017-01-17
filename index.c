@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "index.h"
 
-ind *createNodeIndex(uint32_t index_size) {
+ind *createNodeIndex(int index_size) {
 
     ind *index = NULL;
     int i = 0;
@@ -26,14 +26,14 @@ ind *createNodeIndex(uint32_t index_size) {
     return index;
 }
 
-int lookup(ind *index, uint32_t id, uint32_t index_size) {
+int lookup(ind *index, int id, int index_size) {
 
     if (id >= index_size) return NOT_EXIST; // an den to xwraei den uparxei
     if (index[id].first != -1) return ALR_EXISTS;
     return NOT_EXIST;
 }
 
-ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size, ptrdiff_t *available) {
+ptrdiff_t insertNode(ind **index, int id, list_node **buffer, int *index_size, int *buffer_size, ptrdiff_t *available) {
 
     ptrdiff_t offset = 0;
 
@@ -54,10 +54,10 @@ ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *ind
     return offset;
 }
 
-int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
+int reallocNodeIndex(ind **index, int id, int *index_size) {
 
-    uint32_t realloc_size = *index_size;
-    uint32_t i = 0;
+    int realloc_size = *index_size;
+    int i = 0;
     int j = 0;
     ind *new = NULL;
 
@@ -84,10 +84,10 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
     return OK_SUCCESS;
 }
 
-ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, ptrdiff_t *available, int thread_id) {
+ptrdiff_t addEdge(ind **index, int id, int neighbor, list_node **buffer, int *buffer_size, ptrdiff_t *available, int thread_id) {
 
     int i = 0;
-    uint32_t version = 0;
+    int version = 0;
     ptrdiff_t offset = 0, prev = 0;
 
     offset = getListHead(*index, id);   // offset 1ou komvou sto buffer gia to id
@@ -128,20 +128,32 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
     return offset;
 }
 
-ptrdiff_t getListHead(ind *index, uint32_t id) {
+ptrdiff_t getListHead(ind *index, int id) {
 
     if (index == NULL) return -1;
     return index[id].first;
 }
 
-int destroyNodeIndex(ind *index, uint32_t index_size) {
+int freeNeighbors(ind *index, int index_size) {
+
+    int i;
+
+    for (i = 0; i < index_size; i++) {
+        if(lookup(index, i, index_size) == NOT_EXIST) continue;
+        if (index[i].neighbors != NULL) delete(index[i].neighbors, HT_SMALL);
+        index[i].neighbors = NULL;
+    }
+    return OK_SUCCESS;
+}
+
+int destroyNodeIndex(ind *index, int index_size) {
 
     int i = 0;
 
     if (index == NULL) return IND_EMPTY;
 
     for (i = 0; i < index_size; i++)
-        delete(index[i].neighbors, HT_SMALL);
+        if(index[i].neighbors != NULL) delete(index[i].neighbors, HT_SMALL);
 
     free(index);
 

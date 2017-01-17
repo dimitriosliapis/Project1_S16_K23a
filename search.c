@@ -10,7 +10,7 @@ Queue *createQueue() {
         return NULL;
     else {
         queue->size = QUEUE_SIZE;
-        queue->ids = malloc(QUEUE_SIZE * sizeof(uint32_t));
+        queue->ids = malloc(QUEUE_SIZE * sizeof(int));
         queue->first = 0;
         queue->last = -1;
         queue->count = 0;
@@ -23,10 +23,10 @@ int isEmpty(Queue *queue) {
     return (queue->count == 0);
 }
 
-int enq(Queue *queue, uint32_t id) {
+int enq(Queue *queue, int id) {
 
     if (queue->count >= queue->size) {
-        queue->ids = realloc(queue->ids, queue->size * 2 * sizeof(uint32_t));
+        queue->ids = realloc(queue->ids, queue->size * 2 * sizeof(int));
         queue->size *= 2;
     }
 
@@ -37,9 +37,9 @@ int enq(Queue *queue, uint32_t id) {
     return 0;
 }
 
-uint32_t deq(Queue *queue) {
+int deq(Queue *queue) {
 
-    uint32_t id = DEFAULT;
+    int id = DEFAULT;
 
     if (queue->count == 0)
         return DEFAULT;
@@ -73,15 +73,15 @@ int bBFS(ind *index_in,
          ind *index_out,
          list_node *buffer_in,
          list_node *buffer_out,
-         uint32_t start,
-         uint32_t end,
+         int start,
+         int end,
          Queue *frontierF,
          Queue *frontierB,
-         uint32_t version,
+         int version,
          int thread_id) {
 
     list_node *neighbors = NULL;
-    uint32_t node = DEFAULT, successor = DEFAULT, childrenF = 0, childrenB = 0;
+    int node = DEFAULT, successor = DEFAULT, childrenF = 0, childrenB = 0;
     int i = 0, steps = 0, curr_steps = 0, min_steps = -1, path = 0;
     ptrdiff_t offset = 0;
     int counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, stepsF = 0, stepsB = 0;

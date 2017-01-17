@@ -12,18 +12,18 @@ int main(int argc, char *argv[]) {
     FILE *Graph = NULL;//, *Queries = NULL;
     //list_node *buffer_in = NULL, *buffer_out = NULL;
     //ind *index_in = NULL, *index_out = NULL;
-    uint32_t N1, N2;//, buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
+    int N1, N2;//, buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
     //ptrdiff_t available_in = 0, available_out = 0;
     //Queue *frontierF = NULL, *frontierB = NULL;
     //ht_Node *explored = NULL;
-    //uint32_t version = 0;
+    //int version = 0;
     //int steps = 0;
-    uint32_t max = 0;
+    int max = 0;
 
 //thread
    /* CC *cc = NULL;
-    uint32_t cc_size = 0;
-    uint32_t scc_size = 0;
+    int cc_size = 0;
+    int scc_size = 0;
 
     SCC *scc = NULL;
     GrailIndex *grail = NULL;*/
@@ -43,9 +43,6 @@ int main(int argc, char *argv[]) {
 
     global_available_in = 0;
     global_available_out = 0;
-
-
-
 
 
     // orismata
@@ -94,6 +91,9 @@ int main(int argc, char *argv[]) {
     }
 
     fclose(Graph);
+
+    freeNeighbors(global_index_in, max);
+    freeNeighbors(global_index_out, max);
 
 
     /*if(global_index_size_in > global_index_size_out) global_scc_size = global_index_size_in;
@@ -167,6 +167,7 @@ int main(int argc, char *argv[]) {
     printf("Total time = %f seconds\n",
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
+
     /*fgets(str, sizeof(str), Queries);
 
     if(strncmp(str, "STATIC", 6) == 0){
