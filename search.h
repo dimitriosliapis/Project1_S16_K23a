@@ -1,6 +1,6 @@
 #include "index.h"
 
-#define QUEUE_SIZE 4096
+#define QUEUE_SIZE 65536
 
 typedef struct queue_t {
     int size;
@@ -23,3 +23,5 @@ void restartQueue(Queue *);
 void empty(Queue *);
 
 int bBFS(ind *, ind *, list_node *, list_node *, int, int, Queue *, Queue *, int, int);
+
+int scc_bBFS(int, int, Queue *, Queue *, int, int);

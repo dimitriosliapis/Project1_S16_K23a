@@ -226,30 +226,28 @@ void *worker_thread_function(void *ptr){
 
         toID(query, &N1, &N2);
 
-
         if (lookup(global_index_out, N1, global_index_size_out) == ALR_EXISTS &&
-            lookup(global_index_in, N2, global_index_size_in) == ALR_EXISTS &&
-            isReachableGrailIndex(global_grail, N1, N2, global_scc) == MAYBE) {
-            /*local->data->version++;
-            local_version = local->data->version;*/
-            local_version++;
-            //pthread_mutex_unlock(&vmutex);
-            local->results[line] = bBFS(global_index_in, global_index_out, global_buffer_in,
-                                        global_buffer_out, N1, N2, frontierF, frontierB,
-                                        local_version,thread_id);
+            lookup(global_index_in, N2, global_index_size_in) == ALR_EXISTS) {
 
-            //printf("%d\n", local->data->steps);//den tupwnei ta vazei ston pinaka me ta apotelesmata
-            //local->results[i] = local->data->steps;
-        } else {
-            local->results[line] = -1;
-           // pthread_mutex_unlock(&vmutex);
-        }//printf("-1\n");//den tupwnei ta vazei ston pinaka me ta apotelesmata
+            if(isReachableGrailIndex(global_grail, N1, N2, global_scc) == MAYBE) {
 
-        //pthread_mutex_lock(&vmutex);
-       // local->data->version++;
-        //pthread_mutex_unlock(&vmutex);
+                local_version++;
 
+                local->results[line] = bBFS(global_index_in, global_index_out, global_buffer_in,
+                                            global_buffer_out, N1, N2, frontierF, frontierB,
+                                            local_version, thread_id);
+            }
 
+            else if(isReachableGrailIndex(global_grail, N1, N2, global_scc) == YES) {
+
+                local_version++;
+
+                local->results[line] = scc_bBFS(N1, N2, frontierF, frontierB, local_version, thread_id);
+
+            }
+        }
+
+        else local->results[line] = -1;
     }
     free(query);
 
