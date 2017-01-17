@@ -265,6 +265,7 @@ void *master_thread_function_dynamic(void *ptr) {
 
     arg *local = ptr;
     int line = 1, a, start = 1, realloc_size = 0;
+    int N1, N2;
     char str[64];
 
     pthread_t *worker_threads = (pthread_t*)malloc(THREAD_POOL_SIZE*sizeof(pthread_t));
@@ -299,20 +300,40 @@ void *master_thread_function_dynamic(void *ptr) {
 
         while(str[0] != 'F') {
 
-            place_to_buffer(str, local->buffer, line);
+            if(str[0] == 'A') {
 
-            if(start) {
-                pthread_mutex_unlock(&mutex);
-                start = 0;
+                toID(str, &N1, &N2);
+
+                if(lookup(global_index_out, N1, global_index_size_out) == NOT_EXIST)
+                    insertNode(&global_index_out, N1, &global_buffer_out, &global_index_size_out, &global_buffer_size_out, &global_available_out);
+
+                if(lookup(global_index_in, N2, global_index_size_out) == NOT_EXIST)
+                    insertNode(&global_index_in, N2, &global_buffer_out, &global_index_size_in, &global_buffer_size_in, &global_available_in);
+
+                addEdge(&global_index_out, N1, N2, &global_buffer_out, &global_buffer_size_out, &global_available_out, 0);
+
+                addEdge(&global_index_in, N2, N1, &global_buffer_in, &global_buffer_size_in, &global_available_in, 0);
+
+                refreshUpdateIndex(global_cc, N1, N2);
             }
 
-            line++;
+            else {
 
-            if(line == local->res_size) {
-                realloc_size = 2*local->res_size;
-                local->results = realloc(local->results, realloc_size*sizeof(int));
-                for(a = local->res_size ; a < realloc_size ; a++) local->results[a] = EMPTY;
-                local->res_size = realloc_size;
+                place_to_buffer(str, local->buffer, line);
+
+                if (start) {
+                    pthread_mutex_unlock(&mutex);
+                    start = 0;
+                }
+
+                line++;
+
+                if (line == local->res_size) {
+                    realloc_size = 2 * local->res_size;
+                    local->results = realloc(local->results, realloc_size * sizeof(int));
+                    for (a = local->res_size; a < realloc_size; a++) local->results[a] = EMPTY;
+                    local->res_size = realloc_size;
+                }
             }
 
             fgets(str, sizeof(str), local->file);
