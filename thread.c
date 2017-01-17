@@ -144,33 +144,22 @@ void *master_thread_function(void *ptr) {
 
             //if(status == START) status = CONTINUE;
             line++;
- /*           if(line == 32708){
-                printf("Asgaeg\n");
-            }*/
-            if(line == local->res_size){
 
+            if(line == local->res_size){
                 realloc_size = 2*local->res_size;
-                //while(line >= realloc_size) realloc_size *=2;
                 local->results = realloc(local->results, realloc_size*sizeof(int));
                 for(a = local->res_size; a < realloc_size; a++) local->results[a] = EMPTY;
                 local->res_size = realloc_size;
             }
 
-            fgets(str,sizeof(str), local->file);
+            fgets(str, sizeof(str), local->file);
         }
-        // status = CONTINUE;
-        //while(status != START) {
+
         pthread_mutex_lock(&mutex);
         pthread_cond_wait(&cond_next, &mutex);
         pthread_mutex_unlock(&mutex);
         start = 1;
 
-        //pthread_cond_broadcast(&cond_start);
-
-
-
-
-        //}
         fgets(str,sizeof(str), local->file);
 
     }
@@ -235,8 +224,6 @@ void *worker_thread_function(void *ptr){
         }
         pthread_mutex_unlock(&mutex);
 
-
-
         toID(query, &N1, &N2);
 
 
@@ -272,4 +259,136 @@ void *worker_thread_function(void *ptr){
     i = 0;
 
     pthread_exit(&i);
+}
+
+void *master_thread_function_dynamic(void *ptr) {
+
+    arg *local = ptr;
+    int line = 1, a, start = 1, realloc_size = 0;
+    char str[64];
+    int cc_size;
+    CC *cc = NULL;
+
+    pthread_t *worker_threads = (pthread_t*)malloc(THREAD_POOL_SIZE*sizeof(pthread_t));
+
+    finished = 0;
+    status = START;
+    max_id = 1;
+
+    pthread_mutex_lock(&vmutex);
+
+    for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_create(&worker_threads[a], NULL, worker_thread_function_dynamic, local);
+
+    if(global_index_size_in > global_index_size_out) cc_size = global_index_size_in;
+    else cc_size = global_index_size_out;
+
+    cc = createCCIndex(cc_size, global_index_in, global_index_out, global_buffer_in, global_buffer_out,
+                       global_index_size_in, global_index_size_out, global_explored, global_version, 0);
+
+    cc->u_size = cc->cc_max;
+    cc->metricVal = METRIC;
+
+    initUpdateIndex(cc);
+
+    fgets(str, sizeof(str), local->file);
+    fgets(str, sizeof(str), local->file);
+
+    pthread_mutex_unlock(&vmutex);
+
+    while(!feof(local->file)) {
+
+        pthread_mutex_lock(&mutex);
+
+        while(str[0] != 'F') {
+
+            place_to_buffer(str, local->buffer, line);
+
+            if(start) {
+                pthread_mutex_unlock(&mutex);
+                start = 0;
+            }
+
+            line++;
+
+            if(line == local->res_size) {
+                realloc_size = 2*local->res_size;
+                local->results = realloc(local->results, realloc_size*sizeof(int));
+                for(a = local->res_size ; a < realloc_size ; a++) local->results[a] = EMPTY;
+                local->res_size = realloc_size;
+            }
+
+            fgets(str, sizeof(str), local->file);
+        }
+
+        pthread_mutex_lock(&mutex);
+        pthread_cond_wait(&cond_next, &mutex);
+        pthread_mutex_unlock(&mutex);
+        start = 1;
+
+        fgets(str,sizeof(str), local->file);
+
+    }
+
+    finished = 1;
+
+    local->res_size = line;
+
+    for(a = 0 ; a < THREAD_POOL_SIZE ; a++) pthread_join(worker_threads[a], NULL);
+
+    pthread_exit(&finished);
+
+}
+
+void *worker_thread_function_dynamic(void *ptr) {
+
+    arg *local = ptr;
+    char *query;
+    int N1, N2;
+    int line, a, ret;
+    uint32_t local_version = 0;
+    Queue *frontierF = NULL, *frontierB = NULL;
+    int thread_id;
+
+    pthread_mutex_lock(&vmutex);
+
+    query = malloc(64*sizeof(char));
+    thread_id = max_id;
+    max_id++;
+
+    pthread_mutex_unlock(&vmutex);
+
+    frontierB = createQueue();
+    frontierF = createQueue();
+
+    while(1) {
+
+        if(finished) break;
+
+        pthread_mutex_lock(&mutex);
+
+        ret = remove_from_buffer(local->buffer, &line, &query);
+
+        if(ret == -1) {
+
+            pthread_cond_broadcast(&cond_next);
+            pthread_mutex_unlock(&mutex);
+            if(finished) break;
+            continue;
+
+        }
+
+        pthread_mutex_unlock(&mutex);
+
+        toID(query, &N1, &N2);
+
+        if(lookup(global_index_in, N1, global_index_size_in) == ALR_EXISTS &&
+           lookup(global_index_out, N2, global_index_size_out) == ALR_EXISTS) {
+
+
+        }
+
+
+    }
+
+
 }

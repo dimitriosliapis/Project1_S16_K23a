@@ -31,6 +31,7 @@ typedef struct B_Node_t{
     int line;
     struct B_Node_t *next;
 }B_Node;
+
 typedef struct Buffer_t {
     B_Node *first;
     B_Node *last;
@@ -69,5 +70,7 @@ int remove_from_buffer(Buffer *buffer, int *line, char **query);
 
 void *master_thread_function(void *ptr);
 void *worker_thread_function(void *ptr);
+void *master_thread_function_dynamic(void *ptr);
+void *worker_thread_function_dynamic(void *ptr);
 
 #endif //PROJECT1_S16_K23A_THREAD_H
