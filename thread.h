@@ -20,6 +20,7 @@ pthread_mutex_t vmutex;
 pthread_mutex_t cc_mutex;
 pthread_cond_t cond_start;
 pthread_cond_t cond_next;
+pthread_cond_t cond_wait;
 
 int status;
 int finished;

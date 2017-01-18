@@ -351,6 +351,8 @@ void *master_thread_function_dynamic(void *ptr) {
 
             else {
 
+                pthread_cond_broadcast(&cond_wait);
+
                 prev_job = 1;
 
                 place_to_buffer(str, local->buffer, line);
@@ -451,6 +453,8 @@ void *worker_thread_function_dynamic(void *ptr) {
             }
 
             else {
+                pthread_cond_wait(&cond_wait, NULL);
+
                 pthread_mutex_lock(&cc_mutex);
 
                 if(searchUpdateIndex(*global_cc, N1, N2, global_explored, local_version, thread_id) == FOUND) {

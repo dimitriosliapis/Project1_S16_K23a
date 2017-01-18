@@ -108,6 +108,7 @@ int main(int argc, char *argv[]) {
     pthread_mutex_init(&vmutex, NULL);
     pthread_cond_init(&cond_start, NULL);
     pthread_cond_init(&cond_next, NULL);
+    pthread_cond_init(&cond_wait, NULL);
 
     pthread_t master_thread;
 
