@@ -1,5 +1,4 @@
 #include "thread.h"
-#include <string.h>
 
 int toID(char *str, int *N1, int *N2) {
     int i, j, id;
@@ -26,9 +25,6 @@ int toID(char *str, int *N1, int *N2) {
 
 void place_to_buffer(char *query, Buffer *buffer, int line) {
 
-    int i = 0;
-    int realloc_size;
-    char *new_ptr = NULL;
     B_Node *new = NULL, *tmp = NULL;
 
   //  printf("INSERTING QUERY: %s\n", query);
@@ -108,6 +104,9 @@ void *master_thread_function(void *ptr) {
     int line = 1, a;
     int realloc_size = 0;
     int start = 1;
+
+
+
 
     pthread_t *worker_threads = (pthread_t *)malloc(THREAD_POOL_SIZE*sizeof(pthread_t));
 
@@ -310,7 +309,6 @@ void *master_thread_function_dynamic(void *ptr) {
 
     initUpdateIndex(global_cc);
 
-    fgets(str, sizeof(str), local->file);
     fgets(str, sizeof(str), local->file);
 
     pthread_mutex_unlock(&vmutex);

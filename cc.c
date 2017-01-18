@@ -103,7 +103,7 @@ void deleteStack(Stack *stack) {
     sNode *prev = NULL;
 
     cur = stack->last;
-    prev = NULL;
+//    prev = NULL;
 
     while(cur != NULL){
         prev = cur;
@@ -222,7 +222,7 @@ void refreshUpdateIndex(CC *cc, int N1, int N2) {
     int cc1, cc2;
     int found = 0;
     int new_cc = 0;
-    int i = 0, realloc_size = 0, realloc_update_index_size = cc->u_size, k = 0, l = 0;
+    int i = 0, realloc_size = 0, realloc_update_index_size, k = 0, l = 0;
     int *temp = NULL;
 
 

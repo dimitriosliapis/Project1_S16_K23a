@@ -23,6 +23,7 @@ pthread_cond_t cond_next;
 int status;
 int finished;
 int max_id;
+int max;
 
 
 //Buffer

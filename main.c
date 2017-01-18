@@ -18,7 +18,6 @@ int main(int argc, char *argv[]) {
     //ht_Node *explored = NULL;
     //int version = 0;
     //int steps = 0;
-    int max = 0;
 
 //thread
    /* CC *cc = NULL;
@@ -65,6 +64,7 @@ int main(int argc, char *argv[]) {
 
 
     char str[64];
+    int a = 1;
     fgets(str, sizeof(str), Graph);
 
 
@@ -95,29 +95,6 @@ int main(int argc, char *argv[]) {
     freeNeighbors(global_index_in, max);
     freeNeighbors(global_index_out, max);
 
-
-    /*if(global_index_size_in > global_index_size_out) global_scc_size = global_index_size_in;
-    else global_scc_size = global_index_size_out;*/
-
-    global_scc_size = max;
-
-    global_version++;
-    global_scc = estimateStronglyConnectedComponents(global_index_out, global_buffer_out, global_scc_size, global_version, 0);
-
-
-    global_version = 0;
-    global_version++;
-    global_grail = buildGrailIndex(global_index_out, global_buffer_out, global_scc, global_version, 0);
-    global_version++;
-
-
-    /*thread_args->data->frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
-    thread_args->data->frontierB = createQueue();*/  // synoro tou bfs apo ton stoxo pros thn arxh
-
-    /*exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
-    exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh*/
-
-
     pthread_mutex_init(&mutex, NULL);
     //pthread_mutex_init(&mutexb, NULL);
     pthread_mutex_init(&vmutex, NULL);
@@ -144,13 +121,47 @@ int main(int argc, char *argv[]) {
     thread_args->results = malloc(RES_INIT*sizeof(int));
     for(i = 0; i < thread_args->res_size; i++) thread_args->results[i] = EMPTY;
 
+    fgets(str, sizeof(str), thread_args->file);
+
+    if(strncmp(str, "STATIC", 6) == 0){
+        global_scc_size = max;
+
+        global_version++;
+        global_scc = estimateStronglyConnectedComponents(global_index_out, global_buffer_out, global_scc_size, global_version, 0);
+
+
+        global_version = 0;
+        global_version++;
+        global_grail = buildGrailIndex(global_index_out, global_buffer_out, global_scc, global_version, 0);
+        global_version++;
+
+        pthread_create(&master_thread, NULL, master_thread_function, thread_args);
+        pthread_join(master_thread, NULL);
+    }
+    else{
+        rewind(thread_args->file);
+
+        pthread_create(&master_thread, NULL, master_thread_function_dynamic, thread_args);
+        pthread_join(master_thread, NULL);
+    }
+    /*if(global_index_size_in > global_index_size_out) global_scc_size = global_index_size_in;
+    else global_scc_size = global_index_size_out;*/
+
+
+
+    /*thread_args->data->frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
+    thread_args->data->frontierB = createQueue();*/  // synoro tou bfs apo ton stoxo pros thn arxh
+
+    /*exploredF = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo thn arxh pros ton stoxo
+    exploredB = createHashtable(HT_BIG);  // komvoi pou exei episkeftei o bfs apo ton stoxo pros thn arxh*/
+
+
+
+
 
     //Thread pool
 
-    int a = 1;
 
-    pthread_create(&master_thread, NULL, master_thread_function, thread_args);
-    pthread_join(master_thread, NULL);
 
     while(a < thread_args->res_size){
 
