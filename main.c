@@ -104,6 +104,7 @@ int main(int argc, char *argv[]) {
 
     pthread_mutex_init(&mutex, NULL);
     pthread_mutex_init(&mutexb, NULL);
+    pthread_mutex_init(&cc_mutex, NULL);
     pthread_mutex_init(&vmutex, NULL);
     pthread_cond_init(&cond_start, NULL);
     pthread_cond_init(&cond_next, NULL);
