@@ -1,4 +1,3 @@
-#include <rpcndr.h>
 #include "thread.h"
 
 int toID(char *str, int *N1, int *N2) {
@@ -295,7 +294,7 @@ void *master_thread_function_dynamic(void *ptr) {
     finished = 0;
     status = START;
     max_id = 1;
-    edge_version = -1;
+    edge_version = 0;
 
     pthread_mutex_lock(&vmutex);
 
@@ -389,7 +388,7 @@ void *worker_thread_function_dynamic(void *ptr) {
 
     arg *local = ptr;
     char *query;
-    int N1, N2;
+    int N1, N2, local_edge_version = 0;
     int line, a, ret;
     uint32_t local_version = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
@@ -414,6 +413,8 @@ void *worker_thread_function_dynamic(void *ptr) {
 
         ret = remove_from_buffer(local->buffer, &line, &query);
 
+        local_edge_version = edge_version;
+
         if(ret == -1) {
 
             pthread_cond_broadcast(&cond_next);
@@ -434,7 +435,7 @@ void *worker_thread_function_dynamic(void *ptr) {
                 local_version++;
                 local->results[line] = bBFS(global_index_in, global_index_out, global_buffer_in,
                                             global_buffer_out, N1, N2, frontierF, frontierB,
-                                            local_version, thread_id, edge_version);
+                                            local_version, thread_id, local_edge_version);
             }
 
             else {
@@ -443,7 +444,7 @@ void *worker_thread_function_dynamic(void *ptr) {
                     local_version++;
                     local->results[line] = bBFS(global_index_in, global_index_out, global_buffer_in,
                                                 global_buffer_out, N1, N2, frontierF, frontierB,
-                                                local_version,thread_id, edge_version);
+                                                local_version,thread_id, local_edge_version);
 
                     pthread_mutex_lock(&mutex);
                     global_cc->metricVal--;
