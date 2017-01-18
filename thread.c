@@ -321,9 +321,12 @@ void *master_thread_function_dynamic(void *ptr) {
 
         while(str[0] != 'F') {
 
-            if(str[0] == 'A') {
+            while(str[0] == 'A') {
 
                 if(prev_job == 1) {
+
+                    pthread_mutex_lock(&cc_mutex);
+
                     pthread_mutex_lock(&mutexb);
                     edge_version++;
                     pthread_mutex_unlock(&mutexb);
@@ -342,18 +345,19 @@ void *master_thread_function_dynamic(void *ptr) {
 
                 addEdge(&global_index_in, N2, N1, &global_buffer_in, &global_buffer_size_in, &global_available_in, 0, edge_version);
 
-                pthread_mutex_lock(&cc_mutex);
-
                 refreshUpdateIndex(global_cc, N1, N2);
 
-                pthread_mutex_unlock(&cc_mutex);
+                fgets(str, sizeof(str), local->file);
             }
 
-            else {
+            if(str[0] == 'Q') {
+
+                if(prev_job == 0) {
+                    pthread_mutex_unlock(&cc_mutex);
+                    prev_job = 1;
+                }
 
                 pthread_cond_broadcast(&cond_wait);
-
-                prev_job = 1;
 
                 place_to_buffer(str, local->buffer, line);
 
@@ -456,8 +460,6 @@ void *worker_thread_function_dynamic(void *ptr) {
                 pthread_mutex_lock(&cc_mutex);
 
                 pthread_cond_wait(&cond_wait, &cc_mutex);
-
-                pthread_mutex_lock(&cc_mutex);
 
                 if(searchUpdateIndex(*global_cc, N1, N2, global_explored, local_version, thread_id) == FOUND) {
 
