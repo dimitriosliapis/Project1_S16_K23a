@@ -342,7 +342,11 @@ void *master_thread_function_dynamic(void *ptr) {
 
                 addEdge(&global_index_in, N2, N1, &global_buffer_in, &global_buffer_size_in, &global_available_in, 0, edge_version);
 
+                pthread_mutex_lock(&mutexb);
+
                 refreshUpdateIndex(global_cc, N1, N2);
+
+                pthread_mutex_unlock(&mutexb);
             }
 
             else {
@@ -447,7 +451,11 @@ void *worker_thread_function_dynamic(void *ptr) {
             }
 
             else {
+                pthread_mutex_lock(&mutexb);
+
                 if(searchUpdateIndex(*global_cc, N1, N2, global_explored, local_version, thread_id) == FOUND) {
+
+                    pthread_mutex_unlock(&mutexb);
 
                     local_version++;
                     local->results[line] = bBFS(global_index_in, global_index_out, global_buffer_in,
@@ -471,7 +479,10 @@ void *worker_thread_function_dynamic(void *ptr) {
                     }
                 }
 
-                else local->results[line] = -1;
+                else {
+                    pthread_mutex_unlock(&mutexb);
+                    local->results[line] = -1;
+                }
 
             }
         }
