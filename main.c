@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
     freeNeighbors(global_index_out, max);
 
     pthread_mutex_init(&mutex, NULL);
-    //pthread_mutex_init(&mutexb, NULL);
+    pthread_mutex_init(&mutexb, NULL);
     pthread_mutex_init(&vmutex, NULL);
     pthread_cond_init(&cond_start, NULL);
     pthread_cond_init(&cond_next, NULL);

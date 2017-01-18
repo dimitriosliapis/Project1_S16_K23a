@@ -323,7 +323,11 @@ void *master_thread_function_dynamic(void *ptr) {
 
             if(str[0] == 'A') {
 
-                if(prev_job == 1) edge_version++;
+                if(prev_job == 1) {
+                    pthread_mutex_lock(&mutexb);
+                    edge_version++;
+                    pthread_mutex_unlock(&mutexb);
+                }
                 prev_job = 0;
 
                 toID(str, &N1, &N2);
@@ -413,8 +417,6 @@ void *worker_thread_function_dynamic(void *ptr) {
 
         ret = remove_from_buffer(local->buffer, &line, &query);
 
-        local_edge_version = edge_version;
-
         if(ret == -1) {
 
             pthread_cond_broadcast(&cond_next);
@@ -425,6 +427,12 @@ void *worker_thread_function_dynamic(void *ptr) {
         }
 
         pthread_mutex_unlock(&mutex);
+
+        pthread_mutex_lock(&mutexb);
+
+        local_edge_version = edge_version;
+
+        pthread_mutex_unlock(&mutexb);
 
         toID(query, &N1, &N2);
 

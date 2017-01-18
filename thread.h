@@ -15,7 +15,7 @@
 #define WAIT 2
 
 pthread_mutex_t mutex;
-//pthread_mutex_t mutexb;
+pthread_mutex_t mutexb;
 pthread_mutex_t vmutex;
 pthread_cond_t cond_start;
 pthread_cond_t cond_next;
