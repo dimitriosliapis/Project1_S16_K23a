@@ -118,18 +118,22 @@ int bBFS(ind *index_in,
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (index_out[successor].visited[thread_id] != version && neighbors->edgeProperty[i] <= edge_property) {      // an den ton exei epispeftei o idios
-                                index_out[successor].visited[thread_id] = version;         // ton episkeptetai
+                            if(neighbors->edgeProperty[i] <= edge_property) {
 
-                                if (index_in[successor].visited[thread_id] == version) {   // goal afou ton exei episkeptei o allos
-                                    restartQueue(frontierF);
-                                    restartQueue(frontierB);
-                                    return stepsB + stepsF;
+                                if (index_out[successor].visited[thread_id] != version) {      // an den ton exei epispeftei o idios
+                                    index_out[successor].visited[thread_id] = version;         // ton episkeptetai
 
-                                } else {   // alliws eisagetai sto synoro
-                                    enq(frontierF, successor);
-                                    counterFS++;
-                                    childrenF += index_out[successor].num_of_children;
+                                    if (index_in[successor].visited[thread_id] == version) {   // goal afou ton exei episkeptei o allos
+                                        restartQueue(frontierF);
+                                        restartQueue(frontierB);
+                                        return stepsB + stepsF;
+
+                                    } else {   // alliws eisagetai sto synoro
+                                        enq(frontierF, successor);
+                                        counterFS++;
+                                        childrenF += index_out[successor].num_of_children;
+                                    }
+
                                 }
 
                             }
@@ -172,19 +176,24 @@ int bBFS(ind *index_in,
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (index_in[successor].visited[thread_id] != version && neighbors->edgeProperty[i] <= edge_property) {       // an den ton exei episkeptei o idios
-                                index_in[successor].visited[thread_id] = version;          // ton episkeptetai
+                            if(neighbors->edgeProperty[i] <= edge_property) {
 
-                                if (index_out[successor].visited[thread_id] == version) {  // goal afou ton exei episkeptei o allos
+                                if (index_in[successor].visited[thread_id] != version) {       // an den ton exei episkeptei o idios
+                                    index_in[successor].visited[thread_id] = version;          // ton episkeptetai
 
-                                    restartQueue(frontierB);
-                                    restartQueue(frontierF);
-                                    return stepsF + stepsB;
+                                    if (index_out[successor].visited[thread_id] ==
+                                        version) {  // goal afou ton exei episkeptei o allos
 
-                                } else {    // alliws eisagetai sto synoro
-                                    enq(frontierB, successor);
-                                    counterBS++;
-                                    childrenB += index_in[successor].num_of_children;
+                                        restartQueue(frontierB);
+                                        restartQueue(frontierF);
+                                        return stepsF + stepsB;
+
+                                    } else {    // alliws eisagetai sto synoro
+                                        enq(frontierB, successor);
+                                        counterBS++;
+                                        childrenB += index_in[successor].num_of_children;
+                                    }
+
                                 }
 
                             }
@@ -217,5 +226,3 @@ int bBFS(ind *index_in,
 
     return -1;  // an den vrethei monopati epistrefei -1
 }
-
-
