@@ -159,7 +159,7 @@ int isReachableGrailIndex(GrailIndex* index, int source_node, int target_node, S
     scc_target = scc->id_belongs_to_component[target_node];
 
     if(scc_source == DEFAULT || scc_target == DEFAULT) return NO;
-    if(scc_source == scc_target) return YES;
+    if(scc_source == scc_target) return MAYBE;
     if((index->hyper_index_out[scc_source].min_rank <= index->hyper_index_out[scc_target].min_rank) && (index->hyper_index_out[scc_source].rank > index->hyper_index_out[scc_target].rank)) return MAYBE;
     return NO;
 }
