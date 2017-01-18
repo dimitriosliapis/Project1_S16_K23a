@@ -24,4 +24,4 @@ void empty(Queue *);
 
 int bBFS(ind *, ind *, list_node *, list_node *, int, int, Queue *, Queue *, int, int);
 
-int scc_bBFS(int, int, Queue *, Queue *, int, int);
+

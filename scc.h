@@ -23,4 +23,6 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, int num_n
 
 
 SCC* estimateStronglyConnectedComponents(ind *, list_node *, int, int, int);
+
+int scc_bBFS(ind *, ind *, list_node *, list_node *, SCC *, int, int, Queue *, Queue *, int, int);
 void destroyStronglyConnectedComponents(SCC*);

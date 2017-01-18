@@ -181,6 +181,7 @@ void *worker_thread_function(void *ptr){
     int local_version = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
     int thread_id;
+    int res;
 
     pthread_mutex_lock(&vmutex);
     query = malloc(64*sizeof(char));
@@ -233,7 +234,7 @@ void *worker_thread_function(void *ptr){
 
                 local_version++;
 
-                local->results[line] = bBFS(global_index_in, global_index_out, global_buffer_in,
+                res = bBFS(global_index_in, global_index_out, global_buffer_in,
                                             global_buffer_out, N1, N2, frontierF, frontierB,
                                             local_version, thread_id);
             }
@@ -242,12 +243,15 @@ void *worker_thread_function(void *ptr){
 
                 local_version++;
 
-                local->results[line] = scc_bBFS(N1, N2, frontierF, frontierB, local_version, thread_id);
+                res = scc_bBFS(global_index_in, global_index_out, global_buffer_in,
+                                                global_buffer_out, global_scc, N1, N2, frontierF, frontierB, local_version, thread_id);
 
             }
         }
 
-        else local->results[line] = -1;
+        else res = -1;
+
+        local->results[line] = res;
     }
     free(query);
 
