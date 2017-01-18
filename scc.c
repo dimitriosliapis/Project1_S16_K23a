@@ -79,11 +79,11 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, int num_n
     }
 
     //o komvos pou episkeftetai auti tin stigmi
-    index_out[v].index = *index;
-    index_out[v].lowlink = *index;
+    index_out[v].scc_data->index = *index;
+    index_out[v].scc_data->lowlink = *index;
     (*index)++;
     push(scc_stack, v);
-    index_out[v].onStack = 1;//einai sto scc stack
+    index_out[v].scc_data->onStack = 1;//einai sto scc stack
 
     //an exei paidia
     if(index_out[v].num_of_children != 0) {
@@ -102,12 +102,12 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, int num_n
             //an to paidi tou den einai visited
             if(index_out[w].visited[thread_id] != version) {
                 *scc = tarjanRecursive(scc, index_out, buffer_out, num_nodes, version, w, index, scc_stack, thread_id);
-                if (index_out[v].lowlink > index_out[w].lowlink)
-                    index_out[v].lowlink = index_out[w].lowlink;
+                if (index_out[v].scc_data->lowlink > index_out[w].scc_data->lowlink)
+                    index_out[v].scc_data->lowlink = index_out[w].scc_data->lowlink;
             }
-            else if(index_out[w].onStack){ // alliws an einai sto scc stack
-                if(index_out[v].lowlink > index_out[w].index)
-                    index_out[v].lowlink = index_out[w].index;
+            else if(index_out[w].scc_data->onStack){ // alliws an einai sto scc stack
+                if(index_out[v].scc_data->lowlink > index_out[w].scc_data->index)
+                    index_out[v].scc_data->lowlink = index_out[w].scc_data->index;
             }
 
             k++;
@@ -117,7 +117,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, int num_n
             }
         }
     }
-    if(index_out[v].lowlink == index_out[v].index) {
+    if(index_out[v].scc_data->lowlink == index_out[v].scc_data->index) {
         scc_counter = (*scc)->components_count;
         (*scc)->components[scc_counter].included_nodes_count = 0;
         (*scc)->components[scc_counter].node_array_size = NODE_IDS_SIZE;
@@ -128,7 +128,7 @@ SCC* tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, int num_n
         //ftiakse to SCC
         do {
             w = pop(scc_stack);
-            index_out[w].onStack = 0;
+            index_out[w].scc_data->onStack = 0;
 
             (*scc)->components[scc_counter].included_node_ids[a] = w;
 

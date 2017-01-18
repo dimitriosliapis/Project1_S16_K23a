@@ -29,6 +29,9 @@ int main(int argc, char *argv[]) {
 
     int i = 0;
     struct timeval tv1, tv2;
+    char str[64];
+    int a = 1;
+
 
     gettimeofday(&tv1, NULL);
 
@@ -53,6 +56,11 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    static_graph = 0;
+    fgets(str, sizeof(str), thread_args->file);
+
+    if(strncmp(str, "STATIC", 6) == 0) static_graph = 1;
+
     // zeugh indexes kai buffers
     global_buffer_in = createBuffer(global_buffer_size_in);
     global_index_in = createNodeIndex(global_index_size_in);
@@ -63,8 +71,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    char str[64];
-    int a = 1;
+
     fgets(str, sizeof(str), Graph);
 
 
@@ -121,9 +128,9 @@ int main(int argc, char *argv[]) {
     thread_args->results = malloc(RES_INIT*sizeof(int));
     for(i = 0; i < thread_args->res_size; i++) thread_args->results[i] = EMPTY;
 
-    fgets(str, sizeof(str), thread_args->file);
 
-    if(strncmp(str, "STATIC", 6) == 0){
+
+    if(static_graph){
         global_scc_size = max;
 
         global_version++;

@@ -84,8 +84,8 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, int
             //an den exei paidia tote v.rank = rank, v.min_rank = rank kai pop apo tin stoiva
             if (grail->hyper_index_out[v].num_of_children == 0) {
                 rank++;
-                grail->hyper_index_out[v].min_rank = rank;
-                grail->hyper_index_out[v].rank = rank;
+                grail->hyper_index_out[v].scc_data->min_rank = rank;
+                grail->hyper_index_out[v].scc_data->rank = rank;
                 pop(&dfs_stack);
                 //insert(explored, v, HT_BIG, version);
                 grail->hyper_index_out[v].visited[thread_id] = version;
@@ -113,12 +113,12 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, int
                     else if (search(grail->hyper_index_out[v].neighbors, w, HT_SMALL, version, thread_id) == NOT_FOUND) { //alliws an einai visited
                         // tin prwti fora pou tha ksanaperasei tha auksithei o metritis all_children
 
-                        grail->hyper_index_out[v].all_children_in_scc++;
+                        grail->hyper_index_out[v].scc_data->all_children_in_scc++;
                         insert(grail->hyper_index_out[v].neighbors, w, HT_SMALL, version, thread_id);
 
                         //pairnei to min_rank apo kathe paidi pou exei termatisei
-                        if (grail->hyper_index_out[v].min_rank > grail->hyper_index_out[w].min_rank)
-                            grail->hyper_index_out[v].min_rank = grail->hyper_index_out[w].min_rank;
+                        if (grail->hyper_index_out[v].scc_data->min_rank > grail->hyper_index_out[w].scc_data->min_rank)
+                            grail->hyper_index_out[v].scc_data->min_rank = grail->hyper_index_out[w].scc_data->min_rank;
                     }
                     k++;
                     if (k == N){
@@ -129,9 +129,9 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, int
                     }
                 }
                 //an exoume episkeutei ola ta paidia tote ftianoume kai to rank tou patera kai ton kanoume pop
-                if (grail->hyper_index_out[v].num_of_children != 0 && grail->hyper_index_out[v].all_children_in_scc == grail->hyper_index_out[v].num_of_children) {
+                if (grail->hyper_index_out[v].num_of_children != 0 && grail->hyper_index_out[v].scc_data->all_children_in_scc == grail->hyper_index_out[v].num_of_children) {
                     rank++;
-                    grail->hyper_index_out[v].rank = rank;
+                    grail->hyper_index_out[v].scc_data->rank = rank;
                     //insert(explored, v, HT_BIG, version);
                     grail->hyper_index_out[v].visited[thread_id] = version;
                     pop(&dfs_stack);
@@ -160,7 +160,7 @@ int isReachableGrailIndex(GrailIndex* index, int source_node, int target_node, S
 
     if(scc_source == DEFAULT || scc_target == DEFAULT) return NO;
     if(scc_source == scc_target) return MAYBE;
-    if((index->hyper_index_out[scc_source].min_rank <= index->hyper_index_out[scc_target].min_rank) && (index->hyper_index_out[scc_source].rank > index->hyper_index_out[scc_target].rank)) return MAYBE;
+    if((index->hyper_index_out[scc_source].scc_data->min_rank <= index->hyper_index_out[scc_target].scc_data->min_rank) && (index->hyper_index_out[scc_source].scc_data->rank > index->hyper_index_out[scc_target].scc_data->rank)) return MAYBE;
     return NO;
 }
 // free GrailIndex

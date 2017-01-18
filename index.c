@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "index.h"
 
+
 ind *createNodeIndex(int index_size) {
 
     ind *index = NULL;
@@ -14,13 +15,17 @@ ind *createNodeIndex(int index_size) {
 /*        for(j = 0; j < THREAD_POOL_SIZE; j++) {
             index[i].visited[j] = DEFAULT;
         }*/
-        index[i].lowlink = DEFAULT;
-        index[i].index = DEFAULT;
         index[i].neighbors = NULL;
-        index[i].all_children_in_scc = 0;
-        index[i].rank = DEFAULT;
-        index[i].min_rank = DEFAULT;
         index[i].num_of_children = 0;
+
+        if(static_graph) {
+            index[i].scc_data = malloc(sizeof(SCC_Data));
+            index[i].scc_data->lowlink = DEFAULT;
+            index[i].scc_data->index = DEFAULT;
+            index[i].scc_data->all_children_in_scc = 0;
+            index[i].scc_data->rank = DEFAULT;
+            index[i].scc_data->min_rank = DEFAULT;
+        }
     }
 
     return index;
@@ -49,6 +54,8 @@ ptrdiff_t insertNode(ind **index, int id, list_node **buffer, int *index_size, i
     (*index)[id].first = offset;    // tuxaia seira sto buffer etsi
     (*index)[id].last = offset; // tuxaia seira sto buffer etsi
 
+
+
     (*available)++;
 
     return offset;
@@ -71,13 +78,17 @@ int reallocNodeIndex(ind **index, int id, int *index_size) {
         /*for(j = 0; j < THREAD_POOL_SIZE; j++) {
             (*index)[i].visited[j] = DEFAULT;
         }*/
-        (*index)[i].lowlink = DEFAULT;
-        (*index)[i].index = DEFAULT;
         (*index)[i].neighbors = NULL;
-        (*index)[i].all_children_in_scc = 0;
-        (*index)[i].rank = DEFAULT;
-        (*index)[i].min_rank = DEFAULT;
         (*index)[i].num_of_children = 0;
+
+        if(static_graph) {
+            (*index)[i].scc_data = malloc(sizeof(SCC_Data));
+            (*index)[i].scc_data->lowlink = DEFAULT;
+            (*index)[i].scc_data->index = DEFAULT;
+            (*index)[i].scc_data->all_children_in_scc = 0;
+            (*index)[i].scc_data->rank = DEFAULT;
+            (*index)[i].scc_data->min_rank = DEFAULT;
+        }
 
     }
     *index_size = realloc_size;

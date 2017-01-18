@@ -9,19 +9,33 @@
 #define NOT_EXIST -24
 #define ALR_CONNECTED -25
 
+int static_graph;
+
+
+typedef struct SCC_Data_t{
+    int lowlink;
+    int index;
+    int rank;
+    int min_rank;
+    int onStack;
+    int all_children_in_scc;
+}SCC_Data;
 
 typedef struct index_t{
     ptrdiff_t first;
     ptrdiff_t last;
     int visited[THREAD_POOL_SIZE+1];
-    int lowlink;
+    ht_Node *neighbors;
+    int num_of_children;
+    SCC_Data *scc_data;
+    /*int lowlink;
     int index;
     int rank;
     int min_rank;
-    ht_Node *neighbors;
-    int all_children_in_scc;
-    int num_of_children;
     int onStack;
+    int all_children_in_scc;*/
+
+
 }ind;
 
 ind *createNodeIndex(int);
