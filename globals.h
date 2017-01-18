@@ -20,4 +20,5 @@ int global_cc_size;
 SCC *global_scc;
 GrailIndex *global_grail;
 
+int edge_version;
 #endif //PROJECT1_S16_K23A_GLOBALS_H

@@ -95,7 +95,7 @@ int reallocNodeIndex(ind **index, int id, int *index_size) {
     return OK_SUCCESS;
 }
 
-ptrdiff_t addEdge(ind **index, int id, int neighbor, list_node **buffer, int *buffer_size, ptrdiff_t *available, int thread_id) {
+ptrdiff_t addEdge(ind **index, int id, int neighbor, list_node **buffer, int *buffer_size, ptrdiff_t *available, int thread_id, int edge_property) {
 
     int i = 0;
     int version = 0;
@@ -118,6 +118,7 @@ ptrdiff_t addEdge(ind **index, int id, int neighbor, list_node **buffer, int *bu
 //        if (current->neighbor[i] == neighbor) return ALR_CONNECTED; // gia na dei an uparxei
         if (current->neighbor[i] == DEFAULT) {  // alliws vriskei tin thesi tou 1ou diathesimou
             current->neighbor[i] = neighbor;    // kai ton vazei ekei
+            current->edgeProperty[i] = edge_property;
             break;
         }
         i++;

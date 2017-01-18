@@ -13,7 +13,7 @@
 
 typedef struct list_node_t {
     int neighbor[N];
-    //int edgeProperty[N];
+    int edgeProperty[N];
     ptrdiff_t nextListNode;
 }list_node;
 

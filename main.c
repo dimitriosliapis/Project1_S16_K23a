@@ -90,9 +90,9 @@ int main(int argc, char *argv[]) {
                        &global_available_in);
             if(max < N2) max = N2;
         }
-        addEdge(&global_index_out, N1, N2, &global_buffer_out, &global_buffer_size_out, &global_available_out, 0);
+        addEdge(&global_index_out, N1, N2, &global_buffer_out, &global_buffer_size_out, &global_available_out, 0, 0);
 
-        addEdge(&global_index_in, N2, N1, &global_buffer_in, &global_buffer_size_in, &global_available_in, 0);
+        addEdge(&global_index_in, N2, N1, &global_buffer_in, &global_buffer_size_in, &global_available_in, 0, 0);
 
         fgets(str, sizeof(str), Graph);
     }

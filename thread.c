@@ -1,3 +1,4 @@
+#include <rpcndr.h>
 #include "thread.h"
 
 int toID(char *str, int *N1, int *N2) {
@@ -258,7 +259,7 @@ void *worker_thread_function(void *ptr){
             //pthread_mutex_unlock(&vmutex);
             res = bBFS(global_index_in, global_index_out, global_buffer_in,
                                         global_buffer_out, N1, N2, frontierF, frontierB,
-                                        local_version,thread_id);
+                                        local_version,thread_id, 0);
             local_version++;
             //printf("%d\n", local->data->steps);//den tupwnei ta vazei ston pinaka me ta apotelesmata
             //local->results[i] = local->data->steps;
@@ -287,12 +288,14 @@ void *master_thread_function_dynamic(void *ptr) {
     int line = 1, a, start = 1, realloc_size = 0;
     int N1, N2;
     char str[64];
+    short int prev_job = 0;
 
     pthread_t *worker_threads = (pthread_t*)malloc(THREAD_POOL_SIZE*sizeof(pthread_t));
 
     finished = 0;
     status = START;
     max_id = 1;
+    edge_version = -1;
 
     pthread_mutex_lock(&vmutex);
 
@@ -321,6 +324,9 @@ void *master_thread_function_dynamic(void *ptr) {
 
             if(str[0] == 'A') {
 
+                if(prev_job == 1) edge_version++;
+                prev_job = 0;
+
                 toID(str, &N1, &N2);
 
                 if(lookup(global_index_out, N1, global_index_size_out) == NOT_EXIST)
@@ -329,14 +335,16 @@ void *master_thread_function_dynamic(void *ptr) {
                 if(lookup(global_index_in, N2, global_index_size_out) == NOT_EXIST)
                     insertNode(&global_index_in, N2, &global_buffer_out, &global_index_size_in, &global_buffer_size_in, &global_available_in);
 
-                addEdge(&global_index_out, N1, N2, &global_buffer_out, &global_buffer_size_out, &global_available_out, 0);
+                addEdge(&global_index_out, N1, N2, &global_buffer_out, &global_buffer_size_out, &global_available_out, 0, edge_version);
 
-                addEdge(&global_index_in, N2, N1, &global_buffer_in, &global_buffer_size_in, &global_available_in, 0);
+                addEdge(&global_index_in, N2, N1, &global_buffer_in, &global_buffer_size_in, &global_available_in, 0, edge_version);
 
                 refreshUpdateIndex(global_cc, N1, N2);
             }
 
             else {
+
+                prev_job = 1;
 
                 place_to_buffer(str, local->buffer, line);
 
@@ -426,7 +434,7 @@ void *worker_thread_function_dynamic(void *ptr) {
                 local_version++;
                 local->results[line] = bBFS(global_index_in, global_index_out, global_buffer_in,
                                             global_buffer_out, N1, N2, frontierF, frontierB,
-                                            local_version, thread_id);
+                                            local_version, thread_id, edge_version);
             }
 
             else {
@@ -435,7 +443,7 @@ void *worker_thread_function_dynamic(void *ptr) {
                     local_version++;
                     local->results[line] = bBFS(global_index_in, global_index_out, global_buffer_in,
                                                 global_buffer_out, N1, N2, frontierF, frontierB,
-                                                local_version,thread_id);
+                                                local_version,thread_id, edge_version);
 
                     pthread_mutex_lock(&mutex);
                     global_cc->metricVal--;

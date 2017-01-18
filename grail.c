@@ -48,7 +48,7 @@ GrailIndex* buildGrailIndex(ind *index_out, list_node *buffer_out, SCC* scc, int
 
                     if (neigh_scc != i) {
                         addEdge(&grail->hyper_index_out, i, neigh_scc, &grail->hyper_buffer_out, &grail->buf_size_out,
-                                &available_out, thread_id);
+                                &available_out, thread_id, 0);
                     }
 
                     k++;

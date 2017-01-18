@@ -46,7 +46,7 @@ ptrdiff_t insertNode(ind**, int, list_node**, int*, int*, ptrdiff_t*);
 
 int reallocNodeIndex(ind**, int, int*);
 
-ptrdiff_t addEdge(ind**, int, int, list_node**, int*, ptrdiff_t*, int);
+ptrdiff_t addEdge(ind**, int, int, list_node**, int*, ptrdiff_t*, int, int);
 
 ptrdiff_t getListHead(ind*, int);
 

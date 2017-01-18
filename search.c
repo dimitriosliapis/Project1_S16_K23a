@@ -78,7 +78,8 @@ int bBFS(ind *index_in,
          Queue *frontierF,
          Queue *frontierB,
          int version,
-         int thread_id) {
+         int thread_id,
+         int edge_property) {
 
     list_node *neighbors = NULL;
     int node = DEFAULT, successor = DEFAULT, childrenF = 0, childrenB = 0;
@@ -117,7 +118,7 @@ int bBFS(ind *index_in,
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (index_out[successor].visited[thread_id] != version) {      // an den ton exei epispeftei o idios
+                            if (index_out[successor].visited[thread_id] != version && neighbors->edgeProperty[i] <= edge_property) {      // an den ton exei epispeftei o idios
                                 index_out[successor].visited[thread_id] = version;         // ton episkeptetai
 
                                 if (index_in[successor].visited[thread_id] == version) {   // goal afou ton exei episkeptei o allos
@@ -171,7 +172,7 @@ int bBFS(ind *index_in,
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (index_in[successor].visited[thread_id] != version) {       // an den ton exei episkeptei o idios
+                            if (index_in[successor].visited[thread_id] != version && neighbors->edgeProperty[i] <= edge_property) {       // an den ton exei episkeptei o idios
                                 index_in[successor].visited[thread_id] = version;          // ton episkeptetai
 
                                 if (index_out[successor].visited[thread_id] == version) {  // goal afou ton exei episkeptei o allos
