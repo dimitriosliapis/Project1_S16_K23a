@@ -453,7 +453,9 @@ void *worker_thread_function_dynamic(void *ptr) {
             }
 
             else {
-                pthread_cond_wait(&cond_wait, NULL);
+                pthread_mutex_lock(&cc_mutex);
+
+                pthread_cond_wait(&cond_wait, &cc_mutex);
 
                 pthread_mutex_lock(&cc_mutex);
 
