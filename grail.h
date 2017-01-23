@@ -5,6 +5,7 @@
 
 #define MAYBE 45
 #define NO 46
+#define YES 47
 
 typedef struct GrailIndex_t {
     ind *hyper_index_out;

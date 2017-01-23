@@ -161,6 +161,8 @@ int isReachableGrailIndex(GrailIndex *index, uint32_t source_node, uint32_t targ
 
     if (scc_source == DEFAULT || scc_target == DEFAULT)
         return NO;
+    if (scc_source == scc_target)
+        return YES;
     if ((index->hyper_index_out[scc_source].min_rank <= index->hyper_index_out[scc_target].min_rank) &&
         (index->hyper_index_out[scc_source].rank > index->hyper_index_out[scc_target].rank))
         return MAYBE;

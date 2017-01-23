@@ -1,7 +1,7 @@
 #include <sys/time.h>
 #include "grail.h"
 
-#define RES_INIT 16600000
+#define RES_INIT 60000
 
 list_node *buffer_in = NULL, *buffer_out = NULL;
 ind *index_in = NULL, *index_out = NULL;
@@ -114,7 +114,7 @@ void *worker(void *ptr) {
 
         if (job == NULL) {
             finished = 1;
-            pthread_cond_broadcast(&cond_nonfinished);
+            pthread_cond_signal(&cond_nonfinished);
             if (end) break;
             continue;
         } else
@@ -128,9 +128,8 @@ void *worker(void *ptr) {
             lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
 
             scc_source = scc->id_belongs_to_component[N1];
-            scc_target = scc->id_belongs_to_component[N2];
 
-            if (scc_source == scc_target) { // YES
+            if (isReachableGrailIndex(grail, N1, N2, scc) == YES) { // YES
                 local_version++;
                 steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
                              local_version, thread_id, scc_source);
@@ -158,7 +157,7 @@ void *worker(void *ptr) {
 int main(int argc, char *argv[]) {
 
     FILE *Graph = NULL, *Queries = NULL;
-    int i = 0;
+    int i = 0, print_start = 0, print = 1;
     uint32_t N1, N2, scc_size = 0;
     uint32_t version = 0, line = 0;
     pthread_t * workers_t;
@@ -279,6 +278,7 @@ int main(int argc, char *argv[]) {
         while (!feof(Queries)) {
 
             pthread_mutex_lock(&mtx);
+
             while (finished == 0)
                 pthread_cond_wait(&cond_nonfinished, &mtx);
 
