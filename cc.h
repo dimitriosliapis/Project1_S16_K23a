@@ -1,3 +1,6 @@
+#ifndef CC_H
+#define CC_H
+
 #include "search.h"
 
 #define INIT_UNODE_SIZE 32
@@ -58,3 +61,5 @@ void refreshUpdateIndex(CC *, uint32_t, uint32_t);
 int searchUpdateIndex(CC, uint32_t, uint32_t, ht_Node*, uint32_t);
 uint32_t updateCCIndex(CC *, ht_Node*, uint32_t, uint32_t);
 void destroyCCIndex(CC*);
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef SEARCH_H
+#define SEARCH_H
+
 #include "index.h"
 
 #define QUEUE_SIZE 4096
@@ -22,4 +25,6 @@ void restartQueue(Queue *);
 
 void empty(Queue *);
 
-int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, Queue *, Queue *, uint32_t);
+int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, Queue *, Queue *, uint32_t, int, uint32_t);
+
+#endif

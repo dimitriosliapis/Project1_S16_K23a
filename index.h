@@ -1,5 +1,9 @@
+#ifndef INDEX_H
+#define INDEX_H
+
 #include "buffer.h"
 #include "hash.h"
+#include "thread.h"
 
 #define IND_SIZE 262144
 
@@ -12,7 +16,7 @@
 typedef struct index_t{
     ptrdiff_t first;
     ptrdiff_t last;
-    uint32_t visited;
+    int visited[THREAD_POOL_SIZE + 1];
     uint32_t lowlink;
     uint32_t index;
     uint32_t rank;
@@ -36,3 +40,5 @@ ptrdiff_t addEdge(ind**, uint32_t, uint32_t, list_node**, uint32_t*, ptrdiff_t*)
 ptrdiff_t getListHead(ind*, uint32_t);
 
 int destroyNodeIndex(ind*, uint32_t index_size);
+
+#endif

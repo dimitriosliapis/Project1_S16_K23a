@@ -1,3 +1,6 @@
+#ifndef HASH_H
+#define HASH_H
+
 #include <stdint.h>
 
 #define HT_BIG 148201
@@ -26,3 +29,5 @@ int search(ht_Node *, uint32_t, uint32_t, uint32_t);
 void insert(ht_Node *, uint32_t, uint32_t, uint32_t);
 
 void delete(ht_Node *, uint32_t);
+
+#endif

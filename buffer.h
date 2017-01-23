@@ -1,3 +1,6 @@
+#ifndef BUFFER_H
+#define BUFFER_H
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -24,3 +27,5 @@ ptrdiff_t allocNewNode(list_node**, uint32_t*, ptrdiff_t);
 int reallocBuffer(list_node**, uint32_t*);
 
 int destroyBuffer(list_node*);
+
+#endif

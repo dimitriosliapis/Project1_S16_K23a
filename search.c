@@ -1,4 +1,7 @@
 #include "search.h"
+#include "scc.h"
+
+extern SCC *scc;
 
 Queue *createQueue() {
 
@@ -68,7 +71,6 @@ void empty(Queue *queue) {
     free(queue);
 }
 
-
 int bBFS(ind *index_in,
          ind *index_out,
          list_node *buffer_in,
@@ -77,7 +79,9 @@ int bBFS(ind *index_in,
          uint32_t end,
          Queue *frontierF,
          Queue *frontierB,
-         uint32_t version) {
+         uint32_t version,
+         int thread_id,
+         uint32_t curr_scc) {
 
     list_node *neighbors = NULL;
     uint32_t node = DEFAULT, successor = DEFAULT, childrenF = 0, childrenB = 0;
@@ -88,12 +92,12 @@ int bBFS(ind *index_in,
     if (start == end)   // an o komvos ekkinhshs einai o komvos stoxos tote steps=0
         return 0;
 
-    index_out[start].visited = version;
+    index_out[start].visited[thread_id] = version;
     enq(frontierF, start);
     childrenF = index_out[start].num_of_children;
     counterF++;
 
-    index_in[end].visited = version;
+    index_in[end].visited[thread_id] = version;
     enq(frontierB, end);
     childrenB = index_in[end].num_of_children;
     counterB++;
@@ -116,20 +120,45 @@ int bBFS(ind *index_in,
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (index_out[successor].visited != version) {      // an den ton exei epispeftei o idios
-                                index_out[successor].visited = version;         // ton episkeptetai
+                            if (curr_scc != DEFAULT) {  // periptwsh anazhthshs sto idio scc
 
-                                if (index_in[successor].visited == version) {   // goal afou ton exei episkeptei o allos
-                                    restartQueue(frontierF);
-                                    restartQueue(frontierB);
-                                    return stepsB + stepsF;
+                                if (scc->id_belongs_to_component[successor] == curr_scc) {
 
-                                } else {   // alliws eisagetai sto synoro
-                                    enq(frontierF, successor);
-                                    counterFS++;
-                                    childrenF += index_out[successor].num_of_children;
+                                    if (index_out[successor].visited[thread_id] != version) {  // an den ton exei epispeftei o idios
+                                        index_out[successor].visited[thread_id] = version;         // ton episkeptetai
+
+                                        if (index_in[successor].visited[thread_id] == version) {   // goal afou ton exei episkeptei o allos
+                                            restartQueue(frontierF);
+                                            restartQueue(frontierB);
+                                            return stepsB + stepsF;
+
+                                        } else {   // alliws eisagetai sto synoro
+                                            enq(frontierF, successor);
+                                            counterFS++;
+                                            childrenF += index_out[successor].num_of_children;
+                                        }
+
+                                    }
+
                                 }
 
+                            } else {    // periptwsh anazhthshs se olo ton grafo
+
+                                if (index_out[successor].visited[thread_id] != version) {  // an den ton exei epispeftei o idios
+                                    index_out[successor].visited[thread_id] = version; // ton episkeptetai
+
+                                    if (index_in[successor].visited[thread_id] == version) {   // goal afou ton exei episkeptei o allos
+                                        restartQueue(frontierF);
+                                        restartQueue(frontierB);
+                                        return stepsB + stepsF;
+
+                                    } else {   // alliws eisagetai sto synoro
+                                        enq(frontierF, successor);
+                                        counterFS++;
+                                        childrenF += index_out[successor].num_of_children;
+                                    }
+
+                                }
                             }
 
                         } else
@@ -170,19 +199,46 @@ int bBFS(ind *index_in,
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (index_in[successor].visited != version) {       // an den ton exei episkeptei o idios
-                                index_in[successor].visited = version;          // ton episkeptetai
+                            if (curr_scc != DEFAULT) {  // periptwsh anazhthshs sto idio scc
 
-                                if (index_out[successor].visited == version) {  // goal afou ton exei episkeptei o allos
+                                if (scc->id_belongs_to_component[successor] == curr_scc) {
 
-                                    restartQueue(frontierB);
-                                    restartQueue(frontierF);
-                                    return stepsF + stepsB;
+                                    if (index_in[successor].visited[thread_id] != version) {   // an den ton exei episkeptei o idios
+                                        index_in[successor].visited[thread_id] = version;  // ton episkeptetai
 
-                                } else {    // alliws eisagetai sto synoro
-                                    enq(frontierB, successor);
-                                    counterBS++;
-                                    childrenB += index_in[successor].num_of_children;
+                                        if (index_out[successor].visited[thread_id] == version) {  // goal afou ton exei episkeptei o allos
+
+                                            restartQueue(frontierB);
+                                            restartQueue(frontierF);
+                                            return stepsF + stepsB;
+
+                                        } else {    // alliws eisagetai sto synoro
+                                            enq(frontierB, successor);
+                                            counterBS++;
+                                            childrenB += index_in[successor].num_of_children;
+                                        }
+
+                                    }
+
+                                }
+
+                            } else {    // periptwsh anazhthshs se olo ton grafo
+
+                                if (index_in[successor].visited[thread_id] != version) {   // an den ton exei episkeptei o idios
+                                    index_in[successor].visited[thread_id] = version;  // ton episkeptetai
+
+                                    if (index_out[successor].visited[thread_id] == version) {  // goal afou ton exei episkeptei o allos
+
+                                        restartQueue(frontierB);
+                                        restartQueue(frontierF);
+                                        return stepsF + stepsB;
+
+                                    } else {    // alliws eisagetai sto synoro
+                                        enq(frontierB, successor);
+                                        counterBS++;
+                                        childrenB += index_in[successor].num_of_children;
+                                    }
+
                                 }
 
                             }
