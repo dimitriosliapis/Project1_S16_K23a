@@ -1,4 +1,7 @@
+#include <sys/time.h>
 #include "grail.h"
+
+extern struct timeval tv1, tv2;
 
 GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uint32_t version) {
 
@@ -55,6 +58,11 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
             }
         }
     }
+
+    gettimeofday(&tv2, NULL);
+    printf("Hypergraph creation = %f seconds\n",
+           (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+           (double) (tv2.tv_sec - tv1.tv_sec));
 
     rank = 0;
 
@@ -133,6 +141,11 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
     }
 
     deletestack(dfs_stack);
+
+    gettimeofday(&tv2, NULL);
+    printf("Grail index creation = %f seconds\n",
+           (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+           (double) (tv2.tv_sec - tv1.tv_sec));
 
     return grail;
 }

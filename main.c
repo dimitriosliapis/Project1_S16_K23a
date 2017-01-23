@@ -1,27 +1,20 @@
 #include <sys/time.h>
-#include <unistd.h>
 #include "grail.h"
 #include "thread.h"
 
 #define RES_INIT 70000
 
-FILE *Graph = NULL,
-        *Queries = NULL;
-list_node *buffer_in = NULL,
-        *buffer_out = NULL;
-ind *index_in = NULL,
-        *index_out = NULL;
-uint32_t buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE,
-        index_size_in = IND_SIZE, index_size_out = IND_SIZE,
-        scc_source, scc_target, scc_size = 0;
-ptrdiff_t available_in = 0,
-        available_out = 0;
-ht_Node *explored = NULL;
+FILE *Graph = NULL, *Queries = NULL;
+list_node *buffer_in = NULL, *buffer_out = NULL;
+ind *index_in = NULL, *index_out = NULL;
+uint32_t buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
+ptrdiff_t available_in = 0, available_out = 0;
 SCC *scc = NULL;
 Buffer *buffer = NULL;
 GrailIndex *grail = NULL;
-int steps = 0, start = 0, finished = 1, res_size;
-int *results, id = 1, end = 0;
+int start = 0, finished = 1, res_size, id = 1, end = 0, *results;
+
+struct timeval tv1, tv2;
 
 
 int toID(char *str, uint32_t *N1, uint32_t *N2) {
@@ -58,7 +51,7 @@ void place_to_buffer(char *query, Buffer *buffer, int line) {
     new->next = NULL;
     new->line = line;
 
-    //printf("INSERTING QUERY: %s\n", query);
+    // printf("INSERTING QUERY: %s\n", query);
 
     if (buffer->first == NULL) {
         buffer->first = new;
@@ -98,7 +91,7 @@ B_Node *remove_from_buffer(Buffer *buffer) {
 
 void *worker(void *ptr) {
 
-    uint32_t N1, N2;
+    uint32_t N1, N2, scc_source, scc_target;
     int line, local_version = 0, thread_id, steps;
     Queue *frontierF = NULL, *frontierB = NULL;
     B_Node *job = NULL;
@@ -166,8 +159,8 @@ void *worker(void *ptr) {
 
 int main(int argc, char *argv[]) {
 
-    int i = 0;
-    uint32_t N1, N2;
+    int i = 0, j = 0;
+    uint32_t N1, N2, scc_size = 0;
     int version = 0, line = 0, print_start = 0;
     pthread_t * workers_t;
 
@@ -194,6 +187,8 @@ int main(int argc, char *argv[]) {
 
     // job buffer
     buffer = malloc(sizeof(Buffer));
+    buffer->first = NULL;
+    buffer->last = NULL;
 
     // mutexes and condition variables initialization
     pthread_mutex_init(&mtx, 0);
@@ -202,7 +197,6 @@ int main(int argc, char *argv[]) {
     pthread_cond_init(&cond_start, 0);
 
     // time
-    struct timeval tv1, tv2;
     gettimeofday(&tv1, NULL);
 
     char str[64];
@@ -227,6 +221,11 @@ int main(int argc, char *argv[]) {
 
     fclose(Graph);
 
+    gettimeofday(&tv2, NULL);
+    printf("Graph creation = %f seconds\n",
+           (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+           (double) (tv2.tv_sec - tv1.tv_sec));
+
     fgets(str, sizeof(str), Queries);
 
     // static graph creation
@@ -246,9 +245,19 @@ int main(int argc, char *argv[]) {
         version++;
         scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, version);
 
+        gettimeofday(&tv2, NULL);
+        printf("SCC estimation = %f seconds\n",
+               (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+               (double) (tv2.tv_sec - tv1.tv_sec));
+
         // grail index creation
         version++;
         grail = buildGrailIndex(index_out, buffer_out, scc, version);
+
+        // free unnecessary stuff
+        for (i = 0; i < scc->components_count; i++)
+            free(scc->components[i].included_node_ids);
+        free(scc->components);
 
         fgets(str, sizeof(str), Queries);
 
