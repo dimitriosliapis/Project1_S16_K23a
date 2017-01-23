@@ -65,6 +65,8 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
         }
     }
 
+    free(scc_con);
+
     gettimeofday(&tv2, NULL);
     printf("%f sec: Hypergraph creation\n",
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +

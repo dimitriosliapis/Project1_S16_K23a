@@ -1,10 +1,8 @@
 #include <sys/time.h>
 #include "grail.h"
-#include "thread.h"
 
 #define RES_INIT 70000
 
-FILE *Graph = NULL, *Queries = NULL;
 list_node *buffer_in = NULL, *buffer_out = NULL;
 ind *index_in = NULL, *index_out = NULL;
 uint32_t buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
@@ -12,7 +10,7 @@ ptrdiff_t available_in = 0, available_out = 0;
 SCC *scc = NULL;
 Buffer *buffer = NULL;
 GrailIndex *grail = NULL;
-int start = 0, finished = 1, res_size, id = 1, end = 0, *results;
+int start = 0, finished = 1, id = 1, end = 0, res_size, *results;
 
 struct timeval tv1, tv2;
 
@@ -40,7 +38,7 @@ int toID(char *str, uint32_t *N1, uint32_t *N2) {
     return 1;
 }
 
-void place_to_buffer(char *query, Buffer *buffer, int line) {
+void place_to_buffer(char *query, Buffer *buffer, uint32_t line) {
 
     B_Node *new = NULL, *tmp = NULL;
 
@@ -159,9 +157,10 @@ void *worker(void *ptr) {
 
 int main(int argc, char *argv[]) {
 
+    FILE *Graph = NULL, *Queries = NULL;
     int i = 0;
     uint32_t N1, N2, scc_size = 0;
-    int version = 0, line = 0;
+    uint32_t version = 0, line = 0;
     pthread_t * workers_t;
 
     // orismata

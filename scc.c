@@ -137,14 +137,6 @@ SCC *tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
 
 //free SCC
 void destroyStronglyConnectedComponents(SCC *scc) {
-
-    uint32_t i = 0;
-
-//    for (i = 0; i < scc->components_count; i++) {
-//        free(scc->components[i].included_node_ids);
-//    }
-
     free(scc->id_belongs_to_component);
-//    free(scc->components);
     free(scc);
 }

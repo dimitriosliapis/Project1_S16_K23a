@@ -13,7 +13,7 @@ pthread_cond_t cond_start;
 //Buffer
 typedef struct B_Node_t{
     char query[64];
-    int line;
+    uint32_t line;
     struct B_Node_t *next;
 } B_Node;
 
