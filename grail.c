@@ -80,7 +80,6 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                 grail->hyper_index_out[v].min_rank = rank;
                 grail->hyper_index_out[v].rank = rank;
                 popfromstack(dfs_stack);
-                //insert(explored, v, HT_BIG, version);
                 grail->hyper_index_out[v].visited[0] = version;
             }
 
@@ -126,7 +125,6 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                     grail->hyper_index_out[v].all_children_in_scc == grail->hyper_index_out[v].num_of_children) {
                     rank++;
                     grail->hyper_index_out[v].rank = rank;
-                    //insert(explored, v, HT_BIG, version);
                     grail->hyper_index_out[v].visited[0] = version;
                     popfromstack(dfs_stack);
                 }
