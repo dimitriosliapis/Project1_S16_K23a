@@ -197,13 +197,9 @@ int main(int argc, char *argv[]) {
 
     // mutexes and condition variables initialization
     pthread_mutex_init(&mtx, 0);
+    pthread_mutex_init(&id_mtx, 0);
     pthread_cond_init(&cond_nonfinished, 0);
     pthread_cond_init(&cond_start, 0);
-
-    // worker thread pool
-    workers_t = malloc(THREAD_POOL_SIZE * sizeof (pthread_t));
-    for (i = 0; i < THREAD_POOL_SIZE; i++)
-        pthread_create(&workers_t[i], 0, worker, 0);
 
     // time
     struct timeval tv1, tv2;
@@ -233,16 +229,24 @@ int main(int argc, char *argv[]) {
 
     fgets(str, sizeof(str), Queries);
 
-    if (strncmp(str, "STATIC", 6) == 0) {   // static graph
+    // static graph creation
+    if (strncmp(str, "STATIC", 6) == 0) {
+
+        // worker thread pool
+        workers_t = malloc(THREAD_POOL_SIZE * sizeof (pthread_t));
+        for (i = 0; i < THREAD_POOL_SIZE; i++)
+            pthread_create(&workers_t[i], 0, worker, 0);
 
         if (index_size_in > index_size_out)
             scc_size = index_size_in;
         else
             scc_size = index_size_out;
 
+        // scc estimation
         version++;
         scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, version);
 
+        // grail index creation
         version++;
         grail = buildGrailIndex(index_out, buffer_out, scc, version);
 
@@ -294,6 +298,8 @@ int main(int argc, char *argv[]) {
     destroyBuffer(buffer_out);
     destroyNodeIndex(index_in, index_size_in);
     destroyNodeIndex(index_out, index_size_out);
+    free(results);
+    free(buffer);
 
     if (scc != NULL)
         destroyStronglyConnectedComponents(scc);
@@ -302,6 +308,7 @@ int main(int argc, char *argv[]) {
 
     pthread_cond_destroy(&cond_nonfinished);
     pthread_cond_destroy(&cond_start);
+    pthread_mutex_destroy(&id_mtx);
     pthread_mutex_destroy(&mtx);
 
     return 0;
