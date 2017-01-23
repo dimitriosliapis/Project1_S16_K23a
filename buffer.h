@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#define BUFF_SIZE 262144
+#define BUFF_SIZE 512
 #define N 16
 #define DEFAULT 16777216
 

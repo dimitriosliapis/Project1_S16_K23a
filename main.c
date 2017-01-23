@@ -1,7 +1,7 @@
 #include <sys/time.h>
 #include "grail.h"
 
-#define RES_INIT 70000
+#define RES_INIT 16600000
 
 list_node *buffer_in = NULL, *buffer_out = NULL;
 ind *index_in = NULL, *index_out = NULL;
@@ -213,12 +213,28 @@ int main(int argc, char *argv[]) {
 
         addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1);
 
-        addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 1);
+        addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0);
 
         fgets(str, sizeof(str), Graph);
     }
 
     fclose(Graph);
+
+    // free unnecessary stuff
+    for (i = 0; i < index_size_in; i++) {
+        if (lookup(index_in, i, index_size_in) == ALR_EXISTS) {
+            if (index_in[i].neighbors != NULL)
+                delete(index_in[i].neighbors, HT_SMALL);
+            index_in[i].neighbors = NULL;
+        }
+    }
+    for (i = 0; i < index_size_out; i++) {
+        if (lookup(index_out, i, index_size_out) == ALR_EXISTS) {
+            if (index_out[i].neighbors != NULL)
+                delete(index_out[i].neighbors, HT_SMALL);
+            index_out[i].neighbors = NULL;
+        }
+    }
 
     gettimeofday(&tv2, NULL);
     printf("%f sec: Graph creation\n",

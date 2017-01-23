@@ -5,7 +5,7 @@
 #include "hash.h"
 #include "thread.h"
 
-#define IND_SIZE 262144
+#define IND_SIZE 512
 
 #define IND_EMPTY -1
 #define ALLOC_FAIL -2
