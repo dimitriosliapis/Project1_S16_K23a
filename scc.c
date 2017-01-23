@@ -140,11 +140,11 @@ void destroyStronglyConnectedComponents(SCC *scc) {
 
     uint32_t i = 0;
 
-    for (i = 0; i < scc->components_count; i++) {
-        free(scc->components[i].included_node_ids);
-    }
+//    for (i = 0; i < scc->components_count; i++) {
+//        free(scc->components[i].included_node_ids);
+//    }
 
     free(scc->id_belongs_to_component);
-    free(scc->components);
+//    free(scc->components);
     free(scc);
 }

@@ -12,6 +12,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
     uint32_t neigh_scc = 0;
     uint32_t rank = 1, min_rank = 1;
     Stack_t *dfs_stack = createStack();
+    int *scc_con;
 
     GrailIndex *grail = malloc(sizeof(GrailIndex));
 
@@ -27,13 +28,17 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                    &available_out);
     }
 
+    scc_con = malloc(scc->components_count * sizeof(int));
+    for (i = 0; i < scc->components_count; i++)
+        scc_con[i] = -1;
+
     //prosthiki akmwn metaksi tous
     for (i = 0; i < scc->components_count; i++) {
 
         for (j = 0; j < scc->components[i].included_nodes_count; j++) {
 
             offset_out = getListHead(index_out, scc->components[i].included_node_ids[j]);
-            if (offset_out >= 0) {
+            if (offset_out != -1) {
                 neighbors_out = buffer_out + offset_out;
 
                 k = 0;
@@ -42,9 +47,10 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
 
                     neigh_scc = scc->id_belongs_to_component[neighbors_out->neighbor[k]];
 
-                    if (neigh_scc != i) {
+                    if (neigh_scc != i && scc_con[neigh_scc] != i) {
                         addEdge(&grail->hyper_index_out, i, neigh_scc, &grail->hyper_buffer_out, &grail->buf_size_out,
-                                &available_out);
+                                &available_out, 0);
+                        scc_con[neigh_scc] = i;
                     }
 
                     k++;
@@ -60,7 +66,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
     }
 
     gettimeofday(&tv2, NULL);
-    printf("Hypergraph creation = %f seconds\n",
+    printf("%f sec: Hypergraph creation\n",
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
 
@@ -76,11 +82,6 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
         while (!stackisempty(dfs_stack)) {
 
             v = peekfromstack(dfs_stack);
-
-            //dimiourgia hashtable gia na tsekarei an exei perasei apo ola ta paidia tou
-            if (grail->hyper_index_out[v].neighbors == NULL) {
-                grail->hyper_index_out[v].neighbors = createHashtable(HT_SMALL);
-            }
 
             //an den exei paidia tote v.rank = rank, v.min_rank = rank kai pop apo tin stoiva
             if (grail->hyper_index_out[v].num_of_children == 0) {
@@ -109,12 +110,10 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                     if (grail->hyper_index_out[w].visited[0] != version) {
                         pushinstack(dfs_stack, w);
                         break;
-                    } else if (search(grail->hyper_index_out[v].neighbors, w, HT_SMALL, 1) ==
-                               NOT_FOUND) { //alliws an einai visited
+                    } else { //alliws an einai visited
 
                         // tin prwti fora pou tha ksanaperasei tha auksithei o metritis all_children
                         grail->hyper_index_out[v].all_children_in_scc++;
-                        insert(grail->hyper_index_out[v].neighbors, w, HT_SMALL, 1);
 
                         //pairnei to min_rank apo kathe paidi pou exei termatisei
                         if (grail->hyper_index_out[v].min_rank > grail->hyper_index_out[w].min_rank)
@@ -143,7 +142,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
     deletestack(dfs_stack);
 
     gettimeofday(&tv2, NULL);
-    printf("Grail index creation = %f seconds\n",
+    printf("%f sec: Grail index creation\n",
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
 

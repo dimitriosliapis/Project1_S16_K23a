@@ -4,8 +4,8 @@
 #include <stdint.h>
 
 #define HT_BIG 148201
-#define HT_SMALL 67
-#define HT_N 7
+#define HT_SMALL 71
+#define HT_N 16
 
 #define DEFAULT 16777216
 

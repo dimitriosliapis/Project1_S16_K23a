@@ -11,7 +11,7 @@ ht_Node *createHashtable(uint32_t size) {
     else {
         for (i = 0; i < size; i++) {
             hashTable[i].bucket = NULL;
-            hashTable[i].size = size;
+            hashTable[i].size = HT_N;
         }
         return hashTable;
     }

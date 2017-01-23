@@ -159,9 +159,9 @@ void *worker(void *ptr) {
 
 int main(int argc, char *argv[]) {
 
-    int i = 0, j = 0;
+    int i = 0;
     uint32_t N1, N2, scc_size = 0;
-    int version = 0, line = 0, print_start = 0;
+    int version = 0, line = 0;
     pthread_t * workers_t;
 
     // orismata
@@ -212,9 +212,9 @@ int main(int argc, char *argv[]) {
         if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
             insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
 
-        addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out);
+        addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1);
 
-        addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in);
+        addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 1);
 
         fgets(str, sizeof(str), Graph);
     }
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
     fclose(Graph);
 
     gettimeofday(&tv2, NULL);
-    printf("Graph creation = %f seconds\n",
+    printf("%f sec: Graph creation\n",
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
 
@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
         scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, version);
 
         gettimeofday(&tv2, NULL);
-        printf("SCC estimation = %f seconds\n",
+        printf("%f sec: SCC estimation\n",
                (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
                (double) (tv2.tv_sec - tv1.tv_sec));
 
@@ -299,7 +299,7 @@ int main(int argc, char *argv[]) {
         printf("%d\n", results[i]);
 
     gettimeofday(&tv2, NULL);
-    printf("Total time = %f seconds\n",
+    printf("%f sec: The End\n",
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
 

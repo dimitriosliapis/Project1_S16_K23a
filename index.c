@@ -80,7 +80,7 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
     return OK_SUCCESS;
 }
 
-ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, ptrdiff_t *available) {
+ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, ptrdiff_t *available, int check) {
 
     int i = 0;
     uint32_t version = 0;
@@ -89,16 +89,17 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
     offset = getListHead(*index, id);   // offset 1ou komvou sto buffer gia to id
     list_node *current = *buffer + (*index)[id].last;
 
-    if ((*index)[id].neighbors == NULL)
-        (*index)[id].neighbors = createHashtable(HT_SMALL);
+    if (check == 1) {
+        if ((*index)[id].neighbors == NULL)
+            (*index)[id].neighbors = createHashtable(HT_SMALL);
 
-    if (search((*index)[id].neighbors, neighbor, HT_SMALL, version) == FOUND)
-        return ALR_CONNECTED;
-    else
-        insert((*index)[id].neighbors, neighbor, HT_SMALL, version);
+        if (search((*index)[id].neighbors, neighbor, HT_SMALL, version) == FOUND)
+            return ALR_CONNECTED;
+        else
+            insert((*index)[id].neighbors, neighbor, HT_SMALL, version);
+    }
 
     while (i < N) { // psaxnei stous geitones (max N ana komvo)
-//        if (current->neighbor[i] == neighbor) return ALR_CONNECTED; // gia na dei an uparxei
         if (current->neighbor[i] == DEFAULT) {  // alliws vriskei tin thesi tou 1ou diathesimou
             current->neighbor[i] = neighbor;    // kai ton vazei ekei
             break;
