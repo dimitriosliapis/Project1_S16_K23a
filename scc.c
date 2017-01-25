@@ -156,10 +156,12 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
 
     scc->id_belongs_to_component = malloc(num_nodes*sizeof(uint32_t));
     uint32_t *neigh_counter = malloc(num_nodes*sizeof(uint32_t));
+    uint32_t *caller = malloc(num_nodes*sizeof(uint32_t));
 
     for(i = 0; i < num_nodes; i++) {
         scc->id_belongs_to_component[i] = DEFAULT;
         neigh_counter[i] = 0;
+        caller[i] = DEFAULT;
     }
 
 
@@ -171,7 +173,7 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
 
         index = 1;
 
-        tarjan_iterative(&scc, index_out, buffer_out, num_nodes, version, i, index, scc_stack, neigh_counter);
+        tarjan_iterative(&scc, index_out, buffer_out, num_nodes, version, i, index, scc_stack, neigh_counter, caller);
     }
 
     deletestack(scc_stack);
@@ -179,19 +181,16 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
     return scc;
 }
 
-void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t index, Stack_t *scc_stack, uint32_t *neigh_counter) {
+void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t index, Stack_t *scc_stack, uint32_t *neigh_counter, uint32_t *caller) {
 
     uint32_t w, last, new_last, scc_counter, a, realloc_node_size;
     ptrdiff_t offset_out;
     list_node *neighbors_out;
 
-    uint32_t *caller = malloc(num_nodes*sizeof(uint32_t));
-
-    for(a = 0 ; a < num_nodes ; a++) caller[a] = DEFAULT;
-
     index_out[v].index = index;
     index_out[v].lowlink = index;
     index_out[v].children_in_scc = 0;
+    caller[v] = DEFAULT;
 
     last = v;
 
@@ -201,6 +200,8 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
     index++;
 
     while(1) {
+
+        caller[last] = DEFAULT;
 
         if(index_out[last].children_in_scc < index_out[last].num_of_children) {
 
