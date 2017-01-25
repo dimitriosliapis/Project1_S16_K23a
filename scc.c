@@ -280,6 +280,7 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
             do {
                 w = popfromstack(scc_stack);
                 index_out[w].onStack = 0;
+                caller[w] = DEFAULT;
 
                 (*scc)->components[scc_counter].included_node_ids[a] = w;
 
