@@ -164,24 +164,25 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
         caller[i] = DEFAULT;
     }
 
-
     for(i = 0; i < num_nodes; i++) {
 
         if(lookup(index_out, i, num_nodes) == NOT_EXIST) continue;
-        if(index_out[i].visited[0] == version) continue;
         if(scc->id_belongs_to_component[i] != DEFAULT) continue;
 
         index = 1;
 
-        tarjan_iterative(&scc, index_out, buffer_out, num_nodes, version, i, index, scc_stack, neigh_counter, caller);
+        tarjan_iterative(&scc, index_out, buffer_out, i, index, scc_stack, neigh_counter, caller);
     }
 
     deletestack(scc_stack);
 
+    free(neigh_counter);
+    free(caller);
+
     return scc;
 }
 
-void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t index, Stack_t *scc_stack, uint32_t *neigh_counter, uint32_t *caller) {
+void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t v, uint32_t index, Stack_t *scc_stack, uint32_t *neigh_counter, uint32_t *caller) {
 
     uint32_t w, last, new_last, scc_counter, a, realloc_node_size;
     ptrdiff_t offset_out;
@@ -201,11 +202,9 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
     while(1) {
 
-        caller[last] = DEFAULT;
-
         if(index_out[last].children_in_scc < index_out[last].num_of_children) {
 
-            offset_out = getListHead(index_out, v);
+            offset_out = getListHead(index_out, last);
             neighbors_out = buffer_out + offset_out;
 
             w = neighbors_out->neighbor[neigh_counter[last]];
@@ -213,11 +212,11 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
             index_out[last].children_in_scc++;
 
-            index_out[w].children_in_scc = 0;
-
             if(index_out[w].index == 0) {
 
                 caller[w] = last;
+
+                index_out[w].children_in_scc = 0;
                 index_out[w].index = index;
                 index_out[w].lowlink = index;
                 index++;
@@ -269,7 +268,6 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                 } while (w != v);
 
                 (*scc)->components_count++;//gia to epomeno SCC
-
             }
         }
 
@@ -281,7 +279,6 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
             }
             last = new_last;
         }
-
         else break;
     }
 }
