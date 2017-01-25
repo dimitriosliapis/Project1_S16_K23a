@@ -266,7 +266,7 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
             }
         }
 
-        else if (index_out[last].lowlink == index_out[last].index) {
+        else if (index_out[last].lowlink == index_out[last].index && index_out[last].lowlink != DEFAULT) {
 
             scc_counter = (*scc)->components_count;
             (*scc)->components[scc_counter].included_nodes_count = 0;
