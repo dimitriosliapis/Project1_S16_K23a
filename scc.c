@@ -155,7 +155,13 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
     scc->components_count = 0;
 
     scc->id_belongs_to_component = malloc(num_nodes*sizeof(uint32_t));
-    for(i = 0; i < num_nodes; i++) scc->id_belongs_to_component[i] = DEFAULT;
+    uint32_t *neigh_counter = malloc(num_nodes*sizeof(uint32_t));
+
+    for(i = 0; i < num_nodes; i++) {
+        scc->id_belongs_to_component[i] = DEFAULT;
+        neigh_counter[i] = 0;
+    }
+
 
     for(i = 0; i < num_nodes; i++) {
 
@@ -165,7 +171,7 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
 
         index = 1;
 
-        tarjan_iterative(&scc, index_out, buffer_out, num_nodes, version, i, index, scc_stack);
+        tarjan_iterative(&scc, index_out, buffer_out, num_nodes, version, i, index, scc_stack, neigh_counter);
     }
 
     deletestack(scc_stack);
@@ -173,17 +179,15 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
     return scc;
 }
 
-void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t index, Stack_t *scc_stack) {
+void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t index, Stack_t *scc_stack, uint32_t *neigh_counter) {
 
     uint32_t w, last, new_last, scc_counter, a, realloc_node_size;
     ptrdiff_t offset_out;
     list_node *neighbors_out;
 
     uint32_t *caller = malloc(num_nodes*sizeof(uint32_t));
-    for(a = 0 ; a < num_nodes ; a++) caller[a] = DEFAULT;
 
-    uint32_t *neigh_counter = malloc(num_nodes*sizeof(uint32_t));
-    for(a = 0 ; a < num_nodes ; a++) neigh_counter[a] = 0;
+    for(a = 0 ; a < num_nodes ; a++) caller[a] = DEFAULT;
 
     index_out[v].index = index;
     index_out[v].lowlink = index;
@@ -208,10 +212,10 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
             index_out[last].children_in_scc++;
 
-            if(index_out[w].index == 0) {
+            caller[w] = last;
+            index_out[w].children_in_scc = 0;
 
-                caller[w] = last;
-                index_out[w].children_in_scc = 0;
+            if(index_out[w].index == 0) {
 
                 index_out[w].index = index;
                 index_out[w].lowlink = index;
