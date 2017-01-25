@@ -155,15 +155,12 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
     scc->components_count = 0;
 
     scc->id_belongs_to_component = malloc(num_nodes*sizeof(uint32_t));
-
     for(i = 0; i < num_nodes; i++) scc->id_belongs_to_component[i] = DEFAULT;
 
     for(i = 0; i < num_nodes; i++) {
 
         if(lookup(index_out, i, num_nodes) == NOT_EXIST) continue;
-
         if(index_out[i].visited[0] == version) continue;
-
         if(scc->id_belongs_to_component[i] != DEFAULT) continue;
 
         index = 1;
@@ -172,6 +169,8 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
     }
 
     deletestack(scc_stack);
+
+    return scc;
 }
 
 void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t index, Stack_t *scc_stack) {
@@ -229,41 +228,44 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
             }
         }
 
-        else if(index_out[last].lowlink == index_out[last].index) {
+        else {
+            if (index_out[last].lowlink == index_out[last].index) {
 
-            scc_counter = (*scc)->components_count;
-            (*scc)->components[scc_counter].included_nodes_count = 0;
-            (*scc)->components[scc_counter].node_array_size = NODE_IDS_SIZE;
-            (*scc)->components[scc_counter].included_node_ids = malloc(NODE_IDS_SIZE*sizeof(uint32_t));
-            (*scc)->components[scc_counter].included_node_ids[0] = DEFAULT;
+                scc_counter = (*scc)->components_count;
+                (*scc)->components[scc_counter].included_nodes_count = 0;
+                (*scc)->components[scc_counter].node_array_size = NODE_IDS_SIZE;
+                (*scc)->components[scc_counter].included_node_ids = malloc(NODE_IDS_SIZE * sizeof(uint32_t));
+                (*scc)->components[scc_counter].included_node_ids[0] = DEFAULT;
 
-            a = 0;
+                a = 0;
 
-            //ftiakse to SCC
-            do {
-                w = popfromstack(scc_stack);
-                index_out[w].onStack = 0;
+                //ftiakse to SCC
+                do {
+                    w = popfromstack(scc_stack);
+                    index_out[w].onStack = 0;
 
-                (*scc)->components[scc_counter].included_node_ids[a] = w;
+                    (*scc)->components[scc_counter].included_node_ids[a] = w;
 
-                if (a == ((*scc)->components[scc_counter].node_array_size - 1)) {
-                    realloc_node_size = 2*(*scc)->components[scc_counter].node_array_size;
-                    (*scc)->components[scc_counter].included_node_ids = realloc(
-                            (*scc)->components[scc_counter].included_node_ids, realloc_node_size * sizeof(uint32_t));
-                    (*scc)->components[scc_counter].node_array_size = realloc_node_size;
-                }
+                    if (a == ((*scc)->components[scc_counter].node_array_size - 1)) {
+                        realloc_node_size = 2 * (*scc)->components[scc_counter].node_array_size;
+                        (*scc)->components[scc_counter].included_node_ids = realloc(
+                                (*scc)->components[scc_counter].included_node_ids,
+                                realloc_node_size * sizeof(uint32_t));
+                        (*scc)->components[scc_counter].node_array_size = realloc_node_size;
+                    }
 
-                (*scc)->components[scc_counter].included_node_ids[a + 1] = DEFAULT;
-                (*scc)->components[scc_counter].included_nodes_count++;
-                (*scc)->id_belongs_to_component[w] = scc_counter;
+                    (*scc)->components[scc_counter].included_node_ids[a + 1] = DEFAULT;
+                    (*scc)->components[scc_counter].included_nodes_count++;
+                    (*scc)->id_belongs_to_component[w] = scc_counter;
 
-                a++;
+                    a++;
 
 
-            } while (w != v);
+                } while (w != v);
 
-            (*scc)->components_count++;//gia to epomeno SCC
+                (*scc)->components_count++;//gia to epomeno SCC
 
+            }
         }
 
         new_last = caller[last];
