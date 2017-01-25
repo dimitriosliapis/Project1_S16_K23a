@@ -257,54 +257,54 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
             }
         }
 
+        else if (index_out[last].lowlink == index_out[last].index) {
+
+            scc_counter = (*scc)->components_count;
+            (*scc)->components[scc_counter].included_nodes_count = 0;
+            (*scc)->components[scc_counter].node_array_size = NODE_IDS_SIZE;
+            (*scc)->components[scc_counter].included_node_ids = malloc(NODE_IDS_SIZE * sizeof(uint32_t));
+            (*scc)->components[scc_counter].included_node_ids[0] = DEFAULT;
+
+            a = 0;
+
+            //ftiakse to SCC
+            do {
+                w = popfromstack(scc_stack);
+                index_out[w].onStack = 0;
+
+                (*scc)->components[scc_counter].included_node_ids[a] = w;
+
+                if (a == ((*scc)->components[scc_counter].node_array_size - 1)) {
+                    realloc_node_size = 2 * (*scc)->components[scc_counter].node_array_size;
+                    (*scc)->components[scc_counter].included_node_ids = realloc(
+                            (*scc)->components[scc_counter].included_node_ids,
+                            realloc_node_size * sizeof(uint32_t));
+                    (*scc)->components[scc_counter].node_array_size = realloc_node_size;
+                }
+
+                (*scc)->components[scc_counter].included_node_ids[a + 1] = DEFAULT;
+                (*scc)->components[scc_counter].included_nodes_count++;
+                (*scc)->id_belongs_to_component[w] = scc_counter;
+
+                a++;
+
+
+            } while (w != v);
+
+            (*scc)->components_count++;//gia to epomeno SCC
+        }
+
         else {
-            if (index_out[last].lowlink == index_out[last].index) {
+            new_last = caller[last];
 
-                scc_counter = (*scc)->components_count;
-                (*scc)->components[scc_counter].included_nodes_count = 0;
-                (*scc)->components[scc_counter].node_array_size = NODE_IDS_SIZE;
-                (*scc)->components[scc_counter].included_node_ids = malloc(NODE_IDS_SIZE * sizeof(uint32_t));
-                (*scc)->components[scc_counter].included_node_ids[0] = DEFAULT;
-
-                a = 0;
-
-                //ftiakse to SCC
-                do {
-                    w = popfromstack(scc_stack);
-                    index_out[w].onStack = 0;
-
-                    (*scc)->components[scc_counter].included_node_ids[a] = w;
-
-                    if (a == ((*scc)->components[scc_counter].node_array_size - 1)) {
-                        realloc_node_size = 2 * (*scc)->components[scc_counter].node_array_size;
-                        (*scc)->components[scc_counter].included_node_ids = realloc(
-                                (*scc)->components[scc_counter].included_node_ids,
-                                realloc_node_size * sizeof(uint32_t));
-                        (*scc)->components[scc_counter].node_array_size = realloc_node_size;
-                    }
-
-                    (*scc)->components[scc_counter].included_node_ids[a + 1] = DEFAULT;
-                    (*scc)->components[scc_counter].included_nodes_count++;
-                    (*scc)->id_belongs_to_component[w] = scc_counter;
-
-                    a++;
-
-
-                } while (w != v);
-
-                (*scc)->components_count++;//gia to epomeno SCC
+            if (new_last != DEFAULT) {
+                if (index_out[new_last].lowlink > index_out[last].lowlink) {
+                    index_out[new_last].lowlink = index_out[last].lowlink;
+                }
+                last = new_last;
             }
+            else break;
         }
-
-        new_last = caller[last];
-
-        if(new_last != DEFAULT) {
-            if(index_out[new_last].lowlink > index_out[last].lowlink) {
-                index_out[new_last].lowlink = index_out[last].lowlink;
-            }
-            last = new_last;
-        }
-        else break;
     }
 }
 
