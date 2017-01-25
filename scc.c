@@ -157,11 +157,13 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
     scc->id_belongs_to_component = malloc(num_nodes*sizeof(uint32_t));
     uint32_t *neigh_counter = malloc(num_nodes*sizeof(uint32_t));
     uint32_t *caller = malloc(num_nodes*sizeof(uint32_t));
+    uint32_t *list_node_counter = malloc(num_nodes*sizeof(uint32_t));
 
     for(i = 0; i < num_nodes; i++) {
         scc->id_belongs_to_component[i] = DEFAULT;
         neigh_counter[i] = 0;
         caller[i] = DEFAULT;
+        list_node_counter[i] = 0;
     }
 
     for(i = 0; i < num_nodes; i++) {
@@ -171,7 +173,7 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
 
         index = 1;
 
-        tarjan_iterative(&scc, index_out, buffer_out, i, index, scc_stack, neigh_counter, caller);
+        tarjan_iterative(&scc, index_out, buffer_out, i, index, scc_stack, neigh_counter, caller, list_node_counter);
     }
 
     deletestack(scc_stack);
@@ -182,9 +184,9 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
     return scc;
 }
 
-void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t v, uint32_t index, Stack_t *scc_stack, uint32_t *neigh_counter, uint32_t *caller) {
+void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t v, uint32_t index, Stack_t *scc_stack, uint32_t *neigh_counter, uint32_t *caller, uint32_t *list_node_counter) {
 
-    uint32_t w, last, new_last, scc_counter, a, realloc_node_size;
+    uint32_t w, last, new_last, scc_counter, a, realloc_node_size, i, flag = 0;
     ptrdiff_t offset_out;
     list_node *neighbors_out;
 
@@ -204,11 +206,36 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
         if(index_out[last].children_in_scc < index_out[last].num_of_children) {
 
+//            neighbor_blocks = index_out[last].children_in_scc/index_out[last].num_of_children;
+//            last_neighbors = index_out[last].children_in_scc%index_out[last].num_of_children;
+
             offset_out = getListHead(index_out, last);
             neighbors_out = buffer_out + offset_out;
 
+            if(neigh_counter[last] == N + 1) {
+                for(i = 0 ; i <= list_node_counter[last] ; i++) {
+                    if(neighbors_out->nextListNode != -1) neighbors_out = neighbors_out + neighbors_out->nextListNode;
+                    else {
+                        flag = 1;
+                        last = caller[last];
+                        break;
+                    }
+                }
+                neigh_counter[last] = 0;
+            }
+
+            if(flag == 1) {
+                flag = 0;
+                continue;
+            }
+
             w = neighbors_out->neighbor[neigh_counter[last]];
             neigh_counter[last]++;
+
+            if(w == DEFAULT) {
+                last = caller[last];
+                continue;
+            }
 
             index_out[last].children_in_scc++;
 
