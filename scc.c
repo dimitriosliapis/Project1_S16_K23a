@@ -186,7 +186,7 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
 
 void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t v, uint32_t index, Stack_t *scc_stack, uint32_t *neigh_counter, uint32_t *caller, uint32_t *list_node_counter) {
 
-    uint32_t w, last, new_last, scc_counter, a, realloc_node_size, i, flag = 0;
+    uint32_t w, last, new_last, scc_counter, a, realloc_node_size, i, flag = 0, end = 0;
     ptrdiff_t offset_out;
     list_node *neighbors_out;
 
@@ -215,12 +215,15 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                     else {
                         flag = 1;
                         last = caller[last];
-                        break;
+                        if(last != DEFAULT) break;
+                        else end = 1;
                     }
                 }
                 list_node_counter[last]++;
                 neigh_counter[last] = 0;
             }
+
+            if(end == 1) break;
 
             if(flag == 1) {
                 flag = 0;
