@@ -246,7 +246,7 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
             index_out[last].children_in_scc++;
 
-            if(index_out[w].index == 0) {
+            if(index_out[w].index == DEFAULT) {
 
                 caller[w] = last;
 
