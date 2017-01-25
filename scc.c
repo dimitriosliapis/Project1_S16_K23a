@@ -218,6 +218,7 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                         break;
                     }
                 }
+                list_node_counter[last]++;
                 neigh_counter[last] = 0;
             }
 
