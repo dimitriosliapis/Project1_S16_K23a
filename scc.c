@@ -305,13 +305,15 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
         }
 
         else {
-            new_last = caller[last];
+            if(last != DEFAULT) {
+                new_last = caller[last];
 
-            if (new_last != DEFAULT) {
-                if (index_out[new_last].lowlink > index_out[last].lowlink) {
-                    index_out[new_last].lowlink = index_out[last].lowlink;
+                if (new_last != DEFAULT) {
+                    if (index_out[new_last].lowlink > index_out[last].lowlink) {
+                        index_out[new_last].lowlink = index_out[last].lowlink;
+                    }
+                    last = new_last;
                 }
-                last = new_last;
             }
             else break;
         }
