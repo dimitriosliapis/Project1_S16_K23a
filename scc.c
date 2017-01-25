@@ -216,7 +216,10 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                         flag = 1;
                         last = caller[last];
                         if(last != DEFAULT) break;
-                        else end = 1;
+                        else {
+                            end = 1;
+                            break;
+                        }
                     }
                 }
                 if(end != 1) {
@@ -295,7 +298,7 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                 a++;
 
 
-            } while (w != v);
+            } while (w != last);
 
             (*scc)->components_count++;//gia to epomeno SCC
         }
