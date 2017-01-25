@@ -212,11 +212,11 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
             index_out[last].children_in_scc++;
 
-            caller[w] = last;
             index_out[w].children_in_scc = 0;
 
             if(index_out[w].index == 0) {
 
+                caller[w] = last;
                 index_out[w].index = index;
                 index_out[w].lowlink = index;
                 index++;
