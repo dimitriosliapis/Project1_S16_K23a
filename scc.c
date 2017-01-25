@@ -232,7 +232,8 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
             if(w == DEFAULT) {
                 last = caller[last];
-                continue;
+                if(last != DEFAULT) continue;
+                else break;
             }
 
             index_out[last].children_in_scc++;
