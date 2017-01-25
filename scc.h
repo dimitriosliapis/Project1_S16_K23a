@@ -24,6 +24,10 @@ SCC *tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
 
 SCC *estimateStronglyConnectedComponents(ind *, list_node *, uint32_t, uint32_t);
 
+SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version);
+
+void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version, uint32_t v, uint32_t index, Stack_t *scc_stack);
+
 void destroyStronglyConnectedComponents(SCC *);
 
 #endif

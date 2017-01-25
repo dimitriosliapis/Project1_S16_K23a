@@ -157,7 +157,7 @@ void *worker(void *ptr) {
 int main(int argc, char *argv[]) {
 
     FILE *Graph = NULL, *Queries = NULL;
-    int i = 0, print_start = 0, print = 1;
+    uint32_t i = 0, print_start = 0, print = 1;
     uint32_t N1, N2, scc_size = 0;
     uint32_t version = 0, line = 0;
     pthread_t * workers_t;
@@ -257,7 +257,8 @@ int main(int argc, char *argv[]) {
 
         // scc estimation
         version++;
-        scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, version);
+        //scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, version);
+        scc = estimateStronglyConnectedComponents_iterative(index_out, buffer_out, scc_size, version);
 
         gettimeofday(&tv2, NULL);
         printf("%f sec: SCC estimation\n",
