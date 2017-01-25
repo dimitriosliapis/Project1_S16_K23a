@@ -206,13 +206,10 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
         if(index_out[last].children_in_scc < index_out[last].num_of_children) {
 
-//            neighbor_blocks = index_out[last].children_in_scc/index_out[last].num_of_children;
-//            last_neighbors = index_out[last].children_in_scc%index_out[last].num_of_children;
-
             offset_out = getListHead(index_out, last);
             neighbors_out = buffer_out + offset_out;
 
-            if(neigh_counter[last] == N + 1) {
+            if(neigh_counter[last] == N) {
                 for(i = 0 ; i <= list_node_counter[last] ; i++) {
                     if(neighbors_out->nextListNode != -1) neighbors_out = neighbors_out + neighbors_out->nextListNode;
                     else {
