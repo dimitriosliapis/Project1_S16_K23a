@@ -219,6 +219,8 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
                 if (w == DEFAULT) break;
 
+                index_out[last].children_in_scc++;
+
                 if (index_out[w].index == DEFAULT) {
 
                     caller[w] = last;
@@ -230,7 +232,8 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
                     pushinstack(scc_stack, w);
                     index_out[w].onStack = 1;
-                } else if (index_out[w].onStack == 1) {
+                }
+                else if (index_out[w].onStack == 1) {
                     if (index_out[last].lowlink > index_out[w].index) index_out[last].lowlink = index_out[w].index;
                 }
 
