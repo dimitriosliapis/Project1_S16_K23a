@@ -186,7 +186,7 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
 
 void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t v, uint32_t index, Stack_t *scc_stack, uint32_t *neigh_counter, uint32_t *caller, uint32_t *list_node_counter) {
 
-    uint32_t w, last, new_last, scc_counter, a, realloc_node_size, i, flag = 0, end = 0, k = 0;
+    uint32_t w, last, new_last, scc_counter, a, realloc_node_size, flag = 0, k = 0;
     ptrdiff_t offset_out;
     list_node *neighbors_out;
 
@@ -220,8 +220,6 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
                 if (w == DEFAULT) break;
 
-                index_out[last].children_in_scc++;
-
                 if (index_out[w].index == DEFAULT) {
 
                     caller[w] = last;
@@ -233,6 +231,7 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
                     pushinstack(scc_stack, w);
                     index_out[w].onStack = 1;
+                    index_out[last].children_in_scc++;
                 }
                 else if (index_out[w].onStack == 1) {
                     if (index_out[last].lowlink > index_out[w].index) index_out[last].lowlink = index_out[w].index;
@@ -244,7 +243,8 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                     k = 0;
                 }
             }
-        } else {
+        }
+        else {
             if (index_out[last].lowlink == index_out[last].index) {
 
                 scc_counter = (*scc)->components_count;
