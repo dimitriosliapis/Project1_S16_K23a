@@ -204,7 +204,8 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
     while(1) {
 
-        last = peekfromstack(scc_stack);
+        if(flag == 0) last = peekfromstack(scc_stack);
+        else flag = 0;
 
         if (index_out[last].children_in_scc < index_out[last].num_of_children) {
 
@@ -287,6 +288,7 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                     index_out[new_last].lowlink = index_out[last].lowlink;
                 }
                 last = new_last;
+                flag = 1;
             }
             else break;
         }
