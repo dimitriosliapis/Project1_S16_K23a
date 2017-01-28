@@ -156,15 +156,11 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
     scc->components_count = 0;
 
     scc->id_belongs_to_component = malloc(num_nodes * sizeof(uint32_t));
-    uint32_t *neigh_counter = malloc(num_nodes * sizeof(uint32_t));
     uint32_t *caller = malloc(num_nodes * sizeof(uint32_t));
-    uint32_t *list_node_counter = malloc(num_nodes * sizeof(uint32_t));
 
     for (i = 0; i < num_nodes; i++) {
         scc->id_belongs_to_component[i] = DEFAULT;
-        neigh_counter[i] = 0;
         caller[i] = DEFAULT;
-        list_node_counter[i] = 0;
     }
 
     index = 1;
@@ -179,7 +175,6 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
 
     deletestack(scc_stack);
 
-    free(neigh_counter);
     free(caller);
 
     return scc;
@@ -267,16 +262,15 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                     w = popfromstack(scc_stack);
                     index_out[w].onStack = 0;
 
-                    (*scc)->components[scc_counter].included_node_ids[i] = w;
-
-                    if (i == ((*scc)->components[scc_counter].node_array_size - 1)) {
+                    if (i == ((*scc)->components[scc_counter].node_array_size)) {
                         realloc_node_size = 2 * (*scc)->components[scc_counter].node_array_size;
                         (*scc)->components[scc_counter].included_node_ids = realloc(
                                 (*scc)->components[scc_counter].included_node_ids, realloc_node_size * sizeof(uint32_t));
                         (*scc)->components[scc_counter].node_array_size = realloc_node_size;
                     }
 
-                    (*scc)->components[scc_counter].included_node_ids[i + 1] = DEFAULT;
+                    (*scc)->components[scc_counter].included_node_ids[i] = w;
+                    //(*scc)->components[scc_counter].included_node_ids[i + 1] = DEFAULT;
                     (*scc)->components[scc_counter].included_nodes_count++;
                     (*scc)->id_belongs_to_component[w] = scc_counter;
 
