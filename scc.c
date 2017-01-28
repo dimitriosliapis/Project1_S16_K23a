@@ -136,17 +136,18 @@ SCC *tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
     return *scc;
 }
 
-SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *buffer_out, uint32_t num_nodes, uint32_t version) {
+SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *buffer_out, uint32_t num_nodes,
+                                                   uint32_t version) {
 
     Stack_t *scc_stack = createStack();
     uint32_t i, index;
 
     SCC *scc = malloc(sizeof(SCC));
 
-    scc->components = malloc(COMPONENT_SIZE*sizeof(Component));
+    scc->components = malloc(COMPONENT_SIZE * sizeof(Component));
     scc->component_size = COMPONENT_SIZE;
 
-    for(i = 0; i < scc->component_size; i++) {
+    for (i = 0; i < scc->component_size; i++) {
         scc->components[i].included_node_ids = NULL;
         scc->components[i].included_nodes_count = 0;
         scc->components[i].node_array_size = 0;
@@ -154,26 +155,26 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
 
     scc->components_count = 0;
 
-    scc->id_belongs_to_component = malloc(num_nodes*sizeof(uint32_t));
-    uint32_t *neigh_counter = malloc(num_nodes*sizeof(uint32_t));
-    uint32_t *caller = malloc(num_nodes*sizeof(uint32_t));
-    uint32_t *list_node_counter = malloc(num_nodes*sizeof(uint32_t));
+    scc->id_belongs_to_component = malloc(num_nodes * sizeof(uint32_t));
+    uint32_t *neigh_counter = malloc(num_nodes * sizeof(uint32_t));
+    uint32_t *caller = malloc(num_nodes * sizeof(uint32_t));
+    uint32_t *list_node_counter = malloc(num_nodes * sizeof(uint32_t));
 
-    for(i = 0; i < num_nodes; i++) {
+    for (i = 0; i < num_nodes; i++) {
         scc->id_belongs_to_component[i] = DEFAULT;
         neigh_counter[i] = 0;
         caller[i] = DEFAULT;
         list_node_counter[i] = 0;
     }
 
-    for(i = 0; i < num_nodes; i++) {
+    index = 1;
 
-        if(lookup(index_out, i, num_nodes) == NOT_EXIST) continue;
-        if(scc->id_belongs_to_component[i] != DEFAULT) continue;
+    for (i = 0; i < num_nodes; i++) {
 
-        index = 1;
+        if (lookup(index_out, i, num_nodes) == NOT_EXIST) continue;
+        if (scc->id_belongs_to_component[i] != DEFAULT) continue;
 
-        tarjan_iterative(&scc, index_out, buffer_out, i, index, scc_stack, neigh_counter, caller, list_node_counter);
+        tarjan_iterative(&scc, index_out, buffer_out, i, &index, scc_stack, caller);
     }
 
     deletestack(scc_stack);
@@ -184,28 +185,23 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
     return scc;
 }
 
-void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t v, uint32_t index, Stack_t *scc_stack, uint32_t *neigh_counter, uint32_t *caller, uint32_t *list_node_counter) {
+void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t v, uint32_t *index, Stack_t *scc_stack,
+                      uint32_t *caller) {
 
-    uint32_t w, last, new_last, scc_counter, a, realloc_node_size, flag = 0, k = 0;
+    uint32_t w, last, new_last, scc_counter, i, realloc_node_size, k = 0;
     ptrdiff_t offset_out;
     list_node *neighbors_out;
 
-    index_out[v].index = index;
-    index_out[v].lowlink = index;
+    index_out[v].index = *index;
+    index_out[v].lowlink = *index;
     index_out[v].children_in_scc = 0;
-    caller[v] = DEFAULT;
-
     last = v;
-
     pushinstack(scc_stack, v);
     index_out[v].onStack = 1;
 
-    index++;
+    (*index)++;
 
-    while(1) {
-
-        if(flag == 0) last = peekfromstack(scc_stack);
-        else flag = 0;
+    while (1) {
 
         if (index_out[last].children_in_scc < index_out[last].num_of_children) {
 
@@ -213,31 +209,30 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
             neighbors_out = buffer_out + offset_out;
 
             k = 0;
-
             while (k < N) {
 
                 w = neighbors_out->neighbor[k];
 
                 if (w == DEFAULT) break;
 
-                index_out[last].children_in_scc++;
+                index_out[last].children_in_scc++; // Children that we have checked
 
-                if (index_out[w].index == DEFAULT) {
+                if (index_out[w].index == DEFAULT) {    // If w is unvisited
 
                     caller[w] = last;
-
                     index_out[w].children_in_scc = 0;
-                    index_out[w].index = index;
-                    index_out[w].lowlink = index;
-                    index++;
+                    index_out[w].index = *index;
+                    index_out[w].lowlink = *index;
+                    (*index)++;
 
                     if(index_out[w].onStack == 0) {
                         pushinstack(scc_stack, w);
                         index_out[w].onStack = 1;
+                        last = w;
                     }
-                }
-                else if (index_out[w].onStack == 1) {
-                    if (index_out[last].lowlink > index_out[w].index) index_out[last].lowlink = index_out[w].index;
+                } else if (index_out[w].onStack == 1) {
+                    if (index_out[last].lowlink > index_out[w].index)
+                        index_out[last].lowlink = index_out[w].index;
                 }
 
                 k++;
@@ -246,60 +241,65 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                     k = 0;
                 }
             }
-        }
-        else {
+        } else {
             if (index_out[last].lowlink == index_out[last].index) {
 
                 scc_counter = (*scc)->components_count;
+
+                if (scc_counter == (*scc)->component_size) {
+                    (*scc)->component_size *= 2;
+                    (*scc)->components = realloc((*scc)->components, (*scc)->component_size * sizeof(Component));
+                    for (i = scc_counter; i < (*scc)->component_size; i++) {
+                        (*scc)->components[i].included_node_ids = NULL;
+                        (*scc)->components[i].included_nodes_count = 0;
+                        (*scc)->components[i].node_array_size = 0;
+                    }
+                }
+
                 (*scc)->components[scc_counter].included_nodes_count = 0;
                 (*scc)->components[scc_counter].node_array_size = NODE_IDS_SIZE;
                 (*scc)->components[scc_counter].included_node_ids = malloc(NODE_IDS_SIZE * sizeof(uint32_t));
                 (*scc)->components[scc_counter].included_node_ids[0] = DEFAULT;
 
-                a = 0;
+                i = 0;
+                do {    // Build SCC
 
-                //ftiakse to SCC
-                do {
                     w = popfromstack(scc_stack);
                     index_out[w].onStack = 0;
 
-                    (*scc)->components[scc_counter].included_node_ids[a] = w;
+                    (*scc)->components[scc_counter].included_node_ids[i] = w;
 
-                    if (a == ((*scc)->components[scc_counter].node_array_size - 1)) {
+                    if (i == ((*scc)->components[scc_counter].node_array_size - 1)) {
                         realloc_node_size = 2 * (*scc)->components[scc_counter].node_array_size;
                         (*scc)->components[scc_counter].included_node_ids = realloc(
-                                (*scc)->components[scc_counter].included_node_ids,
-                                realloc_node_size * sizeof(uint32_t));
+                                (*scc)->components[scc_counter].included_node_ids, realloc_node_size * sizeof(uint32_t));
                         (*scc)->components[scc_counter].node_array_size = realloc_node_size;
                     }
 
-                    (*scc)->components[scc_counter].included_node_ids[a + 1] = DEFAULT;
+                    (*scc)->components[scc_counter].included_node_ids[i + 1] = DEFAULT;
                     (*scc)->components[scc_counter].included_nodes_count++;
                     (*scc)->id_belongs_to_component[w] = scc_counter;
 
-                    a++;
-
+                    i++;
                 } while (w != last);
 
-                (*scc)->components_count++;//gia to epomeno SCC
+                (*scc)->components_count++;
             }
 
             new_last = caller[last];
 
-            if (new_last != DEFAULT) {
-                if (index_out[new_last].lowlink > index_out[last].lowlink) {
+            if (new_last != DEFAULT) {  // Go up one recursive call
+                if (index_out[new_last].lowlink > index_out[last].lowlink)
                     index_out[new_last].lowlink = index_out[last].lowlink;
-                }
                 last = new_last;
-                flag = 1;
-            }
-            else break;
+            } else  // We've seen all the nodes
+                break;
         }
     }
 
 }
 
-//free SCC
+// Free SCC
 void destroyStronglyConnectedComponents(SCC *scc) {
     free(scc->id_belongs_to_component);
     free(scc);
