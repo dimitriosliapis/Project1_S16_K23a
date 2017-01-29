@@ -191,8 +191,8 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
     index_out[v].lowlink = *index;
     index_out[v].children_in_scc = 0;
     offset_out = getListHead(index_out, v);
-    neighbors_out = buffer_out + offset_out;
-    index_out[v].next_child = neighbors_out->neighbor;
+    index_out[v].curr_neighbors = buffer_out + offset_out;
+    index_out[v].next_child = index_out[v].curr_neighbors->neighbor;
     last = v;
     pushinstack(scc_stack, v);
     index_out[v].onStack = 1;
@@ -201,18 +201,16 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
     while (1) {
 
-        if (index_out[last].children_in_scc < index_out[last].num_of_children) {
+        if (index_out[last].children_in_scc < index_out[last].num_of_children || index_out[last].next_child != NULL) {
 
             w = *index_out[last].next_child;
             index_out[last].children_in_scc++;
 
             index_out[last].n++;
             if (index_out[last].n == N) {
-                offset_out = getListHead(index_out, last);
-                neighbors_out = buffer_out + offset_out;
-                if (neighbors_out->nextListNode != -1) {
-                    neighbors_out = buffer_out + neighbors_out->nextListNode;
-                    index_out[last].next_child = neighbors_out->neighbor;
+                if (index_out[last].curr_neighbors->nextListNode != -1) {
+                    index_out[last].curr_neighbors = buffer_out + index_out[last].curr_neighbors->nextListNode;
+                    index_out[last].next_child = index_out[last].curr_neighbors->neighbor;
                     index_out[last].n = 0;
                 } else
                     index_out[last].next_child = NULL;
@@ -221,7 +219,7 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
             if (w == DEFAULT) break;
 
-            if (lookup(index_out, w, num_nodes) == NOT_EXIST){
+            if (lookup(index_out, w, num_nodes) == NOT_EXIST) {
 
                 scc_counter = (*scc)->components_count;
 
@@ -239,39 +237,35 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                 (*scc)->components[scc_counter].node_array_size = 1;
                 (*scc)->components[scc_counter].included_node_ids = malloc(sizeof(uint32_t));
 
-
                 (*scc)->components[scc_counter].included_node_ids[0] = w;
                 (*scc)->id_belongs_to_component[w] = scc_counter;
 
                 printf("evala ton %d sto scc %d\n", w, scc_counter);
 
-
-
                 (*scc)->components_count++;
 
-                continue;
-            }
+            } else {
 
+                if (index_out[w].index == DEFAULT) {    // If w is unvisited
 
-            if (index_out[w].index == DEFAULT) {    // If w is unvisited
+                    caller[w] = last;
+                    index_out[w].index = *index;
+                    index_out[w].lowlink = *index;
+                    index_out[w].children_in_scc = 0;
+                    offset_out = getListHead(index_out, w);
+                    index_out[w].curr_neighbors = buffer_out + offset_out;
+                    index_out[w].next_child = index_out[w].curr_neighbors->neighbor;
+                    (*index)++;
 
-                caller[w] = last;
-                index_out[w].index = *index;
-                index_out[w].lowlink = *index;
-                index_out[w].children_in_scc = 0;
-                offset_out = getListHead(index_out, w);
-                neighbors_out = buffer_out + offset_out;
-                index_out[w].next_child = neighbors_out->neighbor;
-                (*index)++;
-
-                if (index_out[w].onStack == 0) {
-                    pushinstack(scc_stack, w);
-                    index_out[w].onStack = 1;
-                    last = w;
+                    if (index_out[w].onStack == 0) {
+                        pushinstack(scc_stack, w);
+                        index_out[w].onStack = 1;
+                        last = w;
+                    }
+                } else if (index_out[w].onStack == 1) {
+                    if (index_out[last].lowlink > index_out[w].index)
+                        index_out[last].lowlink = index_out[w].index;
                 }
-            } else if (index_out[w].onStack == 1) {
-                if (index_out[last].lowlink > index_out[w].index)
-                    index_out[last].lowlink = index_out[w].index;
             }
 
         } else {
