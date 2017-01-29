@@ -190,6 +190,9 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
     index_out[v].index = *index;
     index_out[v].lowlink = *index;
     index_out[v].children_in_scc = 0;
+    offset_out = getListHead(index_out, v);
+    neighbors_out = buffer_out + offset_out;
+    index_out[v].next_child = neighbors_out->neighbor;
     last = v;
     pushinstack(scc_stack, v);
     index_out[v].onStack = 1;
@@ -200,42 +203,45 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
         if (index_out[last].children_in_scc < index_out[last].num_of_children) {
 
-            offset_out = getListHead(index_out, last);
-            neighbors_out = buffer_out + offset_out;
+            w = *index_out[last].next_child;
+            index_out[last].children_in_scc++;
 
-            k = 0;
-            while (k < N) {
-
-                w = neighbors_out->neighbor[k];
-
-                if (w == DEFAULT) break;
-
-                index_out[last].children_in_scc++; // Children that we have checked
-
-                if (index_out[w].index == DEFAULT) {    // If w is unvisited
-
-                    caller[w] = last;
-                    index_out[w].children_in_scc = 0;
-                    index_out[w].index = *index;
-                    index_out[w].lowlink = *index;
-                    (*index)++;
-
-                    if(index_out[w].onStack == 0) {
-                        pushinstack(scc_stack, w);
-                        index_out[w].onStack = 1;
-                        last = w;
-                    }
-                } else if (index_out[w].onStack == 1) {
-                    if (index_out[last].lowlink > index_out[w].index)
-                        index_out[last].lowlink = index_out[w].index;
-                }
-
-                k++;
-                if (k == N && neighbors_out->nextListNode != -1) {
+            index_out[last].n++;
+            if (index_out[last].n == N) {
+                offset_out = getListHead(index_out, last);
+                neighbors_out = buffer_out + offset_out;
+                if (neighbors_out->nextListNode != -1) {
                     neighbors_out = buffer_out + neighbors_out->nextListNode;
-                    k = 0;
+                    index_out[last].next_child = neighbors_out->neighbor;
+                    index_out[last].n = 0;
+                } else
+                    index_out[last].next_child = NULL;
+            } else
+                index_out[last].next_child++;
+
+            if (w == DEFAULT) break;
+
+            if (index_out[w].index == DEFAULT) {    // If w is unvisited
+
+                caller[w] = last;
+                index_out[w].index = *index;
+                index_out[w].lowlink = *index;
+                index_out[w].children_in_scc = 0;
+                offset_out = getListHead(index_out, w);
+                neighbors_out = buffer_out + offset_out;
+                index_out[w].next_child = neighbors_out->neighbor;
+                (*index)++;
+
+                if (index_out[w].onStack == 0) {
+                    pushinstack(scc_stack, w);
+                    index_out[w].onStack = 1;
+                    last = w;
                 }
+            } else if (index_out[w].onStack == 1) {
+                if (index_out[last].lowlink > index_out[w].index)
+                    index_out[last].lowlink = index_out[w].index;
             }
+
         } else {
             if (index_out[last].lowlink == index_out[last].index) {
 
@@ -270,9 +276,10 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                     }
 
                     (*scc)->components[scc_counter].included_node_ids[i] = w;
-                    //(*scc)->components[scc_counter].included_node_ids[i + 1] = DEFAULT;
                     (*scc)->components[scc_counter].included_nodes_count++;
                     (*scc)->id_belongs_to_component[w] = scc_counter;
+
+                    printf("evala ton %d sto scc %d\n", w, scc_counter);
 
                     i++;
                 } while (w != last);

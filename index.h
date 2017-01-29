@@ -25,6 +25,8 @@ typedef struct index_t{
     uint32_t all_children_in_scc;
     uint32_t num_of_children;
     uint32_t children_in_scc;
+    uint32_t *next_child;
+    uint32_t n;
     int onStack;
 }ind;
 
