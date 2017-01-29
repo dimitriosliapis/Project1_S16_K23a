@@ -201,7 +201,7 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
     while (1) {
 
-        if (index_out[last].children_in_scc < index_out[last].num_of_children || index_out[last].next_child != NULL) {
+        if (index_out[last].children_in_scc < index_out[last].num_of_children) {
 
             w = *index_out[last].next_child;
             index_out[last].children_in_scc++;
@@ -220,29 +220,31 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
             if (w == DEFAULT) break;
 
             if (lookup(index_out, w, num_nodes) == NOT_EXIST) {
+                if ((*scc)->id_belongs_to_component[w] == DEFAULT) {
 
-                scc_counter = (*scc)->components_count;
+                    scc_counter = (*scc)->components_count;
 
-                if (scc_counter == (*scc)->component_size) {
-                    (*scc)->component_size *= 2;
-                    (*scc)->components = realloc((*scc)->components, (*scc)->component_size * sizeof(Component));
-                    for (i = scc_counter; i < (*scc)->component_size; i++) {
-                        (*scc)->components[i].included_node_ids = NULL;
-                        (*scc)->components[i].included_nodes_count = 0;
-                        (*scc)->components[i].node_array_size = 0;
+                    if (scc_counter == (*scc)->component_size) {
+                        (*scc)->component_size *= 2;
+                        (*scc)->components = realloc((*scc)->components, (*scc)->component_size * sizeof(Component));
+                        for (i = scc_counter; i < (*scc)->component_size; i++) {
+                            (*scc)->components[i].included_node_ids = NULL;
+                            (*scc)->components[i].included_nodes_count = 0;
+                            (*scc)->components[i].node_array_size = 0;
+                        }
                     }
+
+                    (*scc)->components[scc_counter].included_nodes_count = 1;
+                    (*scc)->components[scc_counter].node_array_size = 1;
+                    (*scc)->components[scc_counter].included_node_ids = malloc(sizeof(uint32_t));
+
+                    (*scc)->components[scc_counter].included_node_ids[0] = w;
+                    (*scc)->id_belongs_to_component[w] = scc_counter;
+
+                    //printf("evala ton %d sto scc %d\n", w, scc_counter);
+
+                    (*scc)->components_count++;
                 }
-
-                (*scc)->components[scc_counter].included_nodes_count = 1;
-                (*scc)->components[scc_counter].node_array_size = 1;
-                (*scc)->components[scc_counter].included_node_ids = malloc(sizeof(uint32_t));
-
-                (*scc)->components[scc_counter].included_node_ids[0] = w;
-                (*scc)->id_belongs_to_component[w] = scc_counter;
-
-                printf("evala ton %d sto scc %d\n", w, scc_counter);
-
-                (*scc)->components_count++;
 
             } else {
 
@@ -305,7 +307,7 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                     (*scc)->components[scc_counter].included_nodes_count++;
                     (*scc)->id_belongs_to_component[w] = scc_counter;
 
-                    printf("evala ton %d sto scc %d\n", w, scc_counter);
+                    //printf("evala ton %d sto scc %d\n", w, scc_counter);
 
                     i++;
                 } while (w != last);
