@@ -137,7 +137,7 @@ SCC *tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
 }
 
 SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *buffer_out, uint32_t num_nodes,
-                                                   uint32_t version) {
+                                                   uint32_t max) {
 
     Stack_t *scc_stack = createStack();
     uint32_t i, index;
@@ -155,10 +155,10 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
 
     scc->components_count = 0;
 
-    scc->id_belongs_to_component = malloc(num_nodes * sizeof(uint32_t));
-    uint32_t *caller = malloc(num_nodes * sizeof(uint32_t));
+    scc->id_belongs_to_component = malloc(max * sizeof(uint32_t));
+    uint32_t *caller = malloc(max * sizeof(uint32_t));
 
-    for (i = 0; i < num_nodes; i++) {
+    for (i = 0; i < max; i++) {
         scc->id_belongs_to_component[i] = DEFAULT;
         caller[i] = DEFAULT;
     }
@@ -170,7 +170,7 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
         if (lookup(index_out, i, num_nodes) == NOT_EXIST) continue;
         if (scc->id_belongs_to_component[i] != DEFAULT) continue;
 
-        tarjan_iterative(&scc, index_out, buffer_out, i, &index, scc_stack, caller);
+        tarjan_iterative(&scc, index_out, buffer_out, i, &index, scc_stack, caller,num_nodes);
     }
 
     deletestack(scc_stack);
@@ -181,7 +181,7 @@ SCC *estimateStronglyConnectedComponents_iterative(ind *index_out, list_node *bu
 }
 
 void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t v, uint32_t *index, Stack_t *scc_stack,
-                      uint32_t *caller) {
+                      uint32_t *caller, uint32_t num_nodes) {
 
     uint32_t w, last, new_last, scc_counter, i, realloc_node_size, k = 0;
     ptrdiff_t offset_out;
@@ -220,6 +220,38 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                 index_out[last].next_child++;
 
             if (w == DEFAULT) break;
+
+            if (lookup(index_out, w, num_nodes) == NOT_EXIST){
+
+                scc_counter = (*scc)->components_count;
+
+                if (scc_counter == (*scc)->component_size) {
+                    (*scc)->component_size *= 2;
+                    (*scc)->components = realloc((*scc)->components, (*scc)->component_size * sizeof(Component));
+                    for (i = scc_counter; i < (*scc)->component_size; i++) {
+                        (*scc)->components[i].included_node_ids = NULL;
+                        (*scc)->components[i].included_nodes_count = 0;
+                        (*scc)->components[i].node_array_size = 0;
+                    }
+                }
+
+                (*scc)->components[scc_counter].included_nodes_count = 1;
+                (*scc)->components[scc_counter].node_array_size = 1;
+                (*scc)->components[scc_counter].included_node_ids = malloc(sizeof(uint32_t));
+
+
+                (*scc)->components[scc_counter].included_node_ids[0] = w;
+                (*scc)->id_belongs_to_component[w] = scc_counter;
+
+                printf("evala ton %d sto scc %d\n", w, scc_counter);
+
+
+
+                (*scc)->components_count++;
+
+                continue;
+            }
+
 
             if (index_out[w].index == DEFAULT) {    // If w is unvisited
 

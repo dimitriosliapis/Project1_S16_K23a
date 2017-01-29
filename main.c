@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
         // scc estimation
         version++;
         //scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, version);
-        scc = estimateStronglyConnectedComponents_iterative(index_out, buffer_out, scc_size, version);
+        scc = estimateStronglyConnectedComponents_iterative(index_out, buffer_out, index_size_out, scc_size);
 
         gettimeofday(&tv2, NULL);
         printf("%f sec: SCC estimation\n",

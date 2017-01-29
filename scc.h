@@ -26,7 +26,7 @@ SCC *estimateStronglyConnectedComponents(ind *, list_node *, uint32_t, uint32_t)
 
 SCC *estimateStronglyConnectedComponents_iterative(ind *, list_node *, uint32_t, uint32_t);
 
-void tarjan_iterative(SCC **, ind *, list_node *, uint32_t, uint32_t *, Stack_t *, uint32_t *);
+void tarjan_iterative(SCC **, ind *, list_node *, uint32_t, uint32_t *, Stack_t *, uint32_t *, uint32_t);
 
 void destroyStronglyConnectedComponents(SCC *);
 
