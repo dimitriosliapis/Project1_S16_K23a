@@ -90,7 +90,7 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
     return OK_SUCCESS;
 }
 
-ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, ptrdiff_t *available, int check) {
+ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, ptrdiff_t *available, int check, uint32_t edge_version) {
 
     int i = 0;
     uint32_t version = 0;
@@ -112,6 +112,7 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
     while (i < N) { // psaxnei stous geitones (max N ana komvo)
         if (current->neighbor[i] == DEFAULT) {  // alliws vriskei tin thesi tou 1ou diathesimou
             current->neighbor[i] = neighbor;    // kai ton vazei ekei
+            current->edgeProperty[i] = edge_version;
             break;
         }
         i++;

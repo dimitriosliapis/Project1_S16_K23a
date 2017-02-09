@@ -49,7 +49,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
 
                     if (neigh_scc != i && scc_con[neigh_scc] != i) {
                         addEdge(&grail->hyper_index_out, i, neigh_scc, &grail->hyper_buffer_out, &grail->buf_size_out,
-                                &available_out, 0);
+                                &available_out, 0, 0);
                         scc_con[neigh_scc] = i;
                     }
 

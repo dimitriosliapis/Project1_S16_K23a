@@ -112,7 +112,7 @@ void deleteStack(Stack *stack) {
     }
 }*/
 
-CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in, uint32_t size_out, ht_Node *explored, uint32_t version) {
+CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out, uint32_t size_in, uint32_t size_out, uint32_t version) {
 
     //dimiourgia CCIndex
 
@@ -122,18 +122,22 @@ CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
     list_node *neighbors_in, *neighbors_out;
     uint32_t cc_counter = 0;
     ptrdiff_t offset_in, offset_out;
-    uint32_t i = 0;
+    uint32_t i = 0, j = 0;
+    int in, out;
 
 
     //memory allocation + initialise
     CC *cc = malloc(sizeof(CC));
-    uint32_t *cc_index = malloc(sizeof(uint32_t) * cc_size);
+
+    CC_ind *cc_index = malloc(sizeof(CC_ind) * cc_size);
 
     for(i = 0; i < cc_size; i++){
-        cc_index[i] = DEFAULT;
+        cc_index[i].id = DEFAULT;
+        for(j = 0; j <= THREAD_POOL_SIZE; j++) cc_index[i].visited[j] = DEFAULT;
     }
 
     cc->cc_index = cc_index;
+
     cc->cc_size = cc_size;
 
   //  stack.last = NULL;
@@ -143,8 +147,13 @@ CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
     cc_counter = 0;
 
     for (cur = 0; cur < cc_size; cur++) {
-        if((lookup(index_in, cur, size_in) == NOT_EXIST)  && (lookup(index_out, cur, size_out) == NOT_EXIST)) continue;//an o komvos den uparxei sinexise ston epomeno
-        if (search(explored, cur, HT_BIG, version) == FOUND) continue; // to idio an einai visited
+        in = lookup(index_in, cur, size_in);
+        out = lookup(index_out, cur, size_out);
+        if((in == NOT_EXIST) && (out == NOT_EXIST)) continue;
+        //if((lookup(index_in, cur, size_in) == NOT_EXIST)  && (lookup(index_out, cur, size_out) == NOT_EXIST)) continue;//an o komvos den uparxei sinexise ston epomeno
+        //if (search(explored, cur, HT_BIG, version) == FOUND) continue; // to idio an einai visited
+        if((in == ALR_EXISTS) && (index_in[cur].visited[0] == version)) continue;
+        if((out == ALR_EXISTS) && (index_out[cur].visited[0] == version)) continue;
 
 
         //vale sto stack ton komvo kai olous tous geitones tou kai kane to idio gia tous geitones tous klp...
@@ -153,9 +162,16 @@ CC* createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
         while (!stackisempty(stack)) {
             v = popfromstack(stack);
 
-            if (search(explored, v, HT_BIG, version) == NOT_FOUND) {
-                cc_index[v] = cc_counter;
-                insert(explored, v, HT_BIG, version);
+            in = lookup(index_in, v, size_in);
+            out = lookup(index_out, v, size_out);
+            //if (search(explored, v, HT_BIG, version) == NOT_FOUND) {
+            if(((in == ALR_EXISTS) && (index_in[v].visited[0] != version)) || ((out == ALR_EXISTS) && (index_out[v].visited[0] != version))){
+                cc_index[v].id = cc_counter;
+                //insert(explored, v, HT_BIG, version);
+                if(in == ALR_EXISTS) index_in[v].visited[0] = version;
+                if(out == ALR_EXISTS) index_out[v].visited[0] = version;
+
+
 
                 offset_in = getListHead(index_in, v);
                 offset_out = getListHead(index_out, v);
@@ -203,12 +219,15 @@ void initUpdateIndex(CC *cc){
     u_node *update_index = malloc(cc->u_size * sizeof(u_node));
 
     uint32_t a = 0;
+    uint32_t j = 0;
     while(a < cc->u_size) {
         update_index[a].cc_array = NULL;
         update_index[a].new_nodes = NULL;
         update_index[a].size = 0;
         update_index[a].n_size = 0;
         update_index[a].state = 'o';//old
+        for(j = 0; j <= THREAD_POOL_SIZE; j++) update_index[a].visited[j] = DEFAULT;
+
         a++;
     }
 
@@ -222,17 +241,17 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     uint32_t cc1, cc2;
     int found = 0;
     uint32_t new_cc = 0;
-    uint32_t i = 0, realloc_size = 0, realloc_update_index_size = cc->u_size, k = 0, l = 0;
+    uint32_t i = 0, realloc_size = 0, realloc_update_index_size = cc->u_size, k = 0, l = 0, j = 0;
     uint32_t *temp = NULL;
 
 
     //an kapoio ap ta N1 N2 den uparxei tote kanto DEFAULT
     //se autin tin perwptwsi koitame an einai megalitera ap ton pinaka tou CC
     if(N1 >= cc->cc_size) cc1 = DEFAULT;
-    else cc1 = cc->cc_index[N1];
+    else cc1 = cc->cc_index[N1].id;
 
     if(N2 >= cc->cc_size) cc2 = DEFAULT;
-    else cc2 = cc->cc_index[N2];
+    else cc2 = cc->cc_index[N2].id;
 
     //an den uparxoun tha exoun parei hdh thn timh DEFAULT
 
@@ -283,6 +302,8 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                         cc->updateIndex[i].state = 'e';
                         cc->updateIndex[i].new_nodes = NULL;
                         cc->updateIndex[i].n_size = 0;
+                        for(j = 0; j <= THREAD_POOL_SIZE; j++) cc->updateIndex[i].visited[j] = DEFAULT;
+
                     }
                     cc->u_size = realloc_update_index_size;
                 }
@@ -292,6 +313,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                 cc->updateIndex[new_cc].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
                 cc->updateIndex[new_cc].new_nodes[0] = N1;
                 cc->updateIndex[new_cc].new_nodes[1] = N2;
+                for(j = 0; j <= THREAD_POOL_SIZE; j++) cc->updateIndex[new_cc].visited[j] = DEFAULT;
                 for(k = 2; k < INIT_NEWNODE_SIZE; k++) cc->updateIndex[new_cc].new_nodes[k] = DEFAULT;
 
                 return;
@@ -310,6 +332,8 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
             cc->updateIndex[new_cc].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
             cc->updateIndex[new_cc].new_nodes[0] = N1;
             cc->updateIndex[new_cc].new_nodes[1] = N2;
+            for(j = 0; j <= THREAD_POOL_SIZE; j++) cc->updateIndex[new_cc].visited[j] = DEFAULT;
+
             for(k = 2; k < INIT_NEWNODE_SIZE; k++) cc->updateIndex[new_cc].new_nodes[k] = DEFAULT;
             for(l = new_cc + 1; l < realloc_size; l++){
                 cc->updateIndex[l].new_nodes = NULL;
@@ -317,6 +341,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                 cc->updateIndex[l].n_size = 0;
                 cc->updateIndex[l].cc_array = NULL;
                 cc->updateIndex[l].size = 0;
+                for(j = 0; j <= THREAD_POOL_SIZE; j++) cc->updateIndex[l].visited[j] = DEFAULT;
             }
             cc->u_size = realloc_size;
             return;
@@ -427,7 +452,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
 
     //an uparxoun kai ta 2 sto CCIndex tote prepei na ta sindesei
 
-    int j = 0;
+    j = 0;
     uint32_t cur_cc = cc1;
 
     while(j < 2) {
@@ -465,7 +490,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     }
 }
 //Anazitisi sto UpdateIndex
-int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32_t version) {
+int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thread_id) {
 
     uint32_t cc1 = 0;
     uint32_t cc2 = 0;
@@ -475,9 +500,9 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
     //stack.last = NULL;
 
     if(N1 >= cc.cc_size) cc1 = DEFAULT;
-    else cc1 = cc.cc_index[N1];
+    else cc1 = cc.cc_index[N1].id;
     if(N2 >= cc.cc_size) cc2 = DEFAULT;
-    else cc2 = cc.cc_index[N2];
+    else cc2 = cc.cc_index[N2].id;
 
     //An kapoio ap ta 2(h kai ta 2) den uparxei sto CCIndex psaxnei mono sto new_nodes
     if(cc1 == DEFAULT){
@@ -525,8 +550,10 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
         while(!stackisempty(stack)) {
             v = popfromstack(stack);
             if(v != cc2) {
-                if (search(explored, v, HT_BIG, version) == NOT_FOUND) {
-                    insert(explored, v, HT_BIG, version);
+                //if (search(explored, v, HT_BIG, version) == NOT_FOUND) {
+                if (cc.updateIndex[v].visited[thread_id] != version) {
+                    //insert(explored, v, HT_BIG, version);
+                    cc.updateIndex[v].visited[thread_id] = version;
 
                     if(cc.updateIndex[v].cc_array == NULL) {
                         continue;
@@ -554,7 +581,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, ht_Node *explored, uint32
     }
 }
 
-uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new_size) {
+uint32_t updateCCIndex(CC *cc, uint32_t version, uint32_t new_size, int thread_id) {
 
     uint32_t v = 0, w = 0;
     uint32_t i = 0, j = 0;
@@ -573,7 +600,7 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new
     if(new_size > cc->cc_size){
         cc->cc_index = realloc(cc->cc_index, new_size*sizeof(uint32_t));
         for(j = cc->cc_size; j < new_size; j++){
-            cc->cc_index[j] = DEFAULT;
+            cc->cc_index[j].id = DEFAULT;
         }
     }
 
@@ -582,7 +609,7 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new
         if(cc->updateIndex[i].new_nodes != NULL) {
             for(k = 0 ; k < cc->updateIndex[i].n_size ; k++) {
                 if(cc->updateIndex[i].new_nodes[k] == DEFAULT) break;
-                cc->cc_index[cc->updateIndex[i].new_nodes[k]] = i;
+                cc->cc_index[cc->updateIndex[i].new_nodes[k]].id = i;
             }
         }
     }
@@ -591,10 +618,12 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new
     //vres gia kathe CC poio tha einai to kainourio pou tha tou antistoixei
     for(i = 0 ; i < cc->u_size ; i++) {
         if(cc->updateIndex[i].state == 'e') break;
-        if(search(explored, i, HT_BIG, version) == FOUND) continue;
+        //if(search(explored, i, HT_BIG, version) == FOUND) continue;
+        if(cc->updateIndex[i].visited[thread_id] == version) continue;
         pushinstack(stack, i);
         new_cc[i] = parent_cc;
-        insert(explored, i, HT_BIG, version);
+        //insert(explored, i, HT_BIG, version);
+        cc->updateIndex[i].visited[thread_id] = version;
         while(!stackisempty(stack)) {
             v = popfromstack(stack);
 
@@ -605,7 +634,8 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new
                     if(new_cc[w] != DEFAULT) continue;
                     pushinstack(stack, w);
                     new_cc[w] = parent_cc;
-                    insert(explored, w, HT_BIG, version);
+                    //insert(explored, w, HT_BIG, version);
+                    cc->updateIndex[w].visited[thread_id] = version;
                 }
             }
 
@@ -614,9 +644,9 @@ uint32_t updateCCIndex(CC *cc, ht_Node* explored, uint32_t version, uint32_t new
     }
     //kai meta allakse ta
     for(k = 0 ; k < cc->cc_size ; k++) {
-        old_cc = cc->cc_index[k];
+        old_cc = cc->cc_index[k].id;
         if(old_cc == DEFAULT) continue;
-        cc->cc_index[k] = new_cc[old_cc];
+        cc->cc_index[k].id = new_cc[old_cc];
     }
     deletestack(stack);
 

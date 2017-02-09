@@ -25,6 +25,6 @@ void restartQueue(Queue *);
 
 void empty(Queue *);
 
-int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, Queue *, Queue *, uint32_t, int, uint32_t);
+int bBFS(ind *, ind *, list_node *, list_node *, uint32_t, uint32_t, Queue *, Queue *, uint32_t, int, int);
 
 #endif

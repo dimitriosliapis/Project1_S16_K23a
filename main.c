@@ -10,7 +10,11 @@ ptrdiff_t available_in = 0, available_out = 0;
 SCC *scc = NULL;
 Buffer *buffer = NULL;
 GrailIndex *grail = NULL;
-int start = 0, finished = 1, id = 1, end = 0, res_size, *results;
+
+CC *cc = NULL;
+uint32_t cc_size = 0;
+
+int start = 0, finished = THREAD_POOL_SIZE, id = 1, end = 0, res_size, *results;
 
 struct timeval tv1, tv2;
 
@@ -89,8 +93,82 @@ B_Node *remove_from_buffer(Buffer *buffer) {
 
 void *worker(void *ptr) {
 
-    uint32_t N1, N2, scc_source, scc_target;
-    int line, local_version = 0, thread_id, steps;
+    uint32_t N1, N2, scc_source;
+    int line, thread_id, steps, local_fin = 0;
+    uint32_t local_version = 0;
+    Queue *frontierF = NULL, *frontierB = NULL;
+    B_Node *job = NULL;
+
+    pthread_mutex_lock(&id_mtx);
+    thread_id = id;
+    id++;
+    pthread_mutex_unlock(&id_mtx);
+
+    frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
+    frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
+
+    while (1) {
+
+        pthread_mutex_lock(&mtx);
+
+        while (start == 0)
+            pthread_cond_wait(&cond_start, &mtx);
+
+        job = remove_from_buffer(buffer);
+
+        if (job == NULL) {
+
+            if(local_fin == 0) {
+                finished++;
+                local_fin = 1;
+                if (finished == THREAD_POOL_SIZE) pthread_cond_signal(&cond_nonfinished);
+            }
+            pthread_mutex_unlock(&mtx);
+            if (end) break;
+            continue;
+        } else {
+            local_fin = 0;
+            line = job->line;
+            pthread_mutex_unlock(&mtx);
+        }
+
+        toID(job->query, &N1, &N2);
+
+        if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
+
+            scc_source = scc->id_belongs_to_component[N1];
+
+            if (isReachableGrailIndex(grail, N1, N2, scc) == YES) { // YES
+                local_version++;
+                steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
+                             local_version, thread_id, scc_source);
+                results[line] = steps;
+
+            } else if (isReachableGrailIndex(grail, N1, N2, scc) == MAYBE) {    // MAYBE
+                local_version++;
+                steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
+                             local_version, thread_id, DEFAULT);
+                results[line] = steps;
+            } else  // NO
+                results[line] = -1;
+
+        } else
+            results[line] = -1;
+
+        free(job);
+    }
+
+    empty(frontierB);
+    empty(frontierF);
+
+    pthread_exit(0);
+}
+
+void *worker_dynamic(void *ptr) {
+
+    uint32_t N1, N2;
+    uint32_t line;
+    int thread_id, steps, local_fin = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
     B_Node *job = NULL;
 
@@ -110,42 +188,73 @@ void *worker(void *ptr) {
 
         job = remove_from_buffer(buffer);
 
-        pthread_mutex_unlock(&mtx);
-
         if (job == NULL) {
-            finished = 1;
-            pthread_cond_signal(&cond_nonfinished);
+
+            if(local_fin == 0) {
+                finished++;
+                local_fin = 1;
+                if (finished == THREAD_POOL_SIZE) pthread_cond_broadcast(&cond_nonfinished);
+            }
+            pthread_mutex_unlock(&mtx);
             if (end) break;
             continue;
-        } else
+        } else {
+            local_fin = 0;
             line = job->line;
-
-        // printf("Worker thread %ld is ready to execute query\n", pthread_self());
+            pthread_mutex_unlock(&mtx);
+        }
 
         toID(job->query, &N1, &N2);
 
-        if (lookup(index_out, N1, index_size_out) == ALR_EXISTS &&
-            lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
+        if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
 
-            scc_source = scc->id_belongs_to_component[N1];
+            pthread_mutex_lock(&id_mtx);
 
-            if (isReachableGrailIndex(grail, N1, N2, scc) == YES) { // YES
-                local_version++;
+            if(cc->cc_index[N1].id == cc->cc_index[N2].id) {
+
+                pthread_mutex_unlock(&id_mtx);
+
                 steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
-                             local_version, thread_id, scc_source);
-                results[line] = steps;
-            } else if (isReachableGrailIndex(grail, N1, N2, scc) == MAYBE) {    // MAYBE
-                local_version++;
-                steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
-                             local_version, thread_id, DEFAULT);
-                results[line] = steps;
-            } else  // NO
-                results[line] = -1;
+                             line, thread_id, -1);
 
-        } else
-            results[line] = -1;
+                results[line] = steps;
+            }
+            else {
+
+                if(searchUpdateIndex(*cc, N1, N2, line, thread_id) == FOUND) {
+
+                    pthread_mutex_unlock(&id_mtx);
+
+                    steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
+                                 line, thread_id, -1);
+
+                    results[line] = steps;
+
+                    pthread_mutex_lock(&id_mtx);
+
+                    cc->metricVal--;
+
+                    if(cc->metricVal == 0) {
+
+                        if(index_size_in > index_size_out) cc_size = index_size_in;
+                        else cc_size = index_size_out;
+                        cc->cc_max = updateCCIndex(cc, line, cc_size, thread_id);
+                        cc->metricVal = METRIC;
+
+                    }
+
+                    pthread_mutex_unlock(&id_mtx);
+                }
+                else {
+                    pthread_mutex_unlock(&id_mtx);
+                    results[line] = -1;
+                }
+            }
+        }
+        else results[line] = -1;
 
         free(job);
+
     }
 
     empty(frontierB);
@@ -210,9 +319,9 @@ int main(int argc, char *argv[]) {
         if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
             insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
 
-        addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1);
+        addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1, 0);
 
-        addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0);
+        addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0, 0);
 
         fgets(str, sizeof(str), Graph);
     }
@@ -280,17 +389,89 @@ int main(int argc, char *argv[]) {
 
             pthread_mutex_lock(&mtx);
 
-            while (finished == 0)
+            while (finished < THREAD_POOL_SIZE)
                 pthread_cond_wait(&cond_nonfinished, &mtx);
 
-//            for (i = print_start; i < line; i++)
-//                printf("%d\n", results[i]);
-//            print_start = line;
+            for (i = print_start; i < line; i++)
+                printf("%d\n", results[i]);
+            print_start = line;
 
             while (str[0] != 'F') {
 
                 place_to_buffer(str, buffer, line);
                 line++;
+                fgets(str, sizeof(str), Queries);
+
+            }
+
+            finished = 0;
+            start = 1;
+            pthread_mutex_unlock(&mtx);
+            pthread_cond_broadcast(&cond_start);
+
+            fgets(str, sizeof(str), Queries);
+        }
+
+        end = 1;
+        res_size = line;
+        fclose(Queries);
+    }
+    else{
+
+        //to megethos tou cc tha einai osoi einai oi komvoi sinolika diladi
+        //to max twn komvwn tou index_in kai index_out
+
+        if(index_size_in > index_size_out) cc_size = index_size_in;
+        else cc_size = index_size_out;
+
+        version++;
+        cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, version);
+
+        cc->u_size = cc->cc_max;
+        cc->metricVal = METRIC;
+
+        initUpdateIndex(cc);
+
+        // worker thread pool
+        workers_t = malloc(THREAD_POOL_SIZE * sizeof (pthread_t));
+
+        for (i = 0; i < THREAD_POOL_SIZE; i++)
+            pthread_create(&workers_t[i], 0, worker_dynamic, 0);
+
+        while (!feof(Queries)) {
+
+            pthread_mutex_lock(&mtx);
+
+            while (finished < THREAD_POOL_SIZE)
+                pthread_cond_wait(&cond_nonfinished, &mtx);
+
+            for (i = print_start; i < line; i++)
+                printf("%d\n", results[i]);
+            print_start = line;
+
+            while (str[0] != 'F') {
+
+                if(str[0] == 'A') {
+
+                    toID(str, &N1, &N2);
+
+                    if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
+                        insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out);
+
+                    if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
+                        insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
+
+                    addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1, line);
+
+                    addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0, line);
+
+                    refreshUpdateIndex(cc, N1, N2);
+                }
+
+                else {
+                    place_to_buffer(str, buffer, line);
+                    line++;
+                }
 
                 fgets(str, sizeof(str), Queries);
             }
@@ -311,8 +492,8 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < THREAD_POOL_SIZE; i++)
         pthread_join(workers_t[i], 0);
 
-    for (i = 0; i < res_size; i++)
-        printf("%d\n", results[i]);
+   /* for (i = 0; i < res_size; i++)
+        printf("%d\n", results[i]);*/
 
     gettimeofday(&tv2, NULL);
     printf("%f sec: The End\n",

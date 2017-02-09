@@ -83,7 +83,7 @@ int bBFS(ind *index_in,
          Queue *frontierB,
          uint32_t version,
          int thread_id,
-         uint32_t curr_scc) {
+         int curr_scc) {
 
     list_node *neighbors = NULL;
     uint32_t node = DEFAULT, successor = DEFAULT, childrenF = 0, childrenB = 0;
@@ -122,14 +122,16 @@ int bBFS(ind *index_in,
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (curr_scc != DEFAULT) {  // periptwsh anazhthshs sto idio scc
+                            if(curr_scc < 0){
 
-                                if (scc->id_belongs_to_component[successor] == curr_scc) {
+                                if(neighbors->edgeProperty[i] <= version) {
 
-                                    if (index_out[successor].visited[thread_id] != version) {  // an den ton exei epispeftei o idios
-                                        index_out[successor].visited[thread_id] = version;         // ton episkeptetai
+                                    if (index_out[successor].visited[thread_id] !=
+                                        version) {  // an den ton exei epispeftei o idios
+                                        index_out[successor].visited[thread_id] = version; // ton episkeptetai
 
-                                        if (index_in[successor].visited[thread_id] == version) {   // goal afou ton exei episkeptei o allos
+                                        if (index_in[successor].visited[thread_id] ==
+                                            version) {   // goal afou ton exei episkeptei o allos
                                             restartQueue(frontierF);
                                             restartQueue(frontierB);
                                             return stepsB + stepsF;
@@ -138,30 +140,56 @@ int bBFS(ind *index_in,
                                             enq(frontierF, successor);
                                             counterFS++;
                                             childrenF += index_out[successor].num_of_children;
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                if (curr_scc != DEFAULT) {  // periptwsh anazhthshs sto idio scc
+
+                                    if (scc->id_belongs_to_component[successor] == curr_scc) {
+
+                                        if (index_out[successor].visited[thread_id] !=
+                                            version) {  // an den ton exei epispeftei o idios
+                                            index_out[successor].visited[thread_id] = version;         // ton episkeptetai
+
+                                            if (index_in[successor].visited[thread_id] ==
+                                                version) {   // goal afou ton exei episkeptei o allos
+                                                restartQueue(frontierF);
+                                                restartQueue(frontierB);
+                                                return stepsB + stepsF;
+
+                                            } else {   // alliws eisagetai sto synoro
+                                                enq(frontierF, successor);
+                                                counterFS++;
+                                                childrenF += index_out[successor].num_of_children;
+                                            }
+
                                         }
 
                                     }
 
-                                }
+                                } else {    // periptwsh anazhthshs se olo ton grafo
 
-                            } else {    // periptwsh anazhthshs se olo ton grafo
+                                    if (isReachableGrailIndex(grail, successor, end, scc) != NO) {
 
-                                if (isReachableGrailIndex(grail, successor, end, scc) != NO) {
+                                        if (index_out[successor].visited[thread_id] !=
+                                            version) {  // an den ton exei epispeftei o idios
+                                            index_out[successor].visited[thread_id] = version; // ton episkeptetai
 
-                                    if (index_out[successor].visited[thread_id] != version) {  // an den ton exei epispeftei o idios
-                                        index_out[successor].visited[thread_id] = version; // ton episkeptetai
+                                            if (index_in[successor].visited[thread_id] ==
+                                                version) {   // goal afou ton exei episkeptei o allos
+                                                restartQueue(frontierF);
+                                                restartQueue(frontierB);
+                                                return stepsB + stepsF;
 
-                                        if (index_in[successor].visited[thread_id] == version) {   // goal afou ton exei episkeptei o allos
-                                            restartQueue(frontierF);
-                                            restartQueue(frontierB);
-                                            return stepsB + stepsF;
+                                            } else {   // alliws eisagetai sto synoro
+                                                enq(frontierF, successor);
+                                                counterFS++;
+                                                childrenF += index_out[successor].num_of_children;
+                                            }
 
-                                        } else {   // alliws eisagetai sto synoro
-                                            enq(frontierF, successor);
-                                            counterFS++;
-                                            childrenF += index_out[successor].num_of_children;
                                         }
-
                                     }
                                 }
                             }
@@ -203,10 +231,9 @@ int bBFS(ind *index_in,
 
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
+                            if(curr_scc < 0){
 
-                            if (curr_scc != DEFAULT) {  // periptwsh anazhthshs sto idio scc
-
-                                if (scc->id_belongs_to_component[successor] == curr_scc) {
+                                if(neighbors->edgeProperty[i] <= version) {
 
                                     if (index_in[successor].visited[thread_id] != version) {   // an den ton exei episkeptei o idios
                                         index_in[successor].visited[thread_id] = version;  // ton episkeptetai
@@ -224,35 +251,60 @@ int bBFS(ind *index_in,
                                         }
 
                                     }
-
                                 }
+                            }
+                            else {
+                                if (curr_scc != DEFAULT) {  // periptwsh anazhthshs sto idio scc
 
-                            } else {    // periptwsh anazhthshs se olo ton grafo
+                                    if (scc->id_belongs_to_component[successor] == curr_scc) {
 
-                                if (isReachableGrailIndex(grail, start, successor, scc) != NO) {
+                                        if (index_in[successor].visited[thread_id] !=
+                                            version) {   // an den ton exei episkeptei o idios
+                                            index_in[successor].visited[thread_id] = version;  // ton episkeptetai
 
-                                    if (index_in[successor].visited[thread_id] !=
-                                        version) {   // an den ton exei episkeptei o idios
-                                        index_in[successor].visited[thread_id] = version;  // ton episkeptetai
+                                            if (index_out[successor].visited[thread_id] ==
+                                                version) {  // goal afou ton exei episkeptei o allos
 
-                                        if (index_out[successor].visited[thread_id] ==
-                                            version) {  // goal afou ton exei episkeptei o allos
+                                                restartQueue(frontierB);
+                                                restartQueue(frontierF);
+                                                return stepsF + stepsB;
 
-                                            restartQueue(frontierB);
-                                            restartQueue(frontierF);
-                                            return stepsF + stepsB;
+                                            } else {    // alliws eisagetai sto synoro
+                                                enq(frontierB, successor);
+                                                counterBS++;
+                                                childrenB += index_in[successor].num_of_children;
+                                            }
 
-                                        } else {    // alliws eisagetai sto synoro
-                                            enq(frontierB, successor);
-                                            counterBS++;
-                                            childrenB += index_in[successor].num_of_children;
                                         }
 
                                     }
+
+                                } else {    // periptwsh anazhthshs se olo ton grafo
+
+                                    if (isReachableGrailIndex(grail, start, successor, scc) != NO) {
+
+                                        if (index_in[successor].visited[thread_id] !=
+                                            version) {   // an den ton exei episkeptei o idios
+                                            index_in[successor].visited[thread_id] = version;  // ton episkeptetai
+
+                                            if (index_out[successor].visited[thread_id] ==
+                                                version) {  // goal afou ton exei episkeptei o allos
+
+                                                restartQueue(frontierB);
+                                                restartQueue(frontierF);
+                                                return stepsF + stepsB;
+
+                                            } else {    // alliws eisagetai sto synoro
+                                                enq(frontierB, successor);
+                                                counterBS++;
+                                                childrenB += index_in[successor].num_of_children;
+                                            }
+
+                                        }
+                                    }
+
                                 }
-
                             }
-
                         } else
                             break;
 

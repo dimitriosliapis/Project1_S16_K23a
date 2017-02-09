@@ -9,6 +9,7 @@ list_node *createBuffer(uint32_t buffer_size) {
     for (pos = 0; pos < buffer_size; pos++) {
         for (n = 0; n < N; n++) {
             buffer[pos].neighbor[n] = DEFAULT;  // sumvasi gia ta id
+            buffer[pos].edgeProperty[n] = DEFAULT;
         }
         buffer[pos].nextListNode = -1;  // den exei epomeno
     }
@@ -39,6 +40,7 @@ int reallocBuffer(list_node **buffer, uint32_t *buffer_size) {
     for (pos = (*buffer_size) / 2; pos < *buffer_size; pos++) {
         for (n = 0; n < N; n++) {
             (*buffer)[pos].neighbor[n] = DEFAULT;
+            (*buffer)[pos].edgeProperty[n] = DEFAULT;
         }
         (*buffer)[pos].nextListNode = -1;
     }

@@ -16,7 +16,7 @@
 
 typedef struct list_node_t {
     uint32_t neighbor[N];
-    //uint32_t edgeProperty[N];
+    uint32_t edgeProperty[N];
     ptrdiff_t nextListNode;
 }list_node;
 
