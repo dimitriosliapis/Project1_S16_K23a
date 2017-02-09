@@ -118,7 +118,7 @@ void *worker(void *ptr) {
 
         if (job == NULL) {
 
-            if(local_fin == 0) {
+            if (local_fin == 0) {
                 finished++;
                 local_fin = 1;
                 if (finished == THREAD_POOL_SIZE) pthread_cond_signal(&cond_nonfinished);
@@ -190,7 +190,7 @@ void *worker_dynamic(void *ptr) {
 
         if (job == NULL) {
 
-            if(local_fin == 0) {
+            if (local_fin == 0) {
                 finished++;
                 local_fin = 1;
                 if (finished == THREAD_POOL_SIZE) pthread_cond_broadcast(&cond_nonfinished);
@@ -208,50 +208,47 @@ void *worker_dynamic(void *ptr) {
 
         if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
 
-            pthread_mutex_lock(&id_mtx);
+            pthread_mutex_lock(&cc_mtx);
 
-            if(cc->cc_index[N1].id == cc->cc_index[N2].id) {
+            if (cc->cc_index[N1].id == cc->cc_index[N2].id) {
 
-                pthread_mutex_unlock(&id_mtx);
+                pthread_mutex_unlock(&cc_mtx);
 
                 steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
                              line, thread_id, -1);
 
                 results[line] = steps;
-            }
-            else {
+            } else {
 
-                if(searchUpdateIndex(*cc, N1, N2, line, thread_id) == FOUND) {
+                if (searchUpdateIndex(*cc, N1, N2, line, thread_id) == FOUND) {
 
-                    pthread_mutex_unlock(&id_mtx);
+                    pthread_mutex_unlock(&cc_mtx);
 
                     steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
                                  line, thread_id, -1);
 
                     results[line] = steps;
 
-                    pthread_mutex_lock(&id_mtx);
+                    pthread_mutex_lock(&cc_mtx);
 
                     cc->metricVal--;
 
-                    if(cc->metricVal == 0) {
+                    if (cc->metricVal == 0) {
 
-                        if(index_size_in > index_size_out) cc_size = index_size_in;
+                        if (index_size_in > index_size_out) cc_size = index_size_in;
                         else cc_size = index_size_out;
                         cc->cc_max = updateCCIndex(cc, line, cc_size, thread_id);
                         cc->metricVal = METRIC;
 
                     }
 
-                    pthread_mutex_unlock(&id_mtx);
-                }
-                else {
-                    pthread_mutex_unlock(&id_mtx);
+                    pthread_mutex_unlock(&cc_mtx);
+                } else {
+                    pthread_mutex_unlock(&cc_mtx);
                     results[line] = -1;
                 }
             }
-        }
-        else results[line] = -1;
+        } else results[line] = -1;
 
         free(job);
 
@@ -269,7 +266,7 @@ int main(int argc, char *argv[]) {
     uint32_t i = 0, print_start = 0, print = 1;
     uint32_t N1, N2, scc_size = 0;
     uint32_t version = 0, line = 0;
-    pthread_t * workers_t;
+    pthread_t *workers_t;
 
     // orismata
     if (argc == 3) {
@@ -300,6 +297,7 @@ int main(int argc, char *argv[]) {
     // mutexes and condition variables initialization
     pthread_mutex_init(&mtx, 0);
     pthread_mutex_init(&id_mtx, 0);
+    pthread_mutex_init(&cc_mtx, 0);
     pthread_cond_init(&cond_nonfinished, 0);
     pthread_cond_init(&cond_start, 0);
 
@@ -355,7 +353,7 @@ int main(int argc, char *argv[]) {
     if (strncmp(str, "STATIC", 6) == 0) {
 
         // worker thread pool
-        workers_t = malloc(THREAD_POOL_SIZE * sizeof (pthread_t));
+        workers_t = malloc(THREAD_POOL_SIZE * sizeof(pthread_t));
         for (i = 0; i < THREAD_POOL_SIZE; i++)
             pthread_create(&workers_t[i], 0, worker, 0);
 
@@ -415,17 +413,16 @@ int main(int argc, char *argv[]) {
         end = 1;
         res_size = line;
         fclose(Queries);
-    }
-    else{
+    } else {
 
         //to megethos tou cc tha einai osoi einai oi komvoi sinolika diladi
         //to max twn komvwn tou index_in kai index_out
 
-        if(index_size_in > index_size_out) cc_size = index_size_in;
+        if (index_size_in > index_size_out) cc_size = index_size_in;
         else cc_size = index_size_out;
 
         version++;
-        cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in,index_size_out, version);
+        cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in, index_size_out, version);
 
         cc->u_size = cc->cc_max;
         cc->metricVal = METRIC;
@@ -433,7 +430,7 @@ int main(int argc, char *argv[]) {
         initUpdateIndex(cc);
 
         // worker thread pool
-        workers_t = malloc(THREAD_POOL_SIZE * sizeof (pthread_t));
+        workers_t = malloc(THREAD_POOL_SIZE * sizeof(pthread_t));
 
         for (i = 0; i < THREAD_POOL_SIZE; i++)
             pthread_create(&workers_t[i], 0, worker_dynamic, 0);
@@ -451,7 +448,7 @@ int main(int argc, char *argv[]) {
 
             while (str[0] != 'F') {
 
-                if(str[0] == 'A') {
+                if (str[0] == 'A') {
 
                     toID(str, &N1, &N2);
 
@@ -466,9 +463,7 @@ int main(int argc, char *argv[]) {
                     addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0, line);
 
                     refreshUpdateIndex(cc, N1, N2);
-                }
-
-                else {
+                } else {
                     place_to_buffer(str, buffer, line);
                     line++;
                 }
@@ -489,11 +484,18 @@ int main(int argc, char *argv[]) {
         fclose(Queries);
     }
 
+    pthread_mutex_lock(&mtx);
+
+    while (finished < THREAD_POOL_SIZE)
+        pthread_cond_wait(&cond_nonfinished, &mtx);
+
+    pthread_mutex_unlock(&mtx);
+
+    for (i = print_start; i < line; i++)
+        printf("%d\n", results[i]);
+
     for (i = 0; i < THREAD_POOL_SIZE; i++)
         pthread_join(workers_t[i], 0);
-
-   /* for (i = 0; i < res_size; i++)
-        printf("%d\n", results[i]);*/
 
     gettimeofday(&tv2, NULL);
     printf("%f sec: The End\n",

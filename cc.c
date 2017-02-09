@@ -588,11 +588,12 @@ uint32_t updateCCIndex(CC *cc, uint32_t version, uint32_t new_size, int thread_i
     Stack_t *stack = createStack();
     uint32_t k;
     uint32_t parent_cc = 0;
-    uint32_t new_cc[cc->u_size];
+    //uint32_t new_cc[new_size];
+    uint32_t  *new_cc = malloc(new_size*sizeof(uint32_t));
     uint32_t old_cc = 0;
 
     //arxikopoisi tou pinaka gia tis allages sta CC
-    for(i = 0; i < cc->u_size; i++) new_cc[i] = DEFAULT;
+    for(i = 0; i < new_size; i++) new_cc[i] = DEFAULT;
 
   //  stack.last = NULL;
 
@@ -664,6 +665,7 @@ uint32_t updateCCIndex(CC *cc, uint32_t version, uint32_t new_size, int thread_i
     cc->u_size = parent_cc;//to megethos tou epomenou UpdateIndex tha einai iso me to teleutaio CC pou mpike
 
     initUpdateIndex(cc);
+    free(new_cc);
 
     return parent_cc;
 }
