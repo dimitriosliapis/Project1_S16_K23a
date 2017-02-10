@@ -14,7 +14,7 @@ GrailIndex *grail = NULL;
 CC *cc = NULL;
 uint32_t cc_size = 0;
 
-int start = 0, finished = THREAD_POOL_SIZE, id = 1, end = 0, res_size, *results;
+int start = 0, finished = 0, id = 1, end = 0, res_size, *results;
 
 struct timeval tv1, tv2;
 
@@ -94,7 +94,7 @@ B_Node *remove_from_buffer(Buffer *buffer) {
 void *worker(void *ptr) {
 
     uint32_t N1, N2, scc_source;
-    int line, thread_id, steps, local_fin = 0;
+    int line, thread_id, steps;
     uint32_t local_version = 0;
     Queue *frontierF = NULL, *frontierB = NULL;
     B_Node *job = NULL;
@@ -118,16 +118,12 @@ void *worker(void *ptr) {
 
         if (job == NULL) {
 
-            if (local_fin == 0) {
-                finished++;
-                local_fin = 1;
-                if (finished == THREAD_POOL_SIZE) pthread_cond_signal(&cond_nonfinished);
-            }
+            pthread_cond_signal(&cond_nonfinished);
             pthread_mutex_unlock(&mtx);
             if (end) break;
             continue;
         } else {
-            local_fin = 0;
+
             line = job->line;
             pthread_mutex_unlock(&mtx);
         }
@@ -156,6 +152,9 @@ void *worker(void *ptr) {
             results[line] = -1;
 
         free(job);
+        pthread_mutex_lock(&mtx);
+        finished++;
+        pthread_mutex_unlock(&mtx);
     }
 
     empty(frontierB);
@@ -168,7 +167,7 @@ void *worker_dynamic(void *ptr) {
 
     uint32_t N1, N2;
     uint32_t line;
-    int thread_id, steps, local_fin = 0;
+    int thread_id, steps;
     Queue *frontierF = NULL, *frontierB = NULL;
     B_Node *job = NULL;
 
@@ -190,16 +189,12 @@ void *worker_dynamic(void *ptr) {
 
         if (job == NULL) {
 
-            if (local_fin == 0) {
-                finished++;
-                local_fin = 1;
-                if (finished == THREAD_POOL_SIZE) pthread_cond_broadcast(&cond_nonfinished);
-            }
+            pthread_cond_signal(&cond_nonfinished);
             pthread_mutex_unlock(&mtx);
             if (end) break;
             continue;
         } else {
-            local_fin = 0;
+
             line = job->line;
             pthread_mutex_unlock(&mtx);
         }
@@ -251,7 +246,9 @@ void *worker_dynamic(void *ptr) {
         } else results[line] = -1;
 
         free(job);
-
+        pthread_mutex_lock(&mtx);
+        finished++;
+        pthread_mutex_unlock(&mtx);
     }
 
     empty(frontierB);
@@ -387,7 +384,7 @@ int main(int argc, char *argv[]) {
 
             pthread_mutex_lock(&mtx);
 
-            while (finished < THREAD_POOL_SIZE)
+            while (finished < line)
                 pthread_cond_wait(&cond_nonfinished, &mtx);
 
             for (i = print_start; i < line; i++)
@@ -402,7 +399,7 @@ int main(int argc, char *argv[]) {
 
             }
 
-            finished = 0;
+            //finished = 0;
             start = 1;
             pthread_mutex_unlock(&mtx);
             pthread_cond_broadcast(&cond_start);
@@ -439,7 +436,7 @@ int main(int argc, char *argv[]) {
 
             pthread_mutex_lock(&mtx);
 
-            while (finished < THREAD_POOL_SIZE)
+            while (finished < line)
                 pthread_cond_wait(&cond_nonfinished, &mtx);
 
             for (i = print_start; i < line; i++)
@@ -471,7 +468,7 @@ int main(int argc, char *argv[]) {
                 fgets(str, sizeof(str), Queries);
             }
 
-            finished = 0;
+            //finished = 0;
             start = 1;
             pthread_mutex_unlock(&mtx);
             pthread_cond_broadcast(&cond_start);
@@ -486,7 +483,7 @@ int main(int argc, char *argv[]) {
 
     pthread_mutex_lock(&mtx);
 
-    while (finished < THREAD_POOL_SIZE)
+    while (finished < line)
         pthread_cond_wait(&cond_nonfinished, &mtx);
 
     pthread_mutex_unlock(&mtx);
