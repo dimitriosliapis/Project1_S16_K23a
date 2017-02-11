@@ -3,6 +3,8 @@
 
 #define RES_INIT 60000
 
+/****************GLOBALS***********************/
+
 list_node *buffer_in = NULL, *buffer_out = NULL;
 ind *index_in = NULL, *index_out = NULL;
 uint32_t buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
@@ -17,6 +19,7 @@ uint32_t cc_size = 0;
 int start = 0, finished = 0, id = 1, end = 0, res_size, *results;
 
 struct timeval tv1, tv2;
+
 
 
 int toID(char *str, uint32_t *N1, uint32_t *N2) {
@@ -41,6 +44,8 @@ int toID(char *str, uint32_t *N1, uint32_t *N2) {
     }
     return 1;
 }
+
+/**************************THREADS************************************/
 
 void place_to_buffer(char *query, Buffer *buffer, uint32_t line) {
 
@@ -90,6 +95,10 @@ B_Node *remove_from_buffer(Buffer *buffer) {
 
     } else return NULL;
 }
+
+/*
+ * static_graph_worker
+*/
 
 void *worker(void *ptr) {
 
@@ -162,6 +171,10 @@ void *worker(void *ptr) {
 
     pthread_exit(0);
 }
+
+/*
+ * dynamic_graph_worker
+*/
 
 void *worker_dynamic(void *ptr) {
 
@@ -256,6 +269,8 @@ void *worker_dynamic(void *ptr) {
 
     pthread_exit(0);
 }
+
+/*********************MAIN**********************/
 
 int main(int argc, char *argv[]) {
 
@@ -425,7 +440,10 @@ int main(int argc, char *argv[]) {
         cc->metricVal = METRIC;
 
         initUpdateIndex(cc);
-
+        gettimeofday(&tv2, NULL);
+        printf("%f sec: CC create\n",
+               (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+               (double) (tv2.tv_sec - tv1.tv_sec));
         // worker thread pool
         workers_t = malloc(THREAD_POOL_SIZE * sizeof(pthread_t));
 
@@ -505,11 +523,14 @@ int main(int argc, char *argv[]) {
     destroyNodeIndex(index_out, index_size_out);
     free(results);
     free(buffer);
+    free(workers_t);
 
     if (scc != NULL)
         destroyStronglyConnectedComponents(scc);
     if (grail != NULL)
         destroyGrailIndex(grail);
+    if (cc != NULL)
+        destroyCCIndex(cc);
 
     pthread_cond_destroy(&cond_nonfinished);
     pthread_cond_destroy(&cond_start);
