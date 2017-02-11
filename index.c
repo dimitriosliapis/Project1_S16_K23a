@@ -31,9 +31,9 @@ ind *createNodeIndex(uint32_t index_size) {
 
 int lookup(ind *index, uint32_t id, uint32_t index_size) {
 
-    if (id >= index_size) return NOT_EXIST; // an den to xwraei den uparxei
-    if (index[id].first != -1) return ALR_EXISTS;
-    return NOT_EXIST;
+    return ((id >= index_size) || (index[id].first == -1) ? NOT_EXIST : ALR_EXISTS); // an den to xwraei den uparxei
+/*    if (index[id].first != -1) return ALR_EXISTS;
+    return NOT_EXIST;*/
 }
 
 ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size, ptrdiff_t *available) {
@@ -100,14 +100,19 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
     list_node *current = *buffer + (*index)[id].last;
 
     if (check == 1) {
-        if ((*index)[id].neighbors == NULL)
+        if ((*index)[id].neighbors == NULL) {
             (*index)[id].neighbors = createHashtable(HT_SMALL);
-
-        if (search((*index)[id].neighbors, neighbor, HT_SMALL, version) == FOUND)
-            return ALR_CONNECTED;
-        else
             insert((*index)[id].neighbors, neighbor, HT_SMALL, version);
+        }
+        else{
+            if (search((*index)[id].neighbors, neighbor, HT_SMALL, version) == FOUND)
+                return ALR_CONNECTED;
+            else
+                insert((*index)[id].neighbors, neighbor, HT_SMALL, version);
+        }
     }
+
+    //while(current->nextListNode != -1) current = *buffer + current->nextListNode;  // an uparxei sunexizei se auton
 
     while (i < N) { // psaxnei stous geitones (max N ana komvo)
         if (current->neighbor[i] == DEFAULT) {  // alliws vriskei tin thesi tou 1ou diathesimou
@@ -117,7 +122,7 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
         }
         i++;
         if (i == N) {   // an ftasei to N paei ston epomeno komvo
-            if (current->nextListNode == -1) {  // an den uparxei ton dimiourgei
+            //if (current->nextListNode == -1) {  // an den uparxei ton dimiourgei
                 prev = current - *buffer;
                 offset = allocNewNode(&(*buffer), &(*buffer_size), *available);
                 (*available)++;
@@ -125,8 +130,8 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
                 current->nextListNode = offset;
                 current = *buffer + offset;
                 (*index)[id].last = offset;
-            } else
-                current = *buffer + current->nextListNode;  // an uparxei sunexizei se auton
+            //} else
+              //  current = *buffer + current->nextListNode;  // an uparxei sunexizei se auton
             i = 0;
         }
     }
@@ -136,8 +141,8 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
 
 ptrdiff_t getListHead(ind *index, uint32_t id) {
 
-    if (index == NULL) return -1;
-    return index[id].first;
+    return (index == NULL ? -1 : index[id].first);
+    /*return index[id].first;*/
 }
 
 int destroyNodeIndex(ind *index, uint32_t index_size) {

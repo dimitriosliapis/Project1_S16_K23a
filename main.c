@@ -279,6 +279,7 @@ int main(int argc, char *argv[]) {
     uint32_t N1, N2, scc_size = 0;
     uint32_t version = 0, line = 0;
     pthread_t *workers_t;
+    ptrdiff_t ret = 0;
 
     // orismata
     if (argc == 3) {
@@ -329,9 +330,10 @@ int main(int argc, char *argv[]) {
         if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
             insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
 
-        addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1, 0);
+        ret = addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1, 0);
 
-        addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0, 0);
+        if(ret != ALR_CONNECTED)
+            addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0, 0);
 
         fgets(str, sizeof(str), Graph);
     }
@@ -473,9 +475,10 @@ int main(int argc, char *argv[]) {
                     if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
                         insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
 
-                    addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1, line);
+                    ret = addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1, line);
 
-                    addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0, line);
+                    if(ret != ALR_CONNECTED)
+                        addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0, line);
 
                     refreshUpdateIndex(cc, N1, N2);
                 } else {

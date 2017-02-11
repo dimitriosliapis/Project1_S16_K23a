@@ -258,9 +258,10 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     if((cc1 != DEFAULT) && (cc1 == cc2)) return;// an einai sto idio cc tote den exei na kanei kati kai epistrefei
 
     if((cc1 == DEFAULT) && (cc2 == DEFAULT)) {                          // an einai kainouria cc
-        i = 0;
+        //i = 0;
         //vriskoume tin prwti thesi meta ta palia CC ( o -> old )
-        while((cc->updateIndex[i].state == 'o') && (i < cc->u_size)) i++;
+       // while((cc->updateIndex[i].state == 'o') && (i < cc->u_size)) i++;
+        i = cc->cc_max;
 
         //an xwraei
         if(i < cc->u_size) {
@@ -354,10 +355,10 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     //an oxi to vazei sto CC tou allou
     if(cc1 == DEFAULT) {
 
-        i = 0;
+        //i = 0;
         found = 0;
-        while((cc->updateIndex[i].state == 'o') && (i < cc->u_size)) i++; //vres tin kainouria thesi
-
+       // while((cc->updateIndex[i].state == 'o') && (i < cc->u_size)) i++; //vres tin kainouria thesi
+        i = cc->cc_max;
         if(i < cc->u_size) {
 
             l = i;
@@ -405,9 +406,9 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     else if(cc2 == DEFAULT){
 
         found = 0;
-        i = 0;
-        while((cc->updateIndex[i].state == 'o' ) && ( i < cc->u_size)) i++;
-
+        //i = 0;
+        //while((cc->updateIndex[i].state == 'o' ) && ( i < cc->u_size)) i++;
+        i = cc->cc_max;
         if(i < cc->u_size) {
 
             l = i;
@@ -509,7 +510,10 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
         i = 0;
 
         while(i < cc.u_size){
-            if(i == cc.u_size || cc.updateIndex[i].state == 'e') return NOT_FOUND;
+            if(i == cc.u_size || cc.updateIndex[i].state == 'e') {
+                deletestack(stack);
+                return NOT_FOUND;
+            }
             if(cc.updateIndex[i].new_nodes != NULL){
                 for(j = 0; j < cc.updateIndex[i].n_size; j++){
                     if(cc.updateIndex[i].new_nodes[j] == N1) {
@@ -525,7 +529,10 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
         i = 0;
 
         while(i < cc.u_size){
-            if(i == cc.u_size || cc.updateIndex[i].state == 'e') return NOT_FOUND;
+            if(i == cc.u_size || cc.updateIndex[i].state == 'e') {
+                deletestack(stack);
+                return NOT_FOUND;
+            }
             if(cc.updateIndex[i].new_nodes != NULL){
                 for(j = 0; j < cc.updateIndex[i].n_size; j++){
                     if(cc.updateIndex[i].new_nodes[j] == N2) {
