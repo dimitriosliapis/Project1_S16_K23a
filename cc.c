@@ -506,7 +506,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
     else cc2 = cc.cc_index[N2].id;
 
     //An kapoio ap ta 2(h kai ta 2) den uparxei sto CCIndex psaxnei mono sto new_nodes
-    if(cc1 == DEFAULT){
+    if(cc1 == DEFAULT || cc2 == DEFAULT){
         i = 0;
 
         while(i < cc.u_size){
@@ -517,8 +517,12 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
             if(cc.updateIndex[i].new_nodes != NULL){
                 for(j = 0; j < cc.updateIndex[i].n_size; j++){
                     if(cc.updateIndex[i].new_nodes[j] == DEFAULT) break;
-                    if(cc.updateIndex[i].new_nodes[j] == N1) {
+                    else if(cc.updateIndex[i].new_nodes[j] == N1) {
                         cc1 = i;
+                        break;
+                    }
+                    else if(cc.updateIndex[i].new_nodes[j] == N2) {
+                        cc2 = i;
                         break;
                     }
                 }
@@ -526,7 +530,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
             i++;
         }
     }
-    if(cc2 == DEFAULT){
+    /*if(cc2 == DEFAULT){
         i = 0;
 
         while(i < cc.u_size){
@@ -545,7 +549,8 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
             }
             i++;
         }
-    }
+    }*/
+
     //an de vrei kapoio ap ta 2 tote sigoura de sindeontai
     if(cc1 == DEFAULT || cc2 == DEFAULT) {
         deletestack(stack);
