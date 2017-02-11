@@ -516,6 +516,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
             }
             if(cc.updateIndex[i].new_nodes != NULL){
                 for(j = 0; j < cc.updateIndex[i].n_size; j++){
+                    if(cc.updateIndex[i].new_nodes[j] == DEFAULT) break;
                     if(cc.updateIndex[i].new_nodes[j] == N1) {
                         cc1 = i;
                         break;
@@ -535,6 +536,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
             }
             if(cc.updateIndex[i].new_nodes != NULL){
                 for(j = 0; j < cc.updateIndex[i].n_size; j++){
+                    if(cc.updateIndex[i].new_nodes[j] == DEFAULT) break;
                     if(cc.updateIndex[i].new_nodes[j] == N2) {
                         cc2 = i;
                         break;
