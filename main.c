@@ -1,9 +1,9 @@
 #include <sys/time.h>
 #include "grail.h"
 
-#define RES_INIT 170000000
+#define RES_INIT 17000000
 
-/****************GLOBALS***********************/
+/**************************GLOBALS**************************/
 
 list_node *buffer_in = NULL, *buffer_out = NULL;
 ind *index_in = NULL, *index_out = NULL;
@@ -45,7 +45,7 @@ int toID(char *str, uint32_t *N1, uint32_t *N2) {
     return 1;
 }
 
-/**************************THREADS************************************/
+/**************************THREADS**************************/
 
 void place_to_buffer(char *query, Buffer *buffer, uint32_t line) {
 
@@ -270,7 +270,7 @@ void *worker_dynamic(void *ptr) {
     pthread_exit(0);
 }
 
-/*********************MAIN**********************/
+/**************************MAIN**************************/
 
 int main(int argc, char *argv[]) {
 
@@ -311,9 +311,7 @@ int main(int argc, char *argv[]) {
     buffer->first = NULL;
     buffer->last = NULL;
 
-
-
-        // mutexes and condition variables initialization
+    // mutexes and condition variables initialization
     pthread_mutex_init(&mtx, 0);
     pthread_mutex_init(&id_mtx, 0);
     pthread_mutex_init(&cc_mtx, 0);
@@ -344,14 +342,6 @@ int main(int argc, char *argv[]) {
 
     fclose(Graph);
 
-    // free unnecessary stuff
-    /*for (i = 0; i < index_size_in; i++) {
-        if (lookup(index_in, i, index_size_in) == ALR_EXISTS) {
-            if (index_in[i].neighbors != NULL)
-                delete(index_in[i].neighbors, HT_SMALL);
-            index_in[i].neighbors = NULL;
-        }
-    }*/
     for (i = 0; i < index_size_out; i++) {
         if (lookup(index_out, i, index_size_out) == ALR_EXISTS) {
             if (index_out[i].neighbors != NULL)
@@ -365,8 +355,8 @@ int main(int argc, char *argv[]) {
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
 
-    //fgets(str, sizeof(str), Queries);
     strcpy(str, which);
+
     // static graph creation
     if (strncmp(str, "STATIC", 6) == 0) {
 
@@ -408,9 +398,9 @@ int main(int argc, char *argv[]) {
             while (finished < line)
                 pthread_cond_wait(&cond_nonfinished, &mtx);
 
-            for (i = print_start; i < line; i++)
-                printf("%d\n", results[i]);
-            print_start = line;
+//            for (i = print_start; i < line; i++)
+//                printf("%d\n", results[i]);
+//            print_start = line;
 
             while (str[0] != 'F') {
 
@@ -513,8 +503,8 @@ int main(int argc, char *argv[]) {
 
     pthread_mutex_unlock(&mtx);
 
-    for (i = print_start; i < line; i++)
-        printf("%d\n", results[i]);
+//    for (i = print_start; i < line; i++)
+//        printf("%d\n", results[i]);
 
     for (i = 0; i < THREAD_POOL_SIZE; i++)
         pthread_join(workers_t[i], 0);

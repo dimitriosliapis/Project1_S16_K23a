@@ -7,7 +7,6 @@ extern GrailIndex *grail;
 
 Queue *createQueue() {
 
-    int i = 0;
     Queue *queue = NULL;
     queue = malloc(sizeof(Queue));
 
@@ -32,15 +31,14 @@ int enq(Queue *queue, uint32_t id) {
 
     if (queue->count >= queue->size) {
         uint32_t *temp = malloc(queue->size*sizeof(uint32_t));
-        int i = 0;
-        for(i = 0 ; i < queue->size ; i++) {
-            temp[i] = queue->ids[queue->first];
-            queue->first = (queue->first + 1) % queue->size;
-        }
+
+        memcpy(temp, queue->ids + (queue->first - 1)*sizeof(uint32_t), (queue->size - queue->first)*sizeof(uint32_t));
+        memcpy(temp + (queue->size - queue->first)*sizeof(uint32_t), queue->ids, queue->first*sizeof(uint32_t));
+
         queue->ids = realloc(queue->ids, queue->size * 2 * sizeof(uint32_t));
-        for(i = 0 ; i < queue->size ; i++) {
-            queue->ids[i] = temp[i];
-        }
+
+        memcpy(queue->ids, temp, queue->size*sizeof(uint32_t));
+
         free(temp);
         queue->first = 0;
         queue->last = queue->size;
@@ -134,9 +132,9 @@ int bBFS(ind *index_in,
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if(curr_scc < 0){
+                            if (curr_scc < 0) {   // periptwsh dynamikou grafou
 
-                                if(neighbors->edgeProperty[i] <= version) {
+                                if (neighbors->edgeProperty[i] <= version) {
 
                                     if (index_out[successor].visited[thread_id] !=
                                         version) {  // an den ton exei epispeftei o idios
@@ -155,8 +153,8 @@ int bBFS(ind *index_in,
                                         }
                                     }
                                 }
-                            }
-                            else {
+                            } else {  // periptwsh statikou grafou
+
                                 if (curr_scc != DEFAULT) {  // periptwsh anazhthshs sto idio scc
 
                                     if (scc->id_belongs_to_component[successor] == curr_scc) {
@@ -243,14 +241,17 @@ int bBFS(ind *index_in,
 
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
-                            if(curr_scc < 0){
 
-                                if(neighbors->edgeProperty[i] <= version) {
+                            if (curr_scc < 0) {   // periptwsh dynamikou grafou
 
-                                    if (index_in[successor].visited[thread_id] != version) {   // an den ton exei episkeptei o idios
+                                if (neighbors->edgeProperty[i] <= version) {
+
+                                    if (index_in[successor].visited[thread_id] !=
+                                        version) {   // an den ton exei episkeptei o idios
                                         index_in[successor].visited[thread_id] = version;  // ton episkeptetai
 
-                                        if (index_out[successor].visited[thread_id] == version) {  // goal afou ton exei episkeptei o allos
+                                        if (index_out[successor].visited[thread_id] ==
+                                            version) {  // goal afou ton exei episkeptei o allos
 
                                             restartQueue(frontierB);
                                             restartQueue(frontierF);
@@ -264,8 +265,8 @@ int bBFS(ind *index_in,
 
                                     }
                                 }
-                            }
-                            else {
+                            } else {      // periptwsh statikou grafou
+
                                 if (curr_scc != DEFAULT) {  // periptwsh anazhthshs sto idio scc
 
                                     if (scc->id_belongs_to_component[successor] == curr_scc) {

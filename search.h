@@ -3,7 +3,7 @@
 
 #include "index.h"
 
-#define QUEUE_SIZE 4096
+#define QUEUE_SIZE 16384
 
 typedef struct queue_t {
     int size;
