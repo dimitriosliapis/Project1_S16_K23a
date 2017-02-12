@@ -5,7 +5,7 @@
 
 #define INIT_UNODE_SIZE 32
 #define INIT_NEWNODE_SIZE 8
-#define METRIC 1250
+#define METRIC 100000
 #define STACK_ARRAY_SIZE 2048
 
 typedef struct stack {

@@ -20,12 +20,12 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
     grail->ind_size_out = scc->components_count;
 
     grail->hyper_buffer_out = createBuffer(grail->buf_size_out);
-    grail->hyper_index_out = createNodeIndex(grail->ind_size_out);
+    grail->hyper_index_out = createNodeIndex(grail->ind_size_out, 1);
 
     //eisagwgi olwn twn SCC sto hyper_index
     for (i = 0; i < scc->components_count; i++) {
         insertNode(&grail->hyper_index_out, i, &grail->hyper_buffer_out, &scc->components_count, &grail->buf_size_out,
-                   &available_out);
+                   &available_out, 1);
     }
 
     scc_con = malloc(scc->components_count * sizeof(int));
@@ -88,8 +88,8 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
             //an den exei paidia tote v.rank = rank, v.min_rank = rank kai pop apo tin stoiva
             if (grail->hyper_index_out[v].num_of_children == 0) {
                 rank++;
-                grail->hyper_index_out[v].min_rank = rank;
-                grail->hyper_index_out[v].rank = rank;
+                grail->hyper_index_out[v].s_data->min_rank = rank;
+                grail->hyper_index_out[v].s_data->rank = rank;
                 popfromstack(dfs_stack);
                 grail->hyper_index_out[v].visited[0] = version;
             }
@@ -115,11 +115,11 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                     } else { //alliws an einai visited
 
                         // tin prwti fora pou tha ksanaperasei tha auksithei o metritis all_children
-                        grail->hyper_index_out[v].all_children_in_scc++;
+                        grail->hyper_index_out[v].s_data->all_children_in_scc++;
 
                         //pairnei to min_rank apo kathe paidi pou exei termatisei
-                        if (grail->hyper_index_out[v].min_rank > grail->hyper_index_out[w].min_rank)
-                            grail->hyper_index_out[v].min_rank = grail->hyper_index_out[w].min_rank;
+                        if (grail->hyper_index_out[v].s_data->min_rank > grail->hyper_index_out[w].s_data->min_rank)
+                            grail->hyper_index_out[v].s_data->min_rank = grail->hyper_index_out[w].s_data->min_rank;
                     }
                     k++;
                     if (k == N) {
@@ -131,9 +131,9 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                 }
                 //an exoume episkeutei ola ta paidia tote ftianoume kai to rank tou patera kai ton kanoume pop
                 if (grail->hyper_index_out[v].num_of_children != 0 &&
-                    grail->hyper_index_out[v].all_children_in_scc == grail->hyper_index_out[v].num_of_children) {
+                    grail->hyper_index_out[v].s_data->all_children_in_scc == grail->hyper_index_out[v].num_of_children) {
                     rank++;
-                    grail->hyper_index_out[v].rank = rank;
+                    grail->hyper_index_out[v].s_data->rank = rank;
                     grail->hyper_index_out[v].visited[0] = version;
                     popfromstack(dfs_stack);
                 }
@@ -163,8 +163,8 @@ int isReachableGrailIndex(GrailIndex *index, uint32_t source_node, uint32_t targ
         return NO;
     if (scc_source == scc_target)
         return YES;
-    if ((index->hyper_index_out[scc_source].min_rank <= index->hyper_index_out[scc_target].min_rank) &&
-        (index->hyper_index_out[scc_source].rank > index->hyper_index_out[scc_target].rank))
+    if ((index->hyper_index_out[scc_source].s_data->min_rank <= index->hyper_index_out[scc_target].s_data->min_rank) &&
+        (index->hyper_index_out[scc_source].s_data->rank > index->hyper_index_out[scc_target].s_data->rank))
         return MAYBE;
     return NO;
 }
@@ -173,7 +173,7 @@ int isReachableGrailIndex(GrailIndex *index, uint32_t source_node, uint32_t targ
 void destroyGrailIndex(GrailIndex *index) {
 
     destroyBuffer(index->hyper_buffer_out);
-    destroyNodeIndex(index->hyper_index_out, index->ind_size_out);
+    destroyNodeIndex(index->hyper_index_out, index->ind_size_out, 2);
 
     free(index);
 }

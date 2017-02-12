@@ -1,29 +1,48 @@
 #include <stdint.h>
 #include "index.h"
 
-ind *createNodeIndex(uint32_t index_size) {
+ind *createNodeIndex(uint32_t index_size, int s) {
 
     ind *index = NULL;
     int i = 0, j = 0;
 
     index = malloc(sizeof(ind) * index_size);
-    for (i = 0; i < index_size; i++) {
-        index[i].first = -1;
-        index[i].last = -1;
-        for (j = 0; j < THREAD_POOL_SIZE; j++)
-            index[i].visited[j] = -1;
-        index[i].lowlink = DEFAULT;
-        index[i].index = DEFAULT;
-        index[i].neighbors = NULL;
-        index[i].all_children_in_scc = 0;
-        index[i].rank = DEFAULT;
-        index[i].min_rank = DEFAULT;
-        index[i].num_of_children = 0;
-        index[i].onStack = 0;
-        index[i].children_in_scc = 0;
-        index[i].curr_neighbors = NULL;
-        index[i].next_child = NULL;
-        index[i].n = 0;
+
+    if(s){
+        for (i = 0; i < index_size; i++) {
+            index[i].first = -1;
+            index[i].last = -1;
+            for (j = 0; j < THREAD_POOL_SIZE; j++)
+                index[i].visited[j] = -1;
+
+            index[i].neighbors = NULL;
+
+            index[i].num_of_children = 0;
+            index[i].s_data = malloc(sizeof(static_data));
+            index[i].s_data->lowlink = DEFAULT;
+            index[i].s_data->index = DEFAULT;
+            index[i].s_data->all_children_in_scc = 0;
+            index[i].s_data->rank = DEFAULT;
+            index[i].s_data->min_rank = DEFAULT;
+            index[i].s_data->onStack = 0;
+            index[i].s_data->children_in_scc = 0;
+            index[i].s_data->curr_neighbors = NULL;
+            index[i].s_data->next_child = NULL;
+            index[i].s_data->n = 0;
+        }
+    }
+    else{
+        for (i = 0; i < index_size; i++) {
+            index[i].first = -1;
+            index[i].last = -1;
+            for (j = 0; j < THREAD_POOL_SIZE; j++)
+                index[i].visited[j] = -1;
+
+            index[i].neighbors = NULL;
+
+            index[i].num_of_children = 0;
+
+        }
     }
 
     return index;
@@ -36,7 +55,7 @@ int lookup(ind *index, uint32_t id, uint32_t index_size) {
     return NOT_EXIST;*/
 }
 
-ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size, ptrdiff_t *available) {
+ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size, ptrdiff_t *available, int s) {
 
     ptrdiff_t offset = 0;
 
@@ -46,7 +65,7 @@ ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *ind
     if (offset == -1) return ALLOC_FAIL;
 
     if (id >= *index_size) {
-        reallocNodeIndex(&(*index), id, &(*index_size));    // an den ton xwraei to index realloc
+        reallocNodeIndex(&(*index), id, &(*index_size), s);    // an den ton xwraei to index realloc
     }
 
     (*index)[id].first = offset;    // tuxaia seira sto buffer etsi
@@ -57,7 +76,7 @@ ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *ind
     return offset;
 }
 
-int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
+int reallocNodeIndex(ind **index, int id, uint32_t *index_size, int s) {
 
     uint32_t realloc_size = *index_size;
     uint32_t i = 0, j = 0;
@@ -67,24 +86,39 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size) {
     new = realloc(*index, realloc_size * sizeof(ind));
     *index = new;
 
-    for (i = *index_size; i < realloc_size; i++) {  // arxikopoihsh twn newn index nodes
-        (*index)[i].first = -1;
-        (*index)[i].last = -1;
-        for (j = 0; j < THREAD_POOL_SIZE; j++)
-            (*index)[i].visited[j] = -1;
-        (*index)[i].lowlink = DEFAULT;
-        (*index)[i].index = DEFAULT;
-        (*index)[i].neighbors = NULL;
-        (*index)[i].all_children_in_scc = 0;
-        (*index)[i].rank = DEFAULT;
-        (*index)[i].min_rank = DEFAULT;
-        (*index)[i].num_of_children = 0;
-        (*index)[i].onStack = 0;
-        (*index)[i].children_in_scc = 0;
-        (*index)[i].curr_neighbors = NULL;
-        (*index)[i].next_child = NULL;
-        (*index)[i].n = 0;
 
+    if(s){
+        for (i = *index_size; i < realloc_size; i++) {
+            (*index)[i].first = -1;
+            (*index)[i].last = -1;
+            for (j = 0; j < THREAD_POOL_SIZE; j++)
+                (*index)[i].visited[j] = -1;
+            (*index)[i].neighbors = NULL;
+            (*index)[i].num_of_children = 0;
+
+            (*index)[i].s_data = malloc(sizeof(static_data));
+            (*index)[i].s_data->lowlink = DEFAULT;
+            (*index)[i].s_data->index = DEFAULT;
+            (*index)[i].s_data->all_children_in_scc = 0;
+            (*index)[i].s_data->rank = DEFAULT;
+            (*index)[i].s_data->min_rank = DEFAULT;
+            (*index)[i].s_data->onStack = 0;
+            (*index)[i].s_data->children_in_scc = 0;
+            (*index)[i].s_data->curr_neighbors = NULL;
+            (*index)[i].s_data->next_child = NULL;
+            (*index)[i].s_data->n = 0;
+        }
+    }
+    else{
+        for (i = *index_size; i < realloc_size; i++) {  // arxikopoihsh twn newn index nodes
+            (*index)[i].first = -1;
+            (*index)[i].last = -1;
+            for (j = 0; j < THREAD_POOL_SIZE; j++)
+                (*index)[i].visited[j] = -1;
+            (*index)[i].neighbors = NULL;
+            (*index)[i].num_of_children = 0;
+
+        }
     }
     *index_size = realloc_size;
     return OK_SUCCESS;
@@ -145,15 +179,29 @@ ptrdiff_t getListHead(ind *index, uint32_t id) {
     /*return index[id].first;*/
 }
 
-int destroyNodeIndex(ind *index, uint32_t index_size) {
+int destroyNodeIndex(ind *index, uint32_t index_size, int s) {
 
     int i = 0;
 
     if (index == NULL) return IND_EMPTY;
 
-    for (i = 0; i < index_size; i++)
-        delete(index[i].neighbors, HT_SMALL);
 
+    if(s == 1){
+        for (i = 0; i < index_size; i++) {
+            delete(index[i].neighbors, HT_SMALL);
+            free(index[i].s_data);
+        }
+    }
+    else if(s == 0){
+        for (i = 0; i < index_size; i++) {
+            delete(index[i].neighbors, HT_SMALL);
+        }
+    }
+    else if(s == 2){
+        for (i = 0; i < index_size; i++) {
+            free(index[i].s_data);
+        }
+    }
     free(index);
 
     return OK_SUCCESS;

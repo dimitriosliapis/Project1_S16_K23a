@@ -1,7 +1,7 @@
 #include <sys/time.h>
 #include "grail.h"
 
-#define RES_INIT 60000
+#define RES_INIT 170000000
 
 /****************GLOBALS***********************/
 
@@ -280,6 +280,8 @@ int main(int argc, char *argv[]) {
     uint32_t version = 0, line = 0;
     pthread_t *workers_t;
     ptrdiff_t ret = 0;
+    char str[64], which[64];
+    int stat = 0;
 
     // orismata
     if (argc == 3) {
@@ -289,12 +291,14 @@ int main(int argc, char *argv[]) {
         printf("Datasets missing");
         return 0;
     }
+    fgets(which, sizeof(which), Queries);
+    if (strncmp(which, "STATIC", 6) == 0) stat = 1;
 
     // zeugh indexes kai buffers
     buffer_in = createBuffer(buffer_size_in);
-    index_in = createNodeIndex(index_size_in);
+    index_in = createNodeIndex(index_size_in, 0);
     buffer_out = createBuffer(buffer_size_out);
-    index_out = createNodeIndex(index_size_out);
+    index_out = createNodeIndex(index_size_out, stat);
 
     // results array
     res_size = RES_INIT;
@@ -307,7 +311,9 @@ int main(int argc, char *argv[]) {
     buffer->first = NULL;
     buffer->last = NULL;
 
-    // mutexes and condition variables initialization
+
+
+        // mutexes and condition variables initialization
     pthread_mutex_init(&mtx, 0);
     pthread_mutex_init(&id_mtx, 0);
     pthread_mutex_init(&cc_mtx, 0);
@@ -317,18 +323,16 @@ int main(int argc, char *argv[]) {
     // time
     gettimeofday(&tv1, NULL);
 
-    char str[64];
     fgets(str, sizeof(str), Graph);
-
     while (str[0] != 'S') {
 
         toID(str, &N1, &N2);
 
         if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
-            insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out);
+            insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out, stat);
 
         if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
-            insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
+            insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in, 0);
 
         ret = addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1, 0);
 
@@ -341,13 +345,13 @@ int main(int argc, char *argv[]) {
     fclose(Graph);
 
     // free unnecessary stuff
-    for (i = 0; i < index_size_in; i++) {
+    /*for (i = 0; i < index_size_in; i++) {
         if (lookup(index_in, i, index_size_in) == ALR_EXISTS) {
             if (index_in[i].neighbors != NULL)
                 delete(index_in[i].neighbors, HT_SMALL);
             index_in[i].neighbors = NULL;
         }
-    }
+    }*/
     for (i = 0; i < index_size_out; i++) {
         if (lookup(index_out, i, index_size_out) == ALR_EXISTS) {
             if (index_out[i].neighbors != NULL)
@@ -361,8 +365,8 @@ int main(int argc, char *argv[]) {
            (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
            (double) (tv2.tv_sec - tv1.tv_sec));
 
-    fgets(str, sizeof(str), Queries);
-
+    //fgets(str, sizeof(str), Queries);
+    strcpy(str, which);
     // static graph creation
     if (strncmp(str, "STATIC", 6) == 0) {
 
@@ -470,10 +474,10 @@ int main(int argc, char *argv[]) {
                     toID(str, &N1, &N2);
 
                     if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
-                        insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out);
+                        insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out, stat);
 
                     if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
-                        insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in);
+                        insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in, 0);
 
                     ret = addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1, line);
 
@@ -522,8 +526,8 @@ int main(int argc, char *argv[]) {
 
     destroyBuffer(buffer_in);
     destroyBuffer(buffer_out);
-    destroyNodeIndex(index_in, index_size_in);
-    destroyNodeIndex(index_out, index_size_out);
+    destroyNodeIndex(index_in, index_size_in, -1);
+    destroyNodeIndex(index_out, index_size_out, stat);
     free(results);
     free(buffer);
     free(workers_t);
