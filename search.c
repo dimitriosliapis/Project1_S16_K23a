@@ -345,3 +345,4 @@ int bBFS(ind *index_in,
 
     return -1;  // an den vrethei monopati epistrefei -1
 }
+
