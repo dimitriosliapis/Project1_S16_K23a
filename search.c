@@ -31,7 +31,19 @@ int isEmpty(Queue *queue) {
 int enq(Queue *queue, uint32_t id) {
 
     if (queue->count >= queue->size) {
+        uint32_t *temp = malloc(queue->size*sizeof(uint32_t));
+        int i = 0;
+        for(i = 0 ; i < queue->size ; i++) {
+            temp[i] = queue->ids[queue->first];
+            queue->first = (queue->first + 1) % queue->size;
+        }
         queue->ids = realloc(queue->ids, queue->size * 2 * sizeof(uint32_t));
+        for(i = 0 ; i < queue->size ; i++) {
+            queue->ids[i] = temp[i];
+        }
+        free(temp);
+        queue->first = 0;
+        queue->last = queue->size;
         queue->size *= 2;
     }
 
