@@ -11,7 +11,6 @@
 typedef struct stack {
     uint32_t *stack_array;
     int size;
-    int first;
     int last;
     int count;
 } Stack_t;

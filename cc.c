@@ -11,7 +11,6 @@ Stack_t *createStack() {
         stack->size = STACK_ARRAY_SIZE;
         stack->stack_array = malloc(STACK_ARRAY_SIZE*sizeof(uint32_t));
         for(i = 0 ; i < STACK_ARRAY_SIZE ; i++) stack->stack_array[i] = DEFAULT;
-        stack->first = 0;
         stack->last = -1;
         stack->count = 0;
         return stack;
