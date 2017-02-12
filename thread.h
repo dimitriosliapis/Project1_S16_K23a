@@ -3,7 +3,7 @@
 
 #include <pthread.h>
 
-#define THREAD_POOL_SIZE 4
+#define THREAD_POOL_SIZE 8
 
 pthread_mutex_t mtx;
 pthread_mutex_t id_mtx;

@@ -59,11 +59,11 @@ SCC *tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
 
 
     //o komvos pou episkeftetai auti tin stigmi
-    index_out[v].index = *index;
-    index_out[v].lowlink = *index;
+    index_out[v].s_data->index = *index;
+    index_out[v].s_data->lowlink = *index;
     (*index)++;
     pushinstack(scc_stack, v);
-    index_out[v].onStack = 1;//einai sto scc stack
+    index_out[v].s_data->onStack = 1;//einai sto scc stack
 
     //an exei paidia
     if (index_out[v].num_of_children != 0) {
@@ -82,11 +82,11 @@ SCC *tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
             //an to paidi tou den einai visited
             if (index_out[w].visited[0] != version) {
                 *scc = tarjanRecursive(scc, index_out, buffer_out, num_nodes, version, w, index, scc_stack);
-                if (index_out[v].lowlink > index_out[w].lowlink)
-                    index_out[v].lowlink = index_out[w].lowlink;
-            } else if (index_out[w].onStack) { // alliws an einai sto scc stack
-                if (index_out[v].lowlink > index_out[w].index)
-                    index_out[v].lowlink = index_out[w].index;
+                if (index_out[v].s_data->lowlink > index_out[w].s_data->lowlink)
+                    index_out[v].s_data->lowlink = index_out[w].s_data->lowlink;
+            } else if (index_out[w].s_data->onStack) { // alliws an einai sto scc stack
+                if (index_out[v].s_data->lowlink > index_out[w].s_data->index)
+                    index_out[v].s_data->lowlink = index_out[w].s_data->index;
             }
 
             k++;
@@ -97,7 +97,7 @@ SCC *tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
         }
     }
 
-    if (index_out[v].lowlink == index_out[v].index) {
+    if (index_out[v].s_data->lowlink == index_out[v].s_data->index) {
         scc_counter = (*scc)->components_count;
         (*scc)->components[scc_counter].included_nodes_count = 0;
         (*scc)->components[scc_counter].node_array_size = NODE_IDS_SIZE;
@@ -110,7 +110,7 @@ SCC *tarjanRecursive(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t 
         //ftiakse to SCC
         do {
             w = popfromstack(scc_stack);
-            index_out[w].onStack = 0;
+            index_out[w].s_data->onStack = 0;
 
             (*scc)->components[scc_counter].included_node_ids[a] = w;
 
@@ -187,35 +187,35 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
     ptrdiff_t offset_out;
     list_node *neighbors_out;
 
-    index_out[v].index = *index;
-    index_out[v].lowlink = *index;
-    index_out[v].children_in_scc = 0;
+    index_out[v].s_data->index = *index;
+    index_out[v].s_data->lowlink = *index;
+    index_out[v].s_data->children_in_scc = 0;
     offset_out = getListHead(index_out, v);
-    index_out[v].curr_neighbors = buffer_out + offset_out;
-    index_out[v].next_child = index_out[v].curr_neighbors->neighbor;
+    index_out[v].s_data->curr_neighbors = buffer_out + offset_out;
+    index_out[v].s_data->next_child = index_out[v].s_data->curr_neighbors->neighbor;
     last = v;
     pushinstack(scc_stack, v);
-    index_out[v].onStack = 1;
+    index_out[v].s_data->onStack = 1;
 
     (*index)++;
 
     while (1) {
 
-        if (index_out[last].children_in_scc < index_out[last].num_of_children) {
+        if (index_out[last].s_data->children_in_scc < index_out[last].num_of_children) {
 
-            w = *index_out[last].next_child;
-            index_out[last].children_in_scc++;
+            w = *index_out[last].s_data->next_child;
+            index_out[last].s_data->children_in_scc++;
 
-            index_out[last].n++;
-            if (index_out[last].n == N) {
-                if (index_out[last].curr_neighbors->nextListNode != -1) {
-                    index_out[last].curr_neighbors = buffer_out + index_out[last].curr_neighbors->nextListNode;
-                    index_out[last].next_child = index_out[last].curr_neighbors->neighbor;
-                    index_out[last].n = 0;
+            index_out[last].s_data->n++;
+            if (index_out[last].s_data->n == N) {
+                if (index_out[last].s_data->curr_neighbors->nextListNode != -1) {
+                    index_out[last].s_data->curr_neighbors = buffer_out + index_out[last].s_data->curr_neighbors->nextListNode;
+                    index_out[last].s_data->next_child = index_out[last].s_data->curr_neighbors->neighbor;
+                    index_out[last].s_data->n = 0;
                 } else
-                    index_out[last].next_child = NULL;
+                    index_out[last].s_data->next_child = NULL;
             } else
-                index_out[last].next_child++;
+                index_out[last].s_data->next_child++;
 
             if (w == DEFAULT) break;
 
@@ -248,30 +248,30 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
 
             } else {
 
-                if (index_out[w].index == DEFAULT) {    // If w is unvisited
+                if (index_out[w].s_data->index == DEFAULT) {    // If w is unvisited
 
                     caller[w] = last;
-                    index_out[w].index = *index;
-                    index_out[w].lowlink = *index;
-                    index_out[w].children_in_scc = 0;
+                    index_out[w].s_data->index = *index;
+                    index_out[w].s_data->lowlink = *index;
+                    index_out[w].s_data->children_in_scc = 0;
                     offset_out = getListHead(index_out, w);
-                    index_out[w].curr_neighbors = buffer_out + offset_out;
-                    index_out[w].next_child = index_out[w].curr_neighbors->neighbor;
+                    index_out[w].s_data->curr_neighbors = buffer_out + offset_out;
+                    index_out[w].s_data->next_child = index_out[w].s_data->curr_neighbors->neighbor;
                     (*index)++;
 
-                    if (index_out[w].onStack == 0) {
+                    if (index_out[w].s_data->onStack == 0) {
                         pushinstack(scc_stack, w);
-                        index_out[w].onStack = 1;
+                        index_out[w].s_data->onStack = 1;
                         last = w;
                     }
-                } else if (index_out[w].onStack == 1) {
-                    if (index_out[last].lowlink > index_out[w].index)
-                        index_out[last].lowlink = index_out[w].index;
+                } else if (index_out[w].s_data->onStack == 1) {
+                    if (index_out[last].s_data->lowlink > index_out[w].s_data->index)
+                        index_out[last].s_data->lowlink = index_out[w].s_data->index;
                 }
             }
 
         } else {
-            if (index_out[last].lowlink == index_out[last].index) {
+            if (index_out[last].s_data->lowlink == index_out[last].s_data->index) {
 
                 scc_counter = (*scc)->components_count;
 
@@ -294,7 +294,7 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
                 do {    // Build SCC
 
                     w = popfromstack(scc_stack);
-                    index_out[w].onStack = 0;
+                    index_out[w].s_data->onStack = 0;
 
                     if (i == ((*scc)->components[scc_counter].node_array_size)) {
                         realloc_node_size = 2 * (*scc)->components[scc_counter].node_array_size;
@@ -318,8 +318,8 @@ void tarjan_iterative(SCC **scc, ind *index_out, list_node *buffer_out, uint32_t
             new_last = caller[last];
 
             if (new_last != DEFAULT) {  // Go up one recursive call
-                if (index_out[new_last].lowlink > index_out[last].lowlink)
-                    index_out[new_last].lowlink = index_out[last].lowlink;
+                if (index_out[new_last].s_data->lowlink > index_out[last].s_data->lowlink)
+                    index_out[new_last].s_data->lowlink = index_out[last].s_data->lowlink;
                 last = new_last;
             } else  // We've seen all the nodes
                 break;
