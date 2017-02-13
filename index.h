@@ -6,6 +6,7 @@
 #include "thread.h"
 
 #define IND_SIZE 512
+#define NUM_GRAIL 5
 
 #define IND_EMPTY -1
 #define ALLOC_FAIL -2
@@ -18,7 +19,7 @@ typedef struct static_data_t{
     uint32_t index;
     uint32_t *rank;
     uint32_t *min_rank;
-    uint32_t all_children_in_scc;
+    uint32_t all_children_in_scc[NUM_GRAIL];
     uint32_t children_in_scc;
     list_node *curr_neighbors;
     uint32_t *next_child;

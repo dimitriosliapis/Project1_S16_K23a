@@ -139,7 +139,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                         } else { //alliws an einai visited
 
                             // tin prwti fora pou tha ksanaperasei tha auksithei o metritis all_children
-                            grail->hyper_index_out[v].s_data->all_children_in_scc++;
+                            grail->hyper_index_out[v].s_data->all_children_in_scc[j]++;
 
                             //pairnei to min_rank apo kathe paidi pou exei termatisei
                             if (grail->hyper_index_out[v].s_data->min_rank[j] > grail->hyper_index_out[w].s_data->min_rank[j])
@@ -155,7 +155,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                     }
                     //an exoume episkeutei ola ta paidia tote ftianoume kai to rank tou patera kai ton kanoume pop
                     if (grail->hyper_index_out[v].num_of_children != 0 &&
-                        grail->hyper_index_out[v].s_data->all_children_in_scc ==
+                        grail->hyper_index_out[v].s_data->all_children_in_scc[j] ==
                         grail->hyper_index_out[v].num_of_children) {
                         rank++;
                         grail->hyper_index_out[v].s_data->rank[j] = rank;
@@ -167,6 +167,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
         }
 
         shuffle(array, grail->ind_size_out);
+        version++;
     }
 
     deletestack(dfs_stack);

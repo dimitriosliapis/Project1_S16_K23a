@@ -5,7 +5,7 @@
 ind *createNodeIndex(uint32_t index_size, int s) {
 
     ind *index = NULL;
-    int i = 0, j = 0;
+    int i = 0, j = 0, k = 0;
 
     index = malloc(sizeof(ind) * index_size);
 
@@ -22,7 +22,7 @@ ind *createNodeIndex(uint32_t index_size, int s) {
             index[i].s_data = malloc(sizeof(static_data));
             index[i].s_data->lowlink = DEFAULT;
             index[i].s_data->index = DEFAULT;
-            index[i].s_data->all_children_in_scc = 0;
+            for(k = 0; k < NUM_GRAIL; k++) index[i].s_data->all_children_in_scc[k] = 0;
             index[i].s_data->rank = malloc(NUM_GRAIL * sizeof(uint32_t));
             index[i].s_data->min_rank = malloc(NUM_GRAIL * sizeof(uint32_t));
             index[i].s_data->onStack = 0;
@@ -78,7 +78,7 @@ ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *ind
 int reallocNodeIndex(ind **index, int id, uint32_t *index_size, int s) {
 
     uint32_t realloc_size = *index_size;
-    uint32_t i = 0, j = 0;
+    uint32_t i = 0, j = 0, k = 0;
     ind *new = NULL;
 
     while (id >= realloc_size) realloc_size = realloc_size * 2; // diplasiasmos tou size mexri na xwraei to id
@@ -98,9 +98,9 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size, int s) {
             (*index)[i].s_data = malloc(sizeof(static_data));
             (*index)[i].s_data->lowlink = DEFAULT;
             (*index)[i].s_data->index = DEFAULT;
-            (*index)[i].s_data->all_children_in_scc = 0;
-            (*index)[i].s_data->rank = malloc(NUM_GRAIL * sizeof(uint32_t));;
-            (*index)[i].s_data->min_rank = malloc(NUM_GRAIL * sizeof(uint32_t));;
+            for(k = 0; k < NUM_GRAIL; k++) (*index)[i].s_data->all_children_in_scc[k] = 0;
+            (*index)[i].s_data->rank = malloc(NUM_GRAIL * sizeof(uint32_t));
+            (*index)[i].s_data->min_rank = malloc(NUM_GRAIL * sizeof(uint32_t));
             (*index)[i].s_data->onStack = 0;
             (*index)[i].s_data->children_in_scc = 0;
             (*index)[i].s_data->curr_neighbors = NULL;

@@ -3,7 +3,6 @@
 
 #include "scc.h"
 
-#define NUM_GRAIL 5
 
 #define MAYBE 45
 #define NO 46
