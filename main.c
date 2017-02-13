@@ -1,25 +1,42 @@
 #include <sys/time.h>
 #include "grail.h"
 
-#define RES_INIT 17000000
+#define RES_INIT 512
 
-/**************************GLOBALS**************************/
+/************************** GLOBALS **************************/
 
-list_node *buffer_in = NULL, *buffer_out = NULL;
-ind *index_in = NULL, *index_out = NULL;
-uint32_t buffer_size_in = BUFF_SIZE, buffer_size_out = BUFF_SIZE, index_size_in = IND_SIZE, index_size_out = IND_SIZE;
-ptrdiff_t available_in = 0, available_out = 0;
+list_node *buffer_in = NULL,
+        *buffer_out = NULL;
+
+ind *index_in = NULL,
+        *index_out = NULL;
+
+uint32_t buffer_size_in = BUFF_SIZE,
+        buffer_size_out = BUFF_SIZE,
+        index_size_in = IND_SIZE,
+        index_size_out = IND_SIZE;
+
+ptrdiff_t available_in = 0,
+        available_out = 0;
+
 SCC *scc = NULL;
+
 Buffer *buffer = NULL;
+
 GrailIndex *grail = NULL;
 
 CC *cc = NULL;
+
 uint32_t cc_size = 0;
 
-int start = 0, finished = 0, id = 1, end = 0, res_size, *results;
+int start = 0,
+        finished = 0,
+        id = 1,
+        end = 0,
+        res_size,
+        *results;
 
 struct timeval tv1, tv2;
-
 
 
 int toID(char *str, uint32_t *N1, uint32_t *N2) {
@@ -45,7 +62,7 @@ int toID(char *str, uint32_t *N1, uint32_t *N2) {
     return 1;
 }
 
-/**************************THREADS**************************/
+/************************** THREADS **************************/
 
 void place_to_buffer(char *query, Buffer *buffer, uint32_t line) {
 
@@ -57,8 +74,6 @@ void place_to_buffer(char *query, Buffer *buffer, uint32_t line) {
     strcpy(new->query, query);
     new->next = NULL;
     new->line = line;
-
-    // printf("INSERTING QUERY: %s\n", query);
 
     if (buffer->first == NULL) {
         buffer->first = new;
@@ -89,16 +104,12 @@ B_Node *remove_from_buffer(Buffer *buffer) {
         buffer->first = tmp->next;
         free(tmp);
 
-        //printf("REMOVING QUERY: %s\n", node->query);
-
         return node;
 
     } else return NULL;
 }
 
-/*
- * static_graph_worker
-*/
+/************************* static_graph_worker *************************/
 
 void *worker(void *ptr) {
 
@@ -131,6 +142,7 @@ void *worker(void *ptr) {
             pthread_mutex_unlock(&mtx);
             if (end) break;
             continue;
+
         } else {
 
             line = job->line;
@@ -147,13 +159,16 @@ void *worker(void *ptr) {
                 local_version++;
                 steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
                              local_version, thread_id, scc_source);
+
                 results[line] = steps;
 
             } else if (isReachableGrailIndex(grail, N1, N2, scc) == MAYBE) {    // MAYBE
                 local_version++;
                 steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
                              local_version, thread_id, DEFAULT);
+
                 results[line] = steps;
+
             } else  // NO
                 results[line] = -1;
 
@@ -172,9 +187,7 @@ void *worker(void *ptr) {
     pthread_exit(0);
 }
 
-/*
- * dynamic_graph_worker
-*/
+/************************* dynamic_graph_worker *************************/
 
 void *worker_dynamic(void *ptr) {
 
@@ -270,7 +283,7 @@ void *worker_dynamic(void *ptr) {
     pthread_exit(0);
 }
 
-/**************************MAIN**************************/
+/************************** MAIN **************************/
 
 int main(int argc, char *argv[]) {
 
@@ -334,7 +347,7 @@ int main(int argc, char *argv[]) {
 
         ret = addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1, 0);
 
-        if(ret != ALR_CONNECTED)
+        if (ret != ALR_CONNECTED)
             addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0, 0);
 
         fgets(str, sizeof(str), Graph);
@@ -372,7 +385,6 @@ int main(int argc, char *argv[]) {
 
         // scc estimation
         version++;
-        //scc = estimateStronglyConnectedComponents(index_out, buffer_out, scc_size, version);
         scc = estimateStronglyConnectedComponents_iterative(index_out, buffer_out, index_size_out, scc_size);
 
         gettimeofday(&tv2, NULL);
@@ -398,14 +410,21 @@ int main(int argc, char *argv[]) {
             while (finished < line)
                 pthread_cond_wait(&cond_nonfinished, &mtx);
 
-//            for (i = print_start; i < line; i++)
-//                printf("%d\n", results[i]);
-//            print_start = line;
+            for (i = print_start; i < line; i++)
+                printf("%d\n", results[i]);
+            print_start = line;
 
             while (str[0] != 'F') {
 
                 place_to_buffer(str, buffer, line);
                 line++;
+
+                // resize results array
+                if (line == res_size) {
+                    results = realloc(results, res_size * 2 * sizeof(int));
+                    res_size *= 2;
+                }
+
                 fgets(str, sizeof(str), Queries);
 
             }
@@ -421,6 +440,7 @@ int main(int argc, char *argv[]) {
         end = 1;
         res_size = line;
         fclose(Queries);
+
     } else {
 
         //to megethos tou cc tha einai osoi einai oi komvoi sinolika diladi
@@ -440,6 +460,7 @@ int main(int argc, char *argv[]) {
         printf("%f sec: CC create\n",
                (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
                (double) (tv2.tv_sec - tv1.tv_sec));
+
         // worker thread pool
         workers_t = malloc(THREAD_POOL_SIZE * sizeof(pthread_t));
 
@@ -464,14 +485,15 @@ int main(int argc, char *argv[]) {
                     toID(str, &N1, &N2);
 
                     if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
-                        insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out, stat);
+                        insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out,
+                                   stat);
 
                     if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
                         insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in, 0);
 
                     ret = addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1, line);
 
-                    if(ret != ALR_CONNECTED)
+                    if (ret != ALR_CONNECTED)
                         addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0, line);
 
                     refreshUpdateIndex(cc, N1, N2);
@@ -483,7 +505,6 @@ int main(int argc, char *argv[]) {
                 fgets(str, sizeof(str), Queries);
             }
 
-            //finished = 0;
             start = 1;
             pthread_mutex_unlock(&mtx);
             pthread_cond_broadcast(&cond_start);
@@ -503,8 +524,8 @@ int main(int argc, char *argv[]) {
 
     pthread_mutex_unlock(&mtx);
 
-//    for (i = print_start; i < line; i++)
-//        printf("%d\n", results[i]);
+    for (i = print_start; i < line; i++)
+        printf("%d\n", results[i]);
 
     for (i = 0; i < THREAD_POOL_SIZE; i++)
         pthread_join(workers_t[i], 0);

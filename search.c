@@ -30,20 +30,13 @@ int isEmpty(Queue *queue) {
 int enq(Queue *queue, uint32_t id) {
 
     if (queue->count >= queue->size) {
-        uint32_t *temp = malloc(queue->size*sizeof(uint32_t));
-
-        //memcpy(temp, queue->ids + queue->first*sizeof(uint32_t), (queue->size - queue->first)*sizeof(uint32_t));
-        //memcpy(temp + (queue->size - queue->first)*sizeof(uint32_t), queue->ids, queue->first*sizeof(uint32_t));
 
         queue->ids = realloc(queue->ids, queue->size * 2 * sizeof(uint32_t));
 
-        memmove(queue->ids + (queue->size + queue->first)*sizeof(uint32_t), queue->ids + queue->first*sizeof(uint32_t), (queue->size - queue->first)*sizeof(uint32_t));
+        memmove(queue->ids + (queue->size + queue->first),
+                queue->ids + queue->first, (queue->size - queue->first) * sizeof(uint32_t));
 
-        //memcpy(queue->ids, temp, queue->size*sizeof(uint32_t));
-
-        free(temp);
-        queue->first = 0;
-        queue->last = queue->size - 1;
+        queue->first = queue->first + queue->size;
         queue->size *= 2;
     }
 
@@ -68,11 +61,6 @@ uint32_t deq(Queue *queue) {
 }
 
 void restartQueue(Queue *queue) {
-
-    int i = 0;
-
-    for (i = 0; i < queue->size; i++)
-        queue->ids[i] = DEFAULT;
 
     queue->first = 0;
     queue->last = -1;
@@ -99,9 +87,8 @@ int bBFS(ind *index_in,
 
     list_node *neighbors = NULL;
     uint32_t node = DEFAULT, successor = DEFAULT, childrenF = 0, childrenB = 0;
-    int i = 0, steps = 0, curr_steps = 0, min_steps = -1, path = 0;
+    int i = 0, counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, stepsF = 0, stepsB = 0;
     ptrdiff_t offset = 0;
-    int counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, stepsF = 0, stepsB = 0;
 
     if (start == end)   // an o komvos ekkinhshs einai o komvos stoxos tote steps=0
         return 0;

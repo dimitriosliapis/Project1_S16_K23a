@@ -176,7 +176,6 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
 ptrdiff_t getListHead(ind *index, uint32_t id) {
 
     return (index == NULL ? -1 : index[id].first);
-    /*return index[id].first;*/
 }
 
 int destroyNodeIndex(ind *index, uint32_t index_size, int s) {
