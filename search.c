@@ -32,16 +32,18 @@ int enq(Queue *queue, uint32_t id) {
     if (queue->count >= queue->size) {
         uint32_t *temp = malloc(queue->size*sizeof(uint32_t));
 
-        memcpy(temp, queue->ids + (queue->first - 1)*sizeof(uint32_t), (queue->size - queue->first)*sizeof(uint32_t));
-        memcpy(temp + (queue->size - queue->first)*sizeof(uint32_t), queue->ids, queue->first*sizeof(uint32_t));
+        //memcpy(temp, queue->ids + queue->first*sizeof(uint32_t), (queue->size - queue->first)*sizeof(uint32_t));
+        //memcpy(temp + (queue->size - queue->first)*sizeof(uint32_t), queue->ids, queue->first*sizeof(uint32_t));
 
         queue->ids = realloc(queue->ids, queue->size * 2 * sizeof(uint32_t));
 
-        memcpy(queue->ids, temp, queue->size*sizeof(uint32_t));
+        memmove(queue->ids + (queue->size + queue->first)*sizeof(uint32_t), queue->ids + queue->first*sizeof(uint32_t), (queue->size - queue->first)*sizeof(uint32_t));
+
+        //memcpy(queue->ids, temp, queue->size*sizeof(uint32_t));
 
         free(temp);
         queue->first = 0;
-        queue->last = queue->size;
+        queue->last = queue->size - 1;
         queue->size *= 2;
     }
 
