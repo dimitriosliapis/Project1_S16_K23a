@@ -3,6 +3,8 @@
 
 #include "scc.h"
 
+#define NUM_GRAIL 5
+
 #define MAYBE 45
 #define NO 46
 #define YES 47
@@ -13,6 +15,8 @@ typedef struct GrailIndex_t {
     uint32_t buf_size_out;
     uint32_t ind_size_out;
 } GrailIndex;
+
+void shuffle(ind *, uint32_t);
 
 GrailIndex *buildGrailIndex(ind *, list_node *, SCC *, uint32_t);
 

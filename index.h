@@ -16,8 +16,8 @@
 typedef struct static_data_t{
     uint32_t lowlink;
     uint32_t index;
-    uint32_t rank;
-    uint32_t min_rank;
+    uint32_t *rank;
+    uint32_t *min_rank;
     uint32_t all_children_in_scc;
     uint32_t children_in_scc;
     list_node *curr_neighbors;

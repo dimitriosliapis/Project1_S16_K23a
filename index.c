@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "index.h"
+#include "grail.h"
 
 ind *createNodeIndex(uint32_t index_size, int s) {
 
@@ -8,7 +9,7 @@ ind *createNodeIndex(uint32_t index_size, int s) {
 
     index = malloc(sizeof(ind) * index_size);
 
-    if(s){
+    if (s) {
         for (i = 0; i < index_size; i++) {
             index[i].first = -1;
             index[i].last = -1;
@@ -22,16 +23,16 @@ ind *createNodeIndex(uint32_t index_size, int s) {
             index[i].s_data->lowlink = DEFAULT;
             index[i].s_data->index = DEFAULT;
             index[i].s_data->all_children_in_scc = 0;
-            index[i].s_data->rank = DEFAULT;
-            index[i].s_data->min_rank = DEFAULT;
+            index[i].s_data->rank = malloc(NUM_GRAIL * sizeof(uint32_t));
+            index[i].s_data->min_rank = malloc(NUM_GRAIL * sizeof(uint32_t));
             index[i].s_data->onStack = 0;
             index[i].s_data->children_in_scc = 0;
             index[i].s_data->curr_neighbors = NULL;
             index[i].s_data->next_child = NULL;
             index[i].s_data->n = 0;
         }
-    }
-    else{
+
+    } else {
         for (i = 0; i < index_size; i++) {
             index[i].first = -1;
             index[i].last = -1;
@@ -51,11 +52,10 @@ ind *createNodeIndex(uint32_t index_size, int s) {
 int lookup(ind *index, uint32_t id, uint32_t index_size) {
 
     return ((id >= index_size) || (index[id].first == -1) ? NOT_EXIST : ALR_EXISTS); // an den to xwraei den uparxei
-/*    if (index[id].first != -1) return ALR_EXISTS;
-    return NOT_EXIST;*/
 }
 
-ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size, ptrdiff_t *available, int s) {
+ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *index_size, uint32_t *buffer_size,
+                     ptrdiff_t *available, int s) {
 
     ptrdiff_t offset = 0;
 
@@ -64,9 +64,8 @@ ptrdiff_t insertNode(ind **index, uint32_t id, list_node **buffer, uint32_t *ind
     offset = allocNewNode(&(*buffer), &(*buffer_size), *available); // to offset tou prwtou eleutherou komvou sto buffer
     if (offset == -1) return ALLOC_FAIL;
 
-    if (id >= *index_size) {
+    if (id >= *index_size)
         reallocNodeIndex(&(*index), id, &(*index_size), s);    // an den ton xwraei to index realloc
-    }
 
     (*index)[id].first = offset;    // tuxaia seira sto buffer etsi
     (*index)[id].last = offset; // tuxaia seira sto buffer etsi
@@ -87,7 +86,7 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size, int s) {
     *index = new;
 
 
-    if(s){
+    if (s) {
         for (i = *index_size; i < realloc_size; i++) {
             (*index)[i].first = -1;
             (*index)[i].last = -1;
@@ -100,16 +99,16 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size, int s) {
             (*index)[i].s_data->lowlink = DEFAULT;
             (*index)[i].s_data->index = DEFAULT;
             (*index)[i].s_data->all_children_in_scc = 0;
-            (*index)[i].s_data->rank = DEFAULT;
-            (*index)[i].s_data->min_rank = DEFAULT;
+            (*index)[i].s_data->rank = malloc(NUM_GRAIL * sizeof(uint32_t));;
+            (*index)[i].s_data->min_rank = malloc(NUM_GRAIL * sizeof(uint32_t));;
             (*index)[i].s_data->onStack = 0;
             (*index)[i].s_data->children_in_scc = 0;
             (*index)[i].s_data->curr_neighbors = NULL;
             (*index)[i].s_data->next_child = NULL;
             (*index)[i].s_data->n = 0;
         }
-    }
-    else{
+
+    } else {
         for (i = *index_size; i < realloc_size; i++) {  // arxikopoihsh twn newn index nodes
             (*index)[i].first = -1;
             (*index)[i].last = -1;
@@ -120,11 +119,14 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size, int s) {
 
         }
     }
+
     *index_size = realloc_size;
     return OK_SUCCESS;
 }
 
-ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, ptrdiff_t *available, int check, uint32_t edge_version) {
+ptrdiff_t
+addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffer, uint32_t *buffer_size, ptrdiff_t *available,
+        int check, uint32_t edge_version) {
 
     int i = 0;
     uint32_t version = 0;
@@ -137,8 +139,7 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
         if ((*index)[id].neighbors == NULL) {
             (*index)[id].neighbors = createHashtable(HT_SMALL);
             insert((*index)[id].neighbors, neighbor, HT_SMALL, version);
-        }
-        else{
+        } else {
             if (search((*index)[id].neighbors, neighbor, HT_SMALL, version) == FOUND)
                 return ALR_CONNECTED;
             else
@@ -157,15 +158,15 @@ ptrdiff_t addEdge(ind **index, uint32_t id, uint32_t neighbor, list_node **buffe
         i++;
         if (i == N) {   // an ftasei to N paei ston epomeno komvo
             //if (current->nextListNode == -1) {  // an den uparxei ton dimiourgei
-                prev = current - *buffer;
-                offset = allocNewNode(&(*buffer), &(*buffer_size), *available);
-                (*available)++;
-                current = *buffer + prev;
-                current->nextListNode = offset;
-                current = *buffer + offset;
-                (*index)[id].last = offset;
+            prev = current - *buffer;
+            offset = allocNewNode(&(*buffer), &(*buffer_size), *available);
+            (*available)++;
+            current = *buffer + prev;
+            current->nextListNode = offset;
+            current = *buffer + offset;
+            (*index)[id].last = offset;
             //} else
-              //  current = *buffer + current->nextListNode;  // an uparxei sunexizei se auton
+            //  current = *buffer + current->nextListNode;  // an uparxei sunexizei se auton
             i = 0;
         }
     }
@@ -184,20 +185,21 @@ int destroyNodeIndex(ind *index, uint32_t index_size, int s) {
 
     if (index == NULL) return IND_EMPTY;
 
-
-    if(s == 1){
+    if (s == 1) {
         for (i = 0; i < index_size; i++) {
             delete(index[i].neighbors, HT_SMALL);
+            free(index[i].s_data->min_rank);
+            free(index[i].s_data->rank);
             free(index[i].s_data);
         }
-    }
-    else if(s == 0){
+    } else if (s == 0) {
         for (i = 0; i < index_size; i++) {
             delete(index[i].neighbors, HT_SMALL);
         }
-    }
-    else if(s == 2){
+    } else if (s == 2) {
         for (i = 0; i < index_size; i++) {
+            free(index[i].s_data->rank);
+            free(index[i].s_data->min_rank);
             free(index[i].s_data);
         }
     }
