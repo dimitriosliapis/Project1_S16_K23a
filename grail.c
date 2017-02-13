@@ -195,8 +195,8 @@ int isReachableGrailIndex(GrailIndex *index, uint32_t source_node, uint32_t targ
 
     for (j = 0; j < NUM_GRAIL; j++) {
 
-        if ((index->hyper_index_out[scc_source].s_data->min_rank[j] > index->hyper_index_out[scc_target].s_data->min_rank[j]) &&
-            (index->hyper_index_out[scc_source].s_data->rank[j] <= index->hyper_index_out[scc_target].s_data->rank[j]))
+        if ((index->hyper_index_out[scc_source].s_data->min_rank[j] > index->hyper_index_out[scc_target].s_data->min_rank[j]) ||
+            (index->hyper_index_out[scc_source].s_data->rank[j] < index->hyper_index_out[scc_target].s_data->rank[j]))
             return NO;
     }
     return MAYBE;
