@@ -4,18 +4,22 @@
 extern struct timeval tv1, tv2;
 
 
-void shuffle(ind *array, uint32_t size) {
+void shuffle(uint32_t *array, uint32_t size) {
 
-    uint32_t i;
-    ind *t = malloc(sizeof(ind));
-    for (i = 0; i < size - 1; i++) {
-        uint32_t j = i + rand() / (RAND_MAX / (size - i) + 1);
-        *t = array[j];
+
+    uint32_t i = 0, t = 0, j = 0;
+
+    for(i = 0 ; i < size ; i++) {
+
+        j = i + rand() / (RAND_MAX / (size - i) + 1);
+        t = array[j];
         array[j] = array[i];
-        array[i] = *t;
+        array[i] = t;
     }
-}
 
+    return;
+
+}
 GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uint32_t version) {
 
     uint32_t i = 0, j = 0, k = 0, v = 0, w = 0,
@@ -86,16 +90,21 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
            (double) (tv2.tv_sec - tv1.tv_sec));
 
     rank = 0;
+    uint32_t *array = malloc(grail->ind_size_out*sizeof(uint32_t));
+    for(i = 0 ; i < grail->ind_size_out ; i++) array[i] = i;
 
+    int a;
     for (j = 0; j < NUM_GRAIL; j++) {
 
         //algorithmos GRAIL
         for (i = 0; i < scc->components_count; i++) {
 
-            //an einai visited sinexise sto epomeno
-            if (grail->hyper_index_out[i].visited[0] == version) continue;
+            a = array[i];
 
-            pushinstack(dfs_stack, i);
+            //an einai visited sinexise sto epomeno
+            if (grail->hyper_index_out[a].visited[0] == version) continue;
+
+            pushinstack(dfs_stack, a);
             while (!stackisempty(dfs_stack)) {
 
                 v = peekfromstack(dfs_stack);
@@ -157,7 +166,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
             }
         }
 
-        shuffle(grail->hyper_index_out, grail->ind_size_out);
+        shuffle(array, grail->ind_size_out);
     }
 
     deletestack(dfs_stack);
