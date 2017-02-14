@@ -3,11 +3,10 @@
 
 #include <stdint.h>
 
-#define HT_BIG 148201
+#define DEFAULT 16777216
+
 #define HT_SMALL 71
 #define HT_N 16
-
-#define DEFAULT 16777216
 
 #define FOUND 1
 #define NOT_FOUND -1

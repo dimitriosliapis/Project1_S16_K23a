@@ -5,6 +5,7 @@
 extern SCC *scc;
 extern GrailIndex *grail;
 
+// Create circular FIFO queue
 Queue *createQueue() {
 
     Queue *queue = NULL;
@@ -22,11 +23,13 @@ Queue *createQueue() {
     }
 }
 
+// Check if queue is empty
 int isEmpty(Queue *queue) {
 
     return (queue->count == 0);
 }
 
+// Push element at the end of queue
 int enq(Queue *queue, uint32_t id) {
 
     if (queue->count >= queue->size) {
@@ -47,6 +50,7 @@ int enq(Queue *queue, uint32_t id) {
     return 0;
 }
 
+// Pop first element in queue
 uint32_t deq(Queue *queue) {
 
     uint32_t id = DEFAULT;
@@ -60,6 +64,7 @@ uint32_t deq(Queue *queue) {
     return id;
 }
 
+// Reinitialize queue
 void restartQueue(Queue *queue) {
 
     queue->first = 0;
@@ -67,12 +72,14 @@ void restartQueue(Queue *queue) {
     queue->count = 0;
 }
 
+// Free queue
 void empty(Queue *queue) {
 
     free(queue->ids);
     free(queue);
 }
 
+// Bidirectional Breadth First Search algorithm to find path between two given nodes and return steps
 int bBFS(ind *index_in,
          ind *index_out,
          list_node *buffer_in,
@@ -90,7 +97,7 @@ int bBFS(ind *index_in,
     int i = 0, counterF = 0, counterFS = 0, counterB = 0, counterBS = 0, stepsF = 0, stepsB = 0;
     ptrdiff_t offset = 0;
 
-    if (start == end)   // an o komvos ekkinhshs einai o komvos stoxos tote steps=0
+    if (start == end)   // if start node is same as goal node then return 0
         return 0;
 
     index_out[start].visited[thread_id] = version;
@@ -103,62 +110,64 @@ int bBFS(ind *index_in,
     childrenB = index_in[end].num_of_children;
     counterB++;
 
-    while (!isEmpty(frontierF) && !isEmpty(frontierB)) {    // oso ta 2 synora den einai adeia
+    while (!isEmpty(frontierF) && !isEmpty(frontierB)) {    // while frontiers are not empty
 
-        if (childrenF <= childrenB) {   // epilogh bfs analoga me ton arithmo ton komvwn pros epektash
+        if (childrenF <= childrenB) {   // choose forward bfs if less nodes are going to be expanded
 
             stepsF++;
-            while (counterF != 0) {     // epanalhpsh gia olous tous komvous tou epipedou
+            while (counterF != 0) {     // iteration for all nodes in the same depth
 
-                node = deq(frontierF);  // exagwgh tou prwtou komvou apo to synoro
+                node = deq(frontierF);  // pop first node in frontier
 
                 offset = getListHead(index_out, node);
-                if (offset != -1) {     // elegxos gia ton an exei geitones
+                if (offset != -1) {     // check if node has neighbors
 
                     neighbors = buffer_out + offset;
-                    while (i < N) {     // gia kathe geitona
+                    while (i < N) {     // for each neighbor
 
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (curr_scc < 0) {   // periptwsh dynamikou grafou
+                            if (curr_scc < 0) {   // dynamic graph case
 
+                                // if neighbor exists in current version
                                 if (neighbors->edgeProperty[i] <= version) {
 
-                                    if (index_out[successor].visited[thread_id] !=
-                                        version) {  // an den ton exei epispeftei o idios
-                                        index_out[successor].visited[thread_id] = version; // ton episkeptetai
+                                    // if neighbor is not visited by the current bfs then visit
+                                    if (index_out[successor].visited[thread_id] != version) {
+                                        index_out[successor].visited[thread_id] = version;
 
-                                        if (index_in[successor].visited[thread_id] ==
-                                            version) {   // goal afou ton exei episkeptei o allos
+                                        // if neighbor is visited by the other bfs then goal
+                                        if (index_in[successor].visited[thread_id] == version) {
                                             restartQueue(frontierF);
                                             restartQueue(frontierB);
                                             return stepsB + stepsF;
 
-                                        } else {   // alliws eisagetai sto synoro
+                                        } else {   // else push in frontier
                                             enq(frontierF, successor);
                                             counterFS++;
                                             childrenF += index_out[successor].num_of_children;
                                         }
                                     }
                                 }
-                            } else {  // periptwsh statikou grafou
+                            } else {    // static graph case
 
-                                if (curr_scc != DEFAULT) {  // periptwsh anazhthshs sto idio scc
+                                if (curr_scc != DEFAULT) {  // search in same scc case
 
+                                    // if neighbor exists in current scc
                                     if (scc->id_belongs_to_component[successor] == curr_scc) {
 
-                                        if (index_out[successor].visited[thread_id] !=
-                                            version) {  // an den ton exei epispeftei o idios
-                                            index_out[successor].visited[thread_id] = version;         // ton episkeptetai
+                                        // if neighbor is not visited by the current bfs then visit
+                                        if (index_out[successor].visited[thread_id] != version) {
+                                            index_out[successor].visited[thread_id] = version;
 
-                                            if (index_in[successor].visited[thread_id] ==
-                                                version) {   // goal afou ton exei episkeptei o allos
+                                            // if neighbor is visited by the other bfs then goal
+                                            if (index_in[successor].visited[thread_id] == version) {
                                                 restartQueue(frontierF);
                                                 restartQueue(frontierB);
                                                 return stepsB + stepsF;
 
-                                            } else {   // alliws eisagetai sto synoro
+                                            } else {   // else push in frontier
                                                 enq(frontierF, successor);
                                                 counterFS++;
                                                 childrenF += index_out[successor].num_of_children;
@@ -168,21 +177,22 @@ int bBFS(ind *index_in,
 
                                     }
 
-                                } else {    // periptwsh anazhthshs se olo ton grafo
+                                } else {    // search in whole graph case
 
+                                    // if goal may be reachable from neighbor
                                     if (isReachableGrailIndex(grail, successor, end, scc) != NO) {
 
-                                        if (index_out[successor].visited[thread_id] !=
-                                            version) {  // an den ton exei epispeftei o idios
-                                            index_out[successor].visited[thread_id] = version; // ton episkeptetai
+                                        // if neighbor is not visited by the current bfs then visit
+                                        if (index_out[successor].visited[thread_id] != version) {
+                                            index_out[successor].visited[thread_id] = version;
 
-                                            if (index_in[successor].visited[thread_id] ==
-                                                version) {   // goal afou ton exei episkeptei o allos
+                                            // if neighbor is visited by the other bfs then goal
+                                            if (index_in[successor].visited[thread_id] == version) {
                                                 restartQueue(frontierF);
                                                 restartQueue(frontierB);
                                                 return stepsB + stepsF;
 
-                                            } else {   // alliws eisagetai sto synoro
+                                            } else {   // else push in frontier
                                                 enq(frontierF, successor);
                                                 counterFS++;
                                                 childrenF += index_out[successor].num_of_children;
@@ -198,7 +208,7 @@ int bBFS(ind *index_in,
 
                         i++;
 
-                        // an exei ki allous geitones se epomeno listnode synexizei
+                        // if there are more neighbors in next listnode continue examining
                         if (i == N && neighbors->nextListNode != -1) {
                             neighbors = buffer_out + neighbors->nextListNode;
                             i = 0;
@@ -215,38 +225,39 @@ int bBFS(ind *index_in,
             counterFS = 0;
         }
 
-        if (childrenB < childrenF) {    // epilogh bfs analoga me ton arithmo ton komvwn pros epektash
+        if (childrenB < childrenF) {    // choose backward bfs if less nodes are going to be expanded
 
             stepsB++;
-            while (counterB != 0) {
+            while (counterB != 0) {     // iteration for all nodes in the same depth
 
-                node = deq(frontierB);  // exagwgh tou prwtou komvou apo to synoro
+                node = deq(frontierB);  // pop first node in frontier
 
                 offset = getListHead(index_in, node);
-                if (offset != -1) {     // elegxos gia ton an exei geitones
+                if (offset != -1) {     // check if node has neighbors
 
                     neighbors = buffer_in + offset;
-                    while (i < N) {     // gia kathe geitona
+                    while (i < N) {     // for each neighbor
 
                         successor = neighbors->neighbor[i];
                         if (successor != DEFAULT) {
 
-                            if (curr_scc < 0) {   // periptwsh dynamikou grafou
+                            if (curr_scc < 0) {   // dynamic graph case
 
+                                // if neighbor exists in current version
                                 if (neighbors->edgeProperty[i] <= version) {
 
-                                    if (index_in[successor].visited[thread_id] !=
-                                        version) {   // an den ton exei episkeptei o idios
-                                        index_in[successor].visited[thread_id] = version;  // ton episkeptetai
+                                    // if neighbor is not visited by the current bfs then visit
+                                    if (index_in[successor].visited[thread_id] != version) {
+                                        index_in[successor].visited[thread_id] = version;
 
-                                        if (index_out[successor].visited[thread_id] ==
-                                            version) {  // goal afou ton exei episkeptei o allos
+                                        // if neighbor is visited by the other bfs then goal
+                                        if (index_out[successor].visited[thread_id] == version) {
 
                                             restartQueue(frontierB);
                                             restartQueue(frontierF);
                                             return stepsF + stepsB;
 
-                                        } else {    // alliws eisagetai sto synoro
+                                        } else {    // else push in frontier
                                             enq(frontierB, successor);
                                             counterBS++;
                                             childrenB += index_in[successor].num_of_children;
@@ -254,24 +265,25 @@ int bBFS(ind *index_in,
 
                                     }
                                 }
-                            } else {      // periptwsh statikou grafou
+                            } else {    // static graph case
 
-                                if (curr_scc != DEFAULT) {  // periptwsh anazhthshs sto idio scc
+                                if (curr_scc != DEFAULT) {  // search in same scc case
 
+                                    // if neighbor exists in current scc
                                     if (scc->id_belongs_to_component[successor] == curr_scc) {
 
-                                        if (index_in[successor].visited[thread_id] !=
-                                            version) {   // an den ton exei episkeptei o idios
-                                            index_in[successor].visited[thread_id] = version;  // ton episkeptetai
+                                        // if neighbor is not visited by the current bfs then visit
+                                        if (index_in[successor].visited[thread_id] != version) {
+                                            index_in[successor].visited[thread_id] = version;
 
-                                            if (index_out[successor].visited[thread_id] ==
-                                                version) {  // goal afou ton exei episkeptei o allos
+                                            // if neighbor is visited by the other bfs then goal
+                                            if (index_out[successor].visited[thread_id] == version) {
 
                                                 restartQueue(frontierB);
                                                 restartQueue(frontierF);
                                                 return stepsF + stepsB;
 
-                                            } else {    // alliws eisagetai sto synoro
+                                            } else {    // else push in frontier
                                                 enq(frontierB, successor);
                                                 counterBS++;
                                                 childrenB += index_in[successor].num_of_children;
@@ -281,22 +293,23 @@ int bBFS(ind *index_in,
 
                                     }
 
-                                } else {    // periptwsh anazhthshs se olo ton grafo
+                                } else {    // search in whole graph case
 
+                                    // if goal may be reachable from neighbor
                                     if (isReachableGrailIndex(grail, start, successor, scc) != NO) {
 
-                                        if (index_in[successor].visited[thread_id] !=
-                                            version) {   // an den ton exei episkeptei o idios
-                                            index_in[successor].visited[thread_id] = version;  // ton episkeptetai
+                                        // if neighbor is not visited by the current bfs then visit
+                                        if (index_in[successor].visited[thread_id] != version) {
+                                            index_in[successor].visited[thread_id] = version;
 
-                                            if (index_out[successor].visited[thread_id] ==
-                                                version) {  // goal afou ton exei episkeptei o allos
+                                            // if neighbor is visited by the other bfs then goal
+                                            if (index_out[successor].visited[thread_id] == version) {
 
                                                 restartQueue(frontierB);
                                                 restartQueue(frontierF);
                                                 return stepsF + stepsB;
 
-                                            } else {    // alliws eisagetai sto synoro
+                                            } else {    // else push in frontier
                                                 enq(frontierB, successor);
                                                 counterBS++;
                                                 childrenB += index_in[successor].num_of_children;
@@ -312,7 +325,7 @@ int bBFS(ind *index_in,
 
                         i++;
 
-                        // an exei ki allous geitones se epomeno listnode synexizei
+                        // if there are more neighbors in next listnode continue examining
                         if (i == N && neighbors->nextListNode != -1) {
                             neighbors = buffer_in + neighbors->nextListNode;
                             i = 0;
@@ -333,6 +346,5 @@ int bBFS(ind *index_in,
     restartQueue(frontierF);
     restartQueue(frontierB);
 
-    return -1;  // an den vrethei monopati epistrefei -1
+    return -1;  // if path is not found then return -1
 }
-

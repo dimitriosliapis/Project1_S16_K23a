@@ -7,28 +7,19 @@
 
 list_node *buffer_in = NULL,
         *buffer_out = NULL;
-
 ind *index_in = NULL,
         *index_out = NULL;
-
 uint32_t buffer_size_in = BUFF_SIZE,
         buffer_size_out = BUFF_SIZE,
         index_size_in = IND_SIZE,
         index_size_out = IND_SIZE;
-
 ptrdiff_t available_in = 0,
         available_out = 0;
-
 SCC *scc = NULL;
-
 Buffer *buffer = NULL;
-
 GrailIndex *grail = NULL;
-
 CC *cc = NULL;
-
 uint32_t cc_size = 0;
-
 int start = 0,
         finished = 0,
         id = 1,
@@ -62,7 +53,7 @@ int toID(char *str, uint32_t *N1, uint32_t *N2) {
     return 1;
 }
 
-/************************** THREADS **************************/
+/************************** JOB BUFFER **************************/
 
 void place_to_buffer(char *query, Buffer *buffer, uint32_t line) {
 
@@ -109,9 +100,9 @@ B_Node *remove_from_buffer(Buffer *buffer) {
     } else return NULL;
 }
 
-/************************* static_graph_worker *************************/
+/************************** WORKER THREADS **************************/
 
-void *worker(void *ptr) {
+void *worker(void *ptr) {   // static graph worker
 
     uint32_t N1, N2, scc_source;
     int line, thread_id, steps;
@@ -124,27 +115,25 @@ void *worker(void *ptr) {
     id++;
     pthread_mutex_unlock(&id_mtx);
 
-    frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
-    frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
+    frontierF = createQueue();  // bfs frontier from start to goal
+    frontierB = createQueue();  // bfs frontier from goal to start
 
     while (1) {
 
         pthread_mutex_lock(&mtx);
 
-        while (start == 0)
+        while (start == 0)  // wait until main finishes placing jobs to buffer
             pthread_cond_wait(&cond_start, &mtx);
 
         job = remove_from_buffer(buffer);
 
         if (job == NULL) {
-
             pthread_cond_signal(&cond_nonfinished);
             pthread_mutex_unlock(&mtx);
             if (end) break;
             continue;
 
         } else {
-
             line = job->line;
             pthread_mutex_unlock(&mtx);
         }
@@ -176,6 +165,7 @@ void *worker(void *ptr) {
             results[line] = -1;
 
         free(job);
+
         pthread_mutex_lock(&mtx);
         finished++;
         pthread_mutex_unlock(&mtx);
@@ -187,12 +177,10 @@ void *worker(void *ptr) {
     pthread_exit(0);
 }
 
-/************************* dynamic_graph_worker *************************/
+void *worker_dynamic(void *ptr) {   // dynamic graph worker
 
-void *worker_dynamic(void *ptr) {
-
-    uint32_t N1, N2;
-    uint32_t line;
+    uint32_t N1, N2,
+            line;
     int thread_id, steps;
     Queue *frontierF = NULL, *frontierB = NULL;
     B_Node *job = NULL;
@@ -202,25 +190,25 @@ void *worker_dynamic(void *ptr) {
     id++;
     pthread_mutex_unlock(&id_mtx);
 
-    frontierF = createQueue();  // synoro tou bfs apo thn arxh pros ton stoxo
-    frontierB = createQueue();  // synoro tou bfs apo ton stoxo pros thn arxh
+    frontierF = createQueue();  // bfs frontier from start to goal
+    frontierB = createQueue();  // bfs frontier from goal to start
 
     while (1) {
 
         pthread_mutex_lock(&mtx);
-        while (start == 0)
+
+        while (start == 0)  // wait until main finishes placing jobs to buffer
             pthread_cond_wait(&cond_start, &mtx);
 
         job = remove_from_buffer(buffer);
 
         if (job == NULL) {
-
             pthread_cond_signal(&cond_nonfinished);
             pthread_mutex_unlock(&mtx);
             if (end) break;
             continue;
-        } else {
 
+        } else {
             line = job->line;
             pthread_mutex_unlock(&mtx);
         }
@@ -239,6 +227,7 @@ void *worker_dynamic(void *ptr) {
                              line, thread_id, -1);
 
                 results[line] = steps;
+
             } else {
 
                 if (searchUpdateIndex(*cc, N1, N2, line, thread_id) == FOUND) {
@@ -256,19 +245,22 @@ void *worker_dynamic(void *ptr) {
 
                     if (cc->metricVal == 0) {
 
-                        if (index_size_in > index_size_out) cc_size = index_size_in;
-                        else cc_size = index_size_out;
+                        if (index_size_in > index_size_out)
+                            cc_size = index_size_in;
+                        else
+                            cc_size = index_size_out;
                         cc->cc_max = updateCCIndex(cc, line, cc_size, thread_id);
                         cc->metricVal = METRIC;
-
                     }
 
                     pthread_mutex_unlock(&cc_mtx);
+
                 } else {
                     pthread_mutex_unlock(&cc_mtx);
                     results[line] = -1;
                 }
             }
+
         } else results[line] = -1;
 
         free(job);
@@ -288,15 +280,15 @@ void *worker_dynamic(void *ptr) {
 int main(int argc, char *argv[]) {
 
     FILE *Graph = NULL, *Queries = NULL;
-    uint32_t i = 0, print_start = 0, print = 1;
-    uint32_t N1, N2, scc_size = 0;
-    uint32_t version = 0, line = 0;
+    uint32_t N1, N2,
+            i = 0, version = 0, line = 0,
+            print_start = 0, scc_size = 0;
     pthread_t *workers_t;
     ptrdiff_t ret = 0;
     char str[64], which[64];
     int stat = 0;
 
-    // orismata
+    // arguments
     if (argc == 3) {
         Graph = fopen(argv[1], "r");
         Queries = fopen(argv[2], "r");
@@ -307,7 +299,7 @@ int main(int argc, char *argv[]) {
     fgets(which, sizeof(which), Queries);
     if (strncmp(which, "STATIC", 6) == 0) stat = 1;
 
-    // zeugh indexes kai buffers
+    // index and buffer pairs
     buffer_in = createBuffer(buffer_size_in);
     index_in = createNodeIndex(index_size_in, 0);
     buffer_out = createBuffer(buffer_size_out);
@@ -370,8 +362,7 @@ int main(int argc, char *argv[]) {
 
     strcpy(str, which);
 
-    // static graph creation
-    if (strncmp(str, "STATIC", 6) == 0) {
+    if (strncmp(str, "STATIC", 6) == 0) {   // static graph creation
 
         // worker thread pool
         workers_t = malloc(THREAD_POOL_SIZE * sizeof(pthread_t));
@@ -441,20 +432,21 @@ int main(int argc, char *argv[]) {
         res_size = line;
         fclose(Queries);
 
-    } else {
+    } else {    // dynamic graph creation
 
-        //to megethos tou cc tha einai osoi einai oi komvoi sinolika diladi
-        //to max twn komvwn tou index_in kai index_out
+        // cc size = max(index_size_in, index_size_out)
+        if (index_size_in > index_size_out)
+            cc_size = index_size_in;
+        else
+            cc_size = index_size_out;
 
-        if (index_size_in > index_size_out) cc_size = index_size_in;
-        else cc_size = index_size_out;
-
+        // CC index creation
         version++;
         cc = createCCIndex(cc_size, index_in, index_out, buffer_in, buffer_out, index_size_in, index_size_out, version);
-
         cc->u_size = cc->cc_max;
         cc->metricVal = METRIC;
 
+        // update index initialization
         initUpdateIndex(cc);
         gettimeofday(&tv2, NULL);
         printf("%f sec: CC create\n",
@@ -463,7 +455,6 @@ int main(int argc, char *argv[]) {
 
         // worker thread pool
         workers_t = malloc(THREAD_POOL_SIZE * sizeof(pthread_t));
-
         for (i = 0; i < THREAD_POOL_SIZE; i++)
             pthread_create(&workers_t[i], 0, worker_dynamic, 0);
 
@@ -471,9 +462,10 @@ int main(int argc, char *argv[]) {
 
             pthread_mutex_lock(&mtx);
 
-            while (finished < line)
+            while (finished < line)     // wait until all workers have finished
                 pthread_cond_wait(&cond_nonfinished, &mtx);
 
+            // print batch
             for (i = print_start; i < line; i++)
                 printf("%d\n", results[i]);
             print_start = line;
@@ -497,6 +489,7 @@ int main(int argc, char *argv[]) {
                         addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0, line);
 
                     refreshUpdateIndex(cc, N1, N2);
+
                 } else {
                     place_to_buffer(str, buffer, line);
                     line++;
@@ -524,6 +517,7 @@ int main(int argc, char *argv[]) {
 
     pthread_mutex_unlock(&mtx);
 
+    // print last batch
     for (i = print_start; i < line; i++)
         printf("%d\n", results[i]);
 

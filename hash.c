@@ -1,11 +1,14 @@
 #include <stdlib.h>
 #include "hash.h"
 
+// Create hash table
 ht_Node *createHashtable(uint32_t size) {
 
     uint32_t i = 0;
     ht_Node *hashTable = NULL;
+
     hashTable = malloc(sizeof(ht_Node) * size);
+
     if (hashTable == NULL)
         return NULL;
     else {
@@ -17,6 +20,7 @@ ht_Node *createHashtable(uint32_t size) {
     }
 }
 
+// Search hash table given a node and the version
 int search(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
 
     uint32_t i = 0;
@@ -41,6 +45,7 @@ int search(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
     return NOT_FOUND;
 }
 
+// Insert node in hash table with current version
 void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
 
     uint32_t i = 0;
@@ -59,8 +64,8 @@ void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
         return;
 
     } else {
-
-        while (i < prev_size) {     // find either older version of the same entry and update or empty cell and insert data
+        // find either older version of the same entry and update or empty cell and insert data
+        while (i < prev_size) {
             if(hashTable[offset].bucket[i].id == id) {
                 hashTable[offset].bucket[i].version = version;
                 return;
@@ -73,7 +78,7 @@ void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
             i++;
         }
 
-        // duplicate bucket and insert id
+        // double bucket and insert id
         hashTable[offset].bucket = realloc(hashTable[offset].bucket, prev_size * 2 * sizeof(ht_Entry));
         hashTable[offset].size *= 2;
         hashTable[offset].bucket[prev_size].id = id;
@@ -85,6 +90,7 @@ void insert(ht_Node *hashTable, uint32_t id, uint32_t size, uint32_t version) {
     }
 }
 
+// Free hash table
 void delete(ht_Node *hashTable, uint32_t size) {
 
     uint32_t i = 0;
@@ -92,9 +98,8 @@ void delete(ht_Node *hashTable, uint32_t size) {
     if (hashTable == NULL)
         return;
 
-    for (i = 0; i < size; i++) {
+    for (i = 0; i < size; i++)
         free(hashTable[i].bucket);
-    }
 
     free(hashTable);
 }
