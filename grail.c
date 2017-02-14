@@ -3,29 +3,22 @@
 
 extern struct timeval tv1, tv2;
 
-
 void shuffle(uint32_t *array, uint32_t size) {
-
 
     uint32_t i = 0, t = 0, j = 0;
 
     srand((unsigned)time(NULL));
 
     for(i = 0 ; i < size ; i++) {
-
         j = i + rand() / (RAND_MAX / (size - i) + 1);
         t = array[j];
         array[j] = array[i];
         array[i] = t;
     }
 
-    /*t = array[size - 1];
-    array[size - 1] = array[size - 2];
-    array[size - 2] = t;
-*/
     return;
-
 }
+
 GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uint32_t version) {
 
     uint32_t i = 0, j = 0, k = 0, v = 0, w = 0,
@@ -45,17 +38,16 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
     grail->hyper_buffer_out = createBuffer(grail->buf_size_out);
     grail->hyper_index_out = createNodeIndex(grail->ind_size_out, 1);
 
-    //eisagwgi olwn twn SCC sto hyper_index
-    for (i = 0; i < scc->components_count; i++) {
+    // eisagwgi olwn twn SCC sto hyper_index
+    for (i = 0; i < scc->components_count; i++)
         insertNode(&grail->hyper_index_out, i, &grail->hyper_buffer_out, &scc->components_count, &grail->buf_size_out,
                    &available_out, 1);
-    }
 
     scc_con = malloc(scc->components_count * sizeof(int));
     for (i = 0; i < scc->components_count; i++)
         scc_con[i] = -1;
 
-    //prosthiki akmwn metaksi tous
+    // prosthiki akmwn metaksi tous
     for (i = 0; i < scc->components_count; i++) {
 
         for (j = 0; j < scc->components[i].included_nodes_count; j++) {
@@ -97,7 +89,6 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
 
     uint32_t *array = malloc(grail->ind_size_out*sizeof(uint32_t));
     for(i = 0 ; i < grail->ind_size_out ; i++) array[i] = i;
-    //shuffle(array, grail->ind_size_out);
 
     uint32_t a;
 
@@ -105,12 +96,12 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
 
         rank = 0;
 
-        //algorithmos GRAIL
+        // algorithmos GRAIL
         for (i = 0 ; i < scc->components_count ; i++) {
 
             a = array[i];
 
-            //an einai visited sinexise sto epomeno
+            // an einai visited sinexise sto epomeno
             if (grail->hyper_index_out[a].visited[0] == version)
                 continue;
             else
@@ -120,7 +111,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
 
                 v = peekfromstack(dfs_stack);
 
-                //an exoume episkeutei ola ta paidia tote ftianoume kai to rank tou patera kai ton kanoume pop
+                // an exoume episkeutei ola ta paidia tote ftianoume kai to rank tou patera kai ton kanoume pop
                 if ((grail->hyper_index_out[v].num_of_children != 0) && (grail->hyper_index_out[v].s_data->all_children_in_scc[j] == grail->hyper_index_out[v].num_of_children)) {
                     rank++;
                     grail->hyper_index_out[v].s_data->rank[j] = rank;
@@ -128,7 +119,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                     popfromstack(dfs_stack);
                 }
 
-                //an den exei paidia tote v.rank = rank, v.min_rank = rank kai pop apo tin stoiva
+                // an den exei paidia tote v.rank = rank, v.min_rank = rank kai pop apo tin stoiva
                 if (grail->hyper_index_out[v].num_of_children == 0) {
                     rank++;
                     grail->hyper_index_out[v].s_data->min_rank[j] = rank;
@@ -137,7 +128,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                     popfromstack(dfs_stack);
                 }
 
-                //an exei paidia
+                // an exei paidia
                 if (grail->hyper_index_out[v].num_of_children != 0) {
 
                     offset_out = getListHead(grail->hyper_index_out, v);
@@ -148,20 +139,21 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
 
                         w = neighbors_out->neighbor[k];
 
-                        //den exei allo paidi
+                        // den exei allo paidi
                         if (w == DEFAULT) break;
 
-                        //an den einai visited to paidi push kai break gia na ginei DFS sta paidia tou
+                        // an den einai visited to paidi push kai break gia na ginei DFS sta paidia tou
                         if (grail->hyper_index_out[w].visited[0] != version) {
                             pushinstack(dfs_stack, w);
-                        } else { //alliws an einai visited
+                        } else { // alliws an einai visited
 
-                            //pairnei to min_rank apo kathe paidi pou exei termatisei
+                            // pairnei to min_rank apo kathe paidi pou exei termatisei
                             if (grail->hyper_index_out[v].s_data->min_rank[j] > grail->hyper_index_out[w].s_data->min_rank[j])
                                 grail->hyper_index_out[v].s_data->min_rank[j] = grail->hyper_index_out[w].s_data->min_rank[j];
 
                             grail->hyper_index_out[v].s_data->all_children_in_scc[j] = grail->hyper_index_out[v].num_of_children;
                         }
+
                         k++;
                         if (k == N) {
                             if (neighbors_out->nextListNode != -1) {
@@ -188,7 +180,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
     return grail;
 }
 
-//sinartisi pou epistrefei tin pithanotita na uparxei monopati ap ton source ston target
+// sinartisi pou epistrefei tin pithanotita na uparxei monopati ap ton source ston target
 int isReachableGrailIndex(GrailIndex *index, uint32_t source_node, uint32_t target_node, SCC *scc) {
 
     uint32_t j = 0,
@@ -211,7 +203,7 @@ int isReachableGrailIndex(GrailIndex *index, uint32_t source_node, uint32_t targ
     return MAYBE;
 }
 
-// free GrailIndex
+// Free Grail index
 void destroyGrailIndex(GrailIndex *index) {
 
     destroyBuffer(index->hyper_buffer_out);
