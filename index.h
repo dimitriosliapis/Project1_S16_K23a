@@ -25,6 +25,7 @@ typedef struct static_data_t{
     uint32_t *next_child;
     uint32_t n;
     int onStack;
+    uint32_t visited_from[NUM_GRAIL];
 }static_data;
 
 typedef struct index_t{

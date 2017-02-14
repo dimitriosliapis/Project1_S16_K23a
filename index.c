@@ -21,10 +21,14 @@ ind *createNodeIndex(uint32_t index_size, int s) {
             index[i].s_data = malloc(sizeof(static_data));
             index[i].s_data->lowlink = DEFAULT;
             index[i].s_data->index = DEFAULT;
-            for (k = 0; k < NUM_GRAIL; k++)
-                index[i].s_data->all_children_in_scc[k] = 0;
             index[i].s_data->rank = malloc(NUM_GRAIL * sizeof(uint32_t));
             index[i].s_data->min_rank = malloc(NUM_GRAIL * sizeof(uint32_t));
+            for (k = 0; k < NUM_GRAIL; k++) {
+                index[i].s_data->all_children_in_scc[k] = 0;
+                index[i].s_data->min_rank[k] = DEFAULT;
+                index[i].s_data->rank[k] = DEFAULT;
+                index[i].s_data->visited_from[k] = DEFAULT;
+            }
             index[i].s_data->onStack = 0;
             index[i].s_data->children_in_scc = 0;
             index[i].s_data->curr_neighbors = NULL;
@@ -100,10 +104,14 @@ int reallocNodeIndex(ind **index, int id, uint32_t *index_size, int s) {
             (*index)[i].s_data = malloc(sizeof(static_data));
             (*index)[i].s_data->lowlink = DEFAULT;
             (*index)[i].s_data->index = DEFAULT;
-            for (k = 0; k < NUM_GRAIL; k++)
-                (*index)[i].s_data->all_children_in_scc[k] = 0;
             (*index)[i].s_data->rank = malloc(NUM_GRAIL * sizeof(uint32_t));
             (*index)[i].s_data->min_rank = malloc(NUM_GRAIL * sizeof(uint32_t));
+            for (k = 0; k < NUM_GRAIL; k++) {
+                (*index)[i].s_data->all_children_in_scc[k] = 0;
+                (*index)[i].s_data->min_rank[k] = DEFAULT;
+                (*index)[i].s_data->rank[k] = DEFAULT;
+                (*index)[i].s_data->visited_from[k] = DEFAULT;
+            }
             (*index)[i].s_data->onStack = 0;
             (*index)[i].s_data->children_in_scc = 0;
             (*index)[i].s_data->curr_neighbors = NULL;
