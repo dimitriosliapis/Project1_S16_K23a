@@ -3,7 +3,6 @@
 
 #include "scc.h"
 
-
 #define MAYBE 45
 #define NO 46
 #define YES 47
