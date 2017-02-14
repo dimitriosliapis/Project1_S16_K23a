@@ -11,7 +11,6 @@ pthread_mutex_t cc_mtx;
 pthread_cond_t cond_nonfinished;
 pthread_cond_t cond_start;
 
-//Buffer
 typedef struct B_Node_t{
     char query[64];
     uint32_t line;
