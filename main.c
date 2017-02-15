@@ -217,11 +217,11 @@ void *worker_dynamic(void *ptr) {   // dynamic graph worker
 
         if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
 
-            pthread_mutex_lock(&cc_mtx);
+            pthread_mutex_lock(&mtx);
 
             if (cc->cc_index[N1].id == cc->cc_index[N2].id) {
 
-                pthread_mutex_unlock(&cc_mtx);
+                pthread_mutex_unlock(&mtx);
 
                 steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
                              line, thread_id, -1);
@@ -232,14 +232,14 @@ void *worker_dynamic(void *ptr) {   // dynamic graph worker
 
                 if (searchUpdateIndex(*cc, N1, N2, line, thread_id) == FOUND) {
 
-                    pthread_mutex_unlock(&cc_mtx);
+                    pthread_mutex_unlock(&mtx);
 
                     steps = bBFS(index_in, index_out, buffer_in, buffer_out, N1, N2, frontierF, frontierB,
                                  line, thread_id, -1);
 
                     results[line] = steps;
 
-                    pthread_mutex_lock(&cc_mtx);
+                    pthread_mutex_lock(&mtx);
 
                     cc->metricVal--;
 
@@ -253,10 +253,10 @@ void *worker_dynamic(void *ptr) {   // dynamic graph worker
                         cc->metricVal = METRIC;
                     }
 
-                    pthread_mutex_unlock(&cc_mtx);
+                    pthread_mutex_unlock(&mtx);
 
                 } else {
-                    pthread_mutex_unlock(&cc_mtx);
+                    pthread_mutex_unlock(&mtx);
                     results[line] = -1;
                 }
             }
@@ -319,7 +319,6 @@ int main(int argc, char *argv[]) {
     // mutexes and condition variables initialization
     pthread_mutex_init(&mtx, 0);
     pthread_mutex_init(&id_mtx, 0);
-    pthread_mutex_init(&cc_mtx, 0);
     pthread_cond_init(&cond_nonfinished, 0);
     pthread_cond_init(&cond_start, 0);
 
@@ -347,11 +346,13 @@ int main(int argc, char *argv[]) {
 
     fclose(Graph);
 
-    for (i = 0; i < index_size_out; i++) {
-        if (lookup(index_out, i, index_size_out) == ALR_EXISTS) {
-            if (index_out[i].neighbors != NULL)
-                delete(index_out[i].neighbors, HT_SMALL);
-            index_out[i].neighbors = NULL;
+    if(stat == 1) {
+        for (i = 0; i < index_size_out; i++) {
+            if (lookup(index_out, i, index_size_out) == ALR_EXISTS) {
+                if (index_out[i].neighbors != NULL)
+                    delete(index_out[i].neighbors, HT_SMALL);
+                index_out[i].neighbors = NULL;
+            }
         }
     }
 
@@ -477,8 +478,7 @@ int main(int argc, char *argv[]) {
                     toID(str, &N1, &N2);
 
                     if (lookup(index_out, N1, index_size_out) == NOT_EXIST)
-                        insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out,
-                                   stat);
+                        insertNode(&index_out, N1, &buffer_out, &index_size_out, &buffer_size_out, &available_out, 0);
 
                     if (lookup(index_in, N2, index_size_in) == NOT_EXIST)
                         insertNode(&index_in, N2, &buffer_in, &index_size_in, &buffer_size_in, &available_in, 0);
@@ -493,6 +493,12 @@ int main(int argc, char *argv[]) {
                 } else {
                     place_to_buffer(str, buffer, line);
                     line++;
+
+                    // resize results array
+                    if (line == res_size) {
+                        results = realloc(results, res_size * 2 * sizeof(int));
+                        res_size *= 2;
+                    }
                 }
 
                 fgets(str, sizeof(str), Queries);

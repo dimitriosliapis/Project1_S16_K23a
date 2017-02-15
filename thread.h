@@ -7,7 +7,6 @@
 
 pthread_mutex_t mtx;
 pthread_mutex_t id_mtx;
-pthread_mutex_t cc_mtx;
 pthread_cond_t cond_nonfinished;
 pthread_cond_t cond_start;
 

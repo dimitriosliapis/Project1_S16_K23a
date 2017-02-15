@@ -180,7 +180,7 @@ int bBFS(ind *index_in,
                                 } else {    // search in whole graph case
 
                                     // if goal may be reachable from neighbor
-                                    if (isReachableGrailIndex(grail, successor, end, scc) != NO) {
+                                    if (isReachableGrailIndex(grail, successor, end, scc) == MAYBE) {
 
                                         // if neighbor is not visited by the current bfs then visit
                                         if (index_out[successor].visited[thread_id] != version) {
@@ -198,6 +198,27 @@ int bBFS(ind *index_in,
                                                 childrenF += index_out[successor].num_of_children;
                                             }
 
+                                        }
+                                    }
+                                    else if (isReachableGrailIndex(grail, successor, end, scc) == YES) {
+
+                                        curr_scc = scc->id_belongs_to_component[successor];
+
+                                        // if neighbor is not visited by the current bfs then visit
+                                        if (index_out[successor].visited[thread_id] != version) {
+                                            index_out[successor].visited[thread_id] = version;
+
+                                            // if neighbor is visited by the other bfs then goal
+                                            if (index_in[successor].visited[thread_id] == version) {
+                                                restartQueue(frontierF);
+                                                restartQueue(frontierB);
+                                                return stepsB + stepsF;
+
+                                            } else {   // else push in frontier
+                                                enq(frontierF, successor);
+                                                counterFS++;
+                                                childrenF += index_out[successor].num_of_children;
+                                            }
                                         }
                                     }
                                 }
@@ -296,7 +317,7 @@ int bBFS(ind *index_in,
                                 } else {    // search in whole graph case
 
                                     // if goal may be reachable from neighbor
-                                    if (isReachableGrailIndex(grail, start, successor, scc) != NO) {
+                                    if (isReachableGrailIndex(grail, start, successor, scc) == MAYBE) {
 
                                         // if neighbor is not visited by the current bfs then visit
                                         if (index_in[successor].visited[thread_id] != version) {
@@ -317,7 +338,29 @@ int bBFS(ind *index_in,
 
                                         }
                                     }
+                                    else if(isReachableGrailIndex(grail, start, successor, scc) == YES) {
 
+                                        curr_scc = scc->id_belongs_to_component[successor];
+
+                                        // if neighbor is not visited by the current bfs then visit
+                                        if (index_in[successor].visited[thread_id] != version) {
+                                            index_in[successor].visited[thread_id] = version;
+
+                                            // if neighbor is visited by the other bfs then goal
+                                            if (index_out[successor].visited[thread_id] == version) {
+
+                                                restartQueue(frontierB);
+                                                restartQueue(frontierF);
+                                                return stepsF + stepsB;
+
+                                            } else {    // else push in frontier
+                                                enq(frontierB, successor);
+                                                counterBS++;
+                                                childrenB += index_in[successor].num_of_children;
+                                            }
+
+                                        }
+                                    }
                                 }
                             }
                         } else
