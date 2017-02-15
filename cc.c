@@ -3,7 +3,6 @@
 // Create stack
 Stack_t *createStack() {
 
-    int i = 0;
     Stack_t *stack = NULL;
     stack = malloc(sizeof(Stack_t));
 
@@ -12,7 +11,6 @@ Stack_t *createStack() {
     else {
         stack->size = STACK_ARRAY_SIZE;
         stack->stack_array = malloc(STACK_ARRAY_SIZE * sizeof(uint32_t));
-        for (i = 0; i < STACK_ARRAY_SIZE; i++) stack->stack_array[i] = DEFAULT;
         stack->last = -1;
         stack->count = 0;
         return stack;
@@ -34,9 +32,6 @@ void pushinstack(Stack_t *stack, uint32_t id) {
     if (stack->count == stack->size) {
         stack->stack_array = realloc(stack->stack_array, 2 * stack->size * sizeof(uint32_t));
         stack->size = 2 * stack->size;
-        int i = 0;
-        for (i = stack->size / 2; i < stack->size; i++)
-            stack->stack_array[i] = DEFAULT;
     }
 
     stack->last = (stack->last + 1) % stack->size;
@@ -52,7 +47,6 @@ uint32_t popfromstack(Stack_t *stack) {
         return DEFAULT;
 
     id = stack->stack_array[stack->last];
-    stack->stack_array[stack->last] = DEFAULT;
     stack->last = (stack->last - 1) % stack->size;
     stack->count--;
     return id;
@@ -77,6 +71,13 @@ void deletestack(Stack_t *stack) {
     free(stack);
 }
 
+void emptystack(Stack_t *stack) {
+
+    stack->count = 0;
+    stack->last = -1;
+
+}
+
 // Create CC index
 CC *createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *buffer_in, list_node *buffer_out,
                   uint32_t size_in, uint32_t size_out, uint32_t version) {
@@ -94,8 +95,6 @@ CC *createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
 
     for (i = 0; i < cc_size; i++) {
         cc_index[i].id = DEFAULT;
-        for (j = 0; j <= THREAD_POOL_SIZE; j++)
-            cc_index[i].visited[j] = DEFAULT;
     }
 
     cc->cc_index = cc_index;
@@ -214,8 +213,7 @@ void initUpdateIndex(CC *cc) {
 void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
 
     uint32_t cc1, cc2, new_cc = 0, realloc_size = 0, realloc_update_index_size,
-            i = 0, k = 0, l = 0, j = 0,
-            *temp = NULL;
+            i = 0, k = 0, l = 0, j = 0;
     uint32_t found = 0;
 
     // if either N1 or N2 does not exist then cc = DEFAULT
@@ -296,7 +294,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                         cc->updateIndex[i].state = 'e';
                         cc->updateIndex[i].new_nodes = NULL;
                         cc->updateIndex[i].n_size = 0;
-                        for (j = 0; j < THREAD_POOL_SIZE; j++) cc->updateIndex[i].visited[j] = DEFAULT;
+                        for (j = 0; j <= THREAD_POOL_SIZE; j++) cc->updateIndex[i].visited[j] = DEFAULT;
 
                     }
                     cc->u_size = realloc_update_index_size;
@@ -310,7 +308,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                 cc->updateIndex[new_cc].new_nodes[0] = N1;
                 cc->updateIndex[new_cc].new_nodes[1] = N2;
                 cc->updateIndex[new_cc].new_nodes[3] = DEFAULT;
-                for (j = 0; j < THREAD_POOL_SIZE; j++)
+                for (j = 0; j <= THREAD_POOL_SIZE; j++)
                     cc->updateIndex[new_cc].visited[j] = DEFAULT;
 
                 return;
@@ -329,7 +327,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
             cc->updateIndex[new_cc].new_nodes[0] = N1;
             cc->updateIndex[new_cc].new_nodes[1] = N2;
             cc->updateIndex[new_cc].new_nodes[3] = DEFAULT;
-            for (j = 0; j < THREAD_POOL_SIZE; j++)
+            for (j = 0; j <= THREAD_POOL_SIZE; j++)
                 cc->updateIndex[new_cc].visited[j] = DEFAULT;
 
             for (l = new_cc + 1; l < realloc_size; l++) {
@@ -338,7 +336,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                 cc->updateIndex[l].n_size = 0;
                 cc->updateIndex[l].cc_array = NULL;
                 cc->updateIndex[l].size = 0;
-                for (j = 0; j < THREAD_POOL_SIZE; j++)
+                for (j = 0; j <= THREAD_POOL_SIZE; j++)
                     cc->updateIndex[l].visited[j] = DEFAULT;
             }
             cc->u_size = realloc_size;
@@ -512,14 +510,13 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
 }
 
 // Search Update index
-int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thread_id) {
+int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thread_id, Stack_t *stack) {
 
     uint32_t cc1 = 0;
     uint32_t cc2 = 0;
     uint32_t flag = 0;
     uint32_t v = 0;
     uint32_t i = 0, j = 0;
-    Stack_t *stack = createStack();
 
     if (N1 >= cc.cc_size) cc1 = DEFAULT;
     else cc1 = cc.cc_index[N1].id;
@@ -532,7 +529,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
 
         while (i < cc.u_size) {
             if (i == cc.u_size || cc.updateIndex[i].state == 'e') {
-                deletestack(stack);
+                emptystack(stack);
                 return NOT_FOUND;
             }
             if (cc.updateIndex[i].new_nodes != NULL) {
@@ -556,7 +553,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
 
     // if we haven't found at least one then they are not connected
     if (cc1 == DEFAULT || cc2 == DEFAULT) {
-        deletestack(stack);
+        emptystack(stack);
         return NOT_FOUND;
     }
 
@@ -587,15 +584,15 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
                 }
 
             } else {
-                deletestack(stack);
+                emptystack(stack);
                 return FOUND;
             }
         }
-        deletestack(stack);
+        emptystack(stack);
         return NOT_FOUND;
 
     } else {
-        deletestack(stack);
+        emptystack(stack);
         return FOUND;   // if cc1 = cc2
     }
 }

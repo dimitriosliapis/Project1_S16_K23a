@@ -183,6 +183,7 @@ void *worker_dynamic(void *ptr) {   // dynamic graph worker
             line;
     int thread_id, steps;
     Queue *frontierF = NULL, *frontierB = NULL;
+    Stack_t *stack = NULL;
     B_Node *job = NULL;
 
     pthread_mutex_lock(&id_mtx);
@@ -192,6 +193,7 @@ void *worker_dynamic(void *ptr) {   // dynamic graph worker
 
     frontierF = createQueue();  // bfs frontier from start to goal
     frontierB = createQueue();  // bfs frontier from goal to start
+    stack = createStack();
 
     while (1) {
 
@@ -227,7 +229,7 @@ void *worker_dynamic(void *ptr) {   // dynamic graph worker
 
             } else {
 
-                if (searchUpdateIndex(*cc, N1, N2, line, thread_id) == FOUND) {
+                if (searchUpdateIndex(*cc, N1, N2, line, thread_id, stack) == FOUND) {
 
                     pthread_mutex_unlock(&mtx);
 
@@ -271,6 +273,7 @@ void *worker_dynamic(void *ptr) {   // dynamic graph worker
 
     empty(frontierB);
     empty(frontierF);
+    deletestack(stack);
 
     pthread_exit(0);
 }
@@ -346,7 +349,7 @@ int main(int argc, char *argv[]) {
 
     fclose(Graph);
 
-    if(stat == 1) {
+    //if(stat == 1) {
         for (i = 0; i < index_size_out; i++) {
             if (lookup(index_out, i, index_size_out) == ALR_EXISTS) {
                 if (index_out[i].neighbors != NULL)
@@ -354,7 +357,7 @@ int main(int argc, char *argv[]) {
                 index_out[i].neighbors = NULL;
             }
         }
-    }
+    //}
 
     gettimeofday(&tv2, NULL);
     printf("%f sec: Graph creation\n",

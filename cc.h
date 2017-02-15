@@ -6,7 +6,7 @@
 #define INIT_UNODE_SIZE 16
 #define INIT_NEWNODE_SIZE 16
 
-#define METRIC 100
+#define METRIC 1000
 #define STACK_ARRAY_SIZE 2048
 
 typedef struct stack {
@@ -28,10 +28,11 @@ uint32_t peekfromstack(Stack_t *stack);
 
 void deletestack(Stack_t *stack);
 
+void emptystack(Stack_t * stack);
+
 
 typedef struct CC_ind_t {
     uint32_t id;
-    int visited[THREAD_POOL_SIZE + 1];
 } CC_ind;
 
 typedef struct u_unode_t {
@@ -45,10 +46,10 @@ typedef struct u_unode_t {
 
 typedef struct CC_t {
     CC_ind *cc_index;
-    uint32_t cc_size;       // megethos cc_index
+    uint32_t cc_size;       // cc_index size
     uint32_t cc_max;
     u_node *updateIndex;
-    uint32_t u_size;        // megethos updateIndex
+    uint32_t u_size;        // update_index size
     uint32_t metricVal;
 } CC;
 
@@ -58,7 +59,7 @@ void initUpdateIndex(CC *);
 
 void refreshUpdateIndex(CC *, uint32_t, uint32_t);
 
-int searchUpdateIndex(CC, uint32_t, uint32_t, uint32_t, int);
+int searchUpdateIndex(CC, uint32_t, uint32_t, uint32_t, int, Stack_t*);
 
 uint32_t updateCCIndex(CC *, uint32_t, uint32_t, int);
 
