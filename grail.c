@@ -182,6 +182,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
         version++;
     }
 
+    free(array);
     deletestack(dfs_stack);
 
     gettimeofday(&tv2, NULL);
