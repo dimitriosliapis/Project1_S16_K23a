@@ -118,6 +118,7 @@ CC *createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
         pushinstack(stack, cur);
 
         while (!stackisempty(stack)) {
+
             v = popfromstack(stack);
 
             in = lookup(index_in, v, size_in);
@@ -125,6 +126,7 @@ CC *createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
 
             if (((in == ALR_EXISTS) && (index_in[v].visited[0] != version)) ||
                 ((out == ALR_EXISTS) && (index_out[v].visited[0] != version))) {
+
                 cc_index[v].id = cc_counter;
 
                 if (in == ALR_EXISTS)
@@ -173,7 +175,6 @@ CC *createCCIndex(uint32_t cc_size, ind *index_in, ind *index_out, list_node *bu
                     }
                 }
             }
-
         }
         cc_counter++;   // next cc
 
@@ -215,7 +216,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     uint32_t cc1, cc2, new_cc = 0, realloc_size = 0, realloc_update_index_size,
             i = 0, k = 0, l = 0, j = 0,
             *temp = NULL;
-    int found = 0;
+    uint32_t found = 0;
 
     // if either N1 or N2 does not exist then cc = DEFAULT
     // in this case we check if they are larger than cc index
@@ -230,53 +231,61 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
         cc2 = cc->cc_index[N2].id;
 
     // if they don't exist then they are already DEFAULT
+    // if they are not DEFAULT and are equal they are already connected
 
     if ((cc1 != DEFAULT) && (cc1 == cc2))
-        return;// an einai sto idio cc tote den exei na kanei kati kai epistrefei
+        return;
 
-    if ((cc1 == DEFAULT) && (cc2 == DEFAULT)) {     // an einai kainouria cc
+    // if we are about to create new cc
+    if ((cc1 == DEFAULT) && (cc2 == DEFAULT)) {
 
         i = cc->cc_max;
 
-        // an xwraei
+        // if they can fit in the update index
         if (i < cc->u_size) {
 
             l = i;
 
-            //psaxnei na vrei tin prwti keni thesi pou tha mporouse na to valei
+            // search for the first available position in the update index
             while ((cc->updateIndex[l].state != 'e') && (l < cc->u_size))
-                l++;// ( e - > empty )
+                l++;    // ( e - > empty )
 
-            //psaxnei an exei hdh mpei se kapoia endiamesi
-            while (i < l) {
+            // search if they are already in the update index
+            while (l < cc->u_size) {
 
-                if (cc->updateIndex[i].new_nodes != NULL) {
+                if (cc->updateIndex[l].new_nodes != NULL) {
 
-                    for (k = 0; k < cc->updateIndex[i].n_size; k++) {
+                    for (k = 0; k < cc->updateIndex[l].n_size; k++) {
 
-                        if (cc->updateIndex[i].new_nodes[k] == DEFAULT)
+                        if (cc->updateIndex[l].new_nodes[k] == DEFAULT)
                             break;
-                        if (cc->updateIndex[i].new_nodes[k] == N1) {
+                        if (cc->updateIndex[l].new_nodes[k] == N1) {
                             cc1 = i;
-                            found = 1; // an exei prostethei hdh krata tin thesi
+                            if(found == N2) {
+                                found+= N1; // count if found
+                                break;
+                            }
                         }
-                        if (cc->updateIndex[i].new_nodes[k] == N2) {
+                        if (cc->updateIndex[l].new_nodes[k] == N2) {
                             cc2 = i;
-                            found = 1; // an exei prostethei hdh krata tin thesi
+                            if(found == N1) {
+                                found+=N2; // count if found
+                                break;
+                            }
                         }
                     }
+                    if(found == N1 + N2) break;
                 }
-                i++;
-
+                l++;
             }
 
-            // an den vrethike tote ftiakse kainourio CC
+            // if we haven't found neither create new cc
             if (!found) {
 
                 if (l < cc->u_size) {
                     new_cc = l;
 
-                } else {    // an de xwraei kane realloc
+                } else {    // realloc if update index is full
                     new_cc = cc->u_size;
                     realloc_update_index_size = 2 * cc->u_size;
                     cc->updateIndex = realloc(cc->updateIndex, realloc_update_index_size * sizeof(u_node));
@@ -287,28 +296,27 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                         cc->updateIndex[i].state = 'e';
                         cc->updateIndex[i].new_nodes = NULL;
                         cc->updateIndex[i].n_size = 0;
-                        for (j = 0; j <= THREAD_POOL_SIZE; j++) cc->updateIndex[i].visited[j] = DEFAULT;
+                        for (j = 0; j < THREAD_POOL_SIZE; j++) cc->updateIndex[i].visited[j] = DEFAULT;
 
                     }
                     cc->u_size = realloc_update_index_size;
 
                 }
 
-                //  kai eisagei tous komvous sto neo CC
+                //  add nodes to the new cc
                 cc->updateIndex[new_cc].state = 'n'; // ( n - > new )
                 cc->updateIndex[new_cc].n_size = INIT_NEWNODE_SIZE;
                 cc->updateIndex[new_cc].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
                 cc->updateIndex[new_cc].new_nodes[0] = N1;
                 cc->updateIndex[new_cc].new_nodes[1] = N2;
-                for (j = 0; j <= THREAD_POOL_SIZE; j++)
+                cc->updateIndex[new_cc].new_nodes[3] = DEFAULT;
+                for (j = 0; j < THREAD_POOL_SIZE; j++)
                     cc->updateIndex[new_cc].visited[j] = DEFAULT;
-                for (k = 2; k < INIT_NEWNODE_SIZE; k++)
-                    cc->updateIndex[new_cc].new_nodes[k] = DEFAULT;
 
                 return;
 
             } else
-                if (cc1 == cc2) return;// an to vrike kai einai hdh sto idio CC epistrefei
+                if (cc1 == cc2) return;     // return if they are already in the same cc
 
         } else {
 
@@ -320,17 +328,17 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
             cc->updateIndex[new_cc].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
             cc->updateIndex[new_cc].new_nodes[0] = N1;
             cc->updateIndex[new_cc].new_nodes[1] = N2;
-            for (j = 0; j <= THREAD_POOL_SIZE; j++)
+            cc->updateIndex[new_cc].new_nodes[3] = DEFAULT;
+            for (j = 0; j < THREAD_POOL_SIZE; j++)
                 cc->updateIndex[new_cc].visited[j] = DEFAULT;
-            for (k = 2; k < INIT_NEWNODE_SIZE; k++)
-                cc->updateIndex[new_cc].new_nodes[k] = DEFAULT;
+
             for (l = new_cc + 1; l < realloc_size; l++) {
                 cc->updateIndex[l].new_nodes = NULL;
                 cc->updateIndex[l].state = 'e';
                 cc->updateIndex[l].n_size = 0;
                 cc->updateIndex[l].cc_array = NULL;
                 cc->updateIndex[l].size = 0;
-                for (j = 0; j <= THREAD_POOL_SIZE; j++)
+                for (j = 0; j < THREAD_POOL_SIZE; j++)
                     cc->updateIndex[l].visited[j] = DEFAULT;
             }
             cc->u_size = realloc_size;
@@ -339,10 +347,7 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
         }
     }
 
-    //an kapoio ap ta 2 den uphrxe tote prepei na to valei sto CC tou allou
-    //h diadikasia einai idia psaxnei na vrei an exei prostethei san neo CC apo proigoumeni RefreshUpdateIndex
-    //an nai tote ta sindeei
-    //an oxi to vazei sto CC tou allou
+    // if N1 or N2 doesn't have an cc then add them
     if (cc1 == DEFAULT) {
 
         found = 0;
@@ -354,43 +359,45 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
             while ((cc->updateIndex[l].state != 'e') && (l < cc->u_size))
                 l++;
 
-            while (i < l) {
-                if (cc->updateIndex[i].new_nodes != NULL) {
-                    for (k = 0; k < cc->updateIndex[i].n_size; k++) {
-                        if (cc->updateIndex[i].new_nodes[k] == DEFAULT)
+            while (l < cc->u_size) {
+                if (cc->updateIndex[l].new_nodes != NULL) {
+                    for (k = 0; k < cc->updateIndex[l].n_size; k++) {
+                        if (cc->updateIndex[l].new_nodes[k] == DEFAULT)
                             break;
-                        if (cc->updateIndex[i].new_nodes[k] == N1) {
-                            cc1 = i;
+                        if (cc->updateIndex[l].new_nodes[k] == N1) {
+                            cc1 = l;
                             found = 1;
+                            break;
                         }
                     }
+                    if(found) break;
                 }
-                i++;
+                l++;
 
             }
         }
 
-        // an den exei prostethei
+        // if it is not found in the update index
         if (!found) {
-            //kai to CC tou allou den exei akoma pinaka me nea nodes pou tha prostethoun
-            //to vazei
-            //alliws vriskei tin prwti keni thesi ston pinaka auton kai ton vazei ekei
+
+            // add N1 to update index for the cc2
             if (cc->updateIndex[cc2].new_nodes == NULL) {
                 cc->updateIndex[cc2].n_size = INIT_NEWNODE_SIZE;
                 cc->updateIndex[cc2].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
                 cc->updateIndex[cc2].new_nodes[0] = N1;
-                for (k = 1; k < INIT_NEWNODE_SIZE; k++)
-                    cc->updateIndex[cc2].new_nodes[k] = DEFAULT;
+                cc->updateIndex[cc2].new_nodes[1] = DEFAULT;
 
             } else {
+
                 k = 0;
+
                 while ((cc->updateIndex[cc2].new_nodes[k] != DEFAULT) && (k < cc->updateIndex[cc2].n_size)) k++;
+
                 if (k == cc->updateIndex[cc2].n_size) {
                     realloc_size = 2 * cc->updateIndex[cc2].n_size;
-                    cc->updateIndex[cc2].new_nodes = realloc(cc->updateIndex[cc2].new_nodes,
-                                                             realloc_size * sizeof(uint32_t));
-                    for (l = cc->updateIndex[cc2].n_size + 1; l < realloc_size; l++)
-                        cc->updateIndex[cc2].new_nodes[l] = DEFAULT;
+                    cc->updateIndex[cc2].new_nodes = realloc(cc->updateIndex[cc2].new_nodes, realloc_size * sizeof(uint32_t));
+
+                    cc->updateIndex[cc2].new_nodes[k + 1] = DEFAULT;
                 }
                 cc->updateIndex[cc2].new_nodes[k] = N1;
             }
@@ -401,25 +408,28 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
     } else if (cc2 == DEFAULT) {
 
         found = 0;
-        //i = 0;
-        //while((cc->updateIndex[i].state == 'o' ) && ( i < cc->u_size)) i++;
+
         i = cc->cc_max;
+
         if (i < cc->u_size) {
 
             l = i;
+
             while ((cc->updateIndex[l].state != 'e') && (l < cc->u_size)) l++;
-            while (i < l) {
-                if (cc->updateIndex[i].new_nodes != NULL) {
-                    for (k = 0; k < cc->updateIndex[i].n_size; k++) {
-                        if (cc->updateIndex[i].new_nodes[k] == DEFAULT) break;
-                        if (cc->updateIndex[i].new_nodes[k] == N2) {
-                            cc2 = i;
+
+            while (l < cc->u_size) {
+                if (cc->updateIndex[l].new_nodes != NULL) {
+                    for (k = 0; k < cc->updateIndex[l].n_size; k++) {
+                        if (cc->updateIndex[l].new_nodes[k] == DEFAULT) break;
+                        if (cc->updateIndex[l].new_nodes[k] == N2) {
+                            cc2 = l;
                             found = 1;
+                            break;
                         }
                     }
+                    if(found) break;
                 }
-
-                i++;
+                l++;
             }
         }
 
@@ -428,16 +438,18 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
                 cc->updateIndex[cc1].n_size = INIT_NEWNODE_SIZE;
                 cc->updateIndex[cc1].new_nodes = malloc(INIT_NEWNODE_SIZE * sizeof(uint32_t));
                 cc->updateIndex[cc1].new_nodes[0] = N2;
-                for (k = 1; k < INIT_NEWNODE_SIZE; k++) cc->updateIndex[cc1].new_nodes[k] = DEFAULT;
+                cc->updateIndex[cc1].new_nodes[1] = DEFAULT;
             } else {
+
                 k = 0;
+
                 while ((cc->updateIndex[cc1].new_nodes[k] != DEFAULT) && (k < cc->updateIndex[cc1].n_size)) k++;
+
                 if (k == cc->updateIndex[cc1].n_size) {
                     realloc_size = 2 * cc->updateIndex[cc1].n_size;
-                    cc->updateIndex[cc1].new_nodes = realloc(cc->updateIndex[cc1].new_nodes,
-                                                             realloc_size * sizeof(uint32_t));
-                    for (l = cc->updateIndex[cc1].n_size + 1; l < realloc_size; l++)
-                        cc->updateIndex[cc1].new_nodes[l] = DEFAULT;
+                    cc->updateIndex[cc1].new_nodes = realloc(cc->updateIndex[cc1].new_nodes, realloc_size * sizeof(uint32_t));
+
+                    cc->updateIndex[cc1].new_nodes[k + 1] = DEFAULT;
                 }
                 cc->updateIndex[cc1].new_nodes[k] = N2;
             }
@@ -445,47 +457,51 @@ void refreshUpdateIndex(CC *cc, uint32_t N1, uint32_t N2) {
         }
     }
 
-    //an uparxoun kai ta 2 sto CCIndex tote prepei na ta sindesei
+    // if both exist in the cc index then connect them in the update index
 
     j = 0;
     uint32_t cur_cc = cc1;
 
     while (j < 2) {
 
-        // an den exei sindethei me alla cc (o pinakas twn cc einai kenos)
+        // if it isn't connected with another cc
         if (cc->updateIndex[cur_cc].cc_array == NULL) {
             cc->updateIndex[cur_cc].cc_array = malloc(INIT_UNODE_SIZE * sizeof(uint32_t));
-            temp = cc->updateIndex[cur_cc].cc_array;
-            if (j == 0)     // elegxos se poio apo ta 2 vriskomaste
-                temp[0] = cc2;
-            else temp[0] = cc1;
+
+            if (j == 0)     // check for the cc we are reffering to
+                cc->updateIndex[cur_cc].cc_array[0] = cc2;
+            else
+                cc->updateIndex[cur_cc].cc_array[0] = cc1;
+
             cc->updateIndex[cur_cc].size = INIT_UNODE_SIZE;
-            i = 1;
-            while (i < INIT_UNODE_SIZE) {
-                temp[i] = DEFAULT;
-                i++;
-            }
+            cc->updateIndex[cur_cc].cc_array[1] = DEFAULT;
 
         } else {
-            temp = cc->updateIndex[cur_cc].cc_array;
             i = 0;
-            while ((temp[i] != DEFAULT) && (i < cc->updateIndex[cur_cc].size))
+
+            while ((cc->updateIndex[cur_cc].cc_array[i] != DEFAULT) && (i < cc->updateIndex[cur_cc].size))
                 i++;
+
             if (i < cc->updateIndex[cur_cc].size) {
-                if (j == 0)
-                    temp[i] = cc2;
-                else
-                    temp[i] = cc1;
-            } else if (i == cc->updateIndex[cur_cc].size) {
-                realloc_size = 2 * cc->updateIndex[cur_cc].size;
-                cc->updateIndex[cur_cc].cc_array = realloc(cc->updateIndex[cur_cc].cc_array,
-                                                           realloc_size * sizeof(uint32_t));
                 if (j == 0)
                     cc->updateIndex[cur_cc].cc_array[i] = cc2;
                 else
                     cc->updateIndex[cur_cc].cc_array[i] = cc1;
-                for (i = cc->updateIndex[cur_cc].size + 1; i < realloc_size; i++)
-                    cc->updateIndex[cur_cc].cc_array[i] = DEFAULT;
+
+                if(i < cc->updateIndex[cur_cc].size - 1)
+                    cc->updateIndex[cur_cc].cc_array[i + 1] = DEFAULT;
+
+            } else if (i == cc->updateIndex[cur_cc].size) {
+                realloc_size = 2 * cc->updateIndex[cur_cc].size;
+                cc->updateIndex[cur_cc].cc_array = realloc(cc->updateIndex[cur_cc].cc_array, realloc_size * sizeof(uint32_t));
+
+                if (j == 0)
+                    cc->updateIndex[cur_cc].cc_array[i] = cc2;
+                else
+                    cc->updateIndex[cur_cc].cc_array[i] = cc1;
+
+                cc->updateIndex[cur_cc].cc_array[i + 1] = DEFAULT;
+
                 cc->updateIndex[cur_cc].size = realloc_size;
             }
         }
@@ -500,6 +516,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
 
     uint32_t cc1 = 0;
     uint32_t cc2 = 0;
+    uint32_t flag = 0;
     uint32_t v = 0;
     uint32_t i = 0, j = 0;
     Stack_t *stack = createStack();
@@ -509,7 +526,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
     if (N2 >= cc.cc_size) cc2 = DEFAULT;
     else cc2 = cc.cc_index[N2].id;
 
-    // An kapoio ap ta 2(h kai ta 2) den uparxei sto CCIndex psaxnei mono sto new_nodes
+    // if some node doesn't exist in the cc index search only the update index
     if (cc1 == DEFAULT || cc2 == DEFAULT) {
         i = 0;
 
@@ -523,30 +540,35 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
                     if (cc.updateIndex[i].new_nodes[j] == DEFAULT) break;
                     else if (cc.updateIndex[i].new_nodes[j] == N1) {
                         cc1 = i;
+                        flag++;
                         break;
                     } else if (cc.updateIndex[i].new_nodes[j] == N2) {
                         cc2 = i;
+                        flag++;
                         break;
                     }
                 }
+                if(flag == 2) break;
             }
             i++;
         }
     }
 
-    // an de vrei kapoio ap ta 2 tote sigoura de sindeontai
+    // if we haven't found at least one then they are not connected
     if (cc1 == DEFAULT || cc2 == DEFAULT) {
         deletestack(stack);
         return NOT_FOUND;
     }
 
-    // an den einai sto idio kainourio CC prepei na psaksei an sindeontai
-    // opote koitaei stous geitones tou kai poious geitones exoun autoi klp...
-    // mexri na vrei to cc2
+    //search the update index to see if the 2 cc are connected
     if (cc1 != cc2) {
+
         pushinstack(stack, cc1);
+
         while (!stackisempty(stack)) {
+
             v = popfromstack(stack);
+
             if (v != cc2) {
 
                 if (cc.updateIndex[v].visited[thread_id] != version) {
@@ -574,7 +596,7 @@ int searchUpdateIndex(CC cc, uint32_t N1, uint32_t N2, uint32_t version, int thr
 
     } else {
         deletestack(stack);
-        return FOUND;   // an cc1 == cc2
+        return FOUND;   // if cc1 = cc2
     }
 }
 
@@ -587,18 +609,17 @@ uint32_t updateCCIndex(CC *cc, uint32_t version, uint32_t new_size, int thread_i
     Stack_t *stack = createStack();
     uint32_t *new_cc = malloc(new_size * sizeof(uint32_t));
 
-    // arxikopoisi tou pinaka gia tis allages sta CC
-    for (i = 0; i < new_size; i++)
-        new_cc[i] = DEFAULT;
+    // initialize array to change the cc index
+    for (i = 0; i < new_size; i++) new_cc[i] = DEFAULT;
 
-    // an de xwraei ta kanouria CC kane realloc
+    // if the new cc doesn't fit realloc cc index
     if (new_size > cc->cc_size) {
         cc->cc_index = realloc(cc->cc_index, new_size * sizeof(uint32_t));
         for (j = cc->cc_size; j < new_size; j++)
             cc->cc_index[j].id = DEFAULT;
     }
 
-    // gia tous neous komvous pou den upirxan prin sto CCIndex
+    // insert new nodes to the cc index
     for (i = 0; i < cc->u_size; i++) {
         if (cc->updateIndex[i].new_nodes != NULL) {
             for (k = 0; k < cc->updateIndex[i].n_size; k++) {
@@ -607,14 +628,17 @@ uint32_t updateCCIndex(CC *cc, uint32_t version, uint32_t new_size, int thread_i
             }
         }
     }
-    parent_cc = 0;//gia na bgoun me ti seira ta CC ap to 0
 
-    // vres gia kathe CC poio tha einai to kainourio pou tha tou antistoixei
+    // reenumerate the cc (begin from 0)
+    parent_cc = 0;
+
+    // find for every cc the new id
     for (i = 0; i < cc->u_size; i++) {
-        if (cc->updateIndex[i].state == 'e')
-            break;
-        if (cc->updateIndex[i].visited[thread_id] == version)
-            continue;
+
+        if (cc->updateIndex[i].state == 'e') break;
+
+        if (cc->updateIndex[i].visited[thread_id] == version) continue;
+
         pushinstack(stack, i);
         new_cc[i] = parent_cc;
 
@@ -624,7 +648,7 @@ uint32_t updateCCIndex(CC *cc, uint32_t version, uint32_t new_size, int thread_i
             v = popfromstack(stack);
 
             if (cc->updateIndex[v].cc_array != NULL) {
-                for (k = 0; k < cc->updateIndex[v].size; k++) {
+                for (k = 0 ; k < cc->updateIndex[v].size ; k++) {
                     w = cc->updateIndex[v].cc_array[k];
                     if (w == DEFAULT) break;
                     if (new_cc[w] != DEFAULT) continue;
@@ -633,35 +657,36 @@ uint32_t updateCCIndex(CC *cc, uint32_t version, uint32_t new_size, int thread_i
                     cc->updateIndex[w].visited[thread_id] = version;
                 }
             }
-
         }
-        parent_cc++;
-    }
 
-    // kai meta allakse ta
-    for (k = 0; k < cc->cc_size; k++) {
-        old_cc = cc->cc_index[k].id;
-        if (old_cc == DEFAULT)
-            continue;
-        cc->cc_index[k].id = new_cc[old_cc];
+        parent_cc++;
     }
     deletestack(stack);
 
-    // diagrafi tou paliou updateIndex
-    for (i = 0; i < cc->u_size; i++) {
+    // change the cc index
+    for (k = 0 ; k < cc->cc_size ; k++) {
+
+        old_cc = cc->cc_index[k].id;
+
+        if (old_cc == DEFAULT) continue;
+
+        cc->cc_index[k].id = new_cc[old_cc];
+    }
+    free(new_cc);
+
+    // delete the update index
+    for (i = 0 ; i < cc->u_size ; i++) {
         free(cc->updateIndex[i].cc_array);
         free(cc->updateIndex[i].new_nodes);
-
-        cc->updateIndex[i].cc_array = NULL;
-        cc->updateIndex[i].new_nodes = NULL;
     }
+
     free(cc->updateIndex);
     cc->updateIndex = NULL;
 
-    cc->u_size = parent_cc;     // to megethos tou epomenou UpdateIndex tha einai iso me to teleutaio CC pou mpike
+    cc->u_size = parent_cc;
 
+    // initialize a new update index
     initUpdateIndex(cc);
-    free(new_cc);
 
     return parent_cc;
 }
