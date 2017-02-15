@@ -113,32 +113,27 @@
 * __CC Index__
     Δομή που κρατάει ένα προς ένα για κάθε κόμβο το Conected Component στο οποίο ανήκει. Κραταέι επίσης και το Update Index.
 
-    * `CC_ind_t`
-    
+    * `CC_ind_t`    _(Περιέχει το id του κάθε CC.)_
     
     * `u_unode_t`
     Δομή που κρατάει για κάθε CC με ποιά άλλα συνδέεται μετά από προσθήκη ακμών (`cc_array`) και ένα πίνακα με τους καινούριους κόμβους που θα προστεθούν σε αυτό το CC (`new_nodes`).
     
     * `CC_t`
-    
+    Δομή που περιέχει το CC index και το Update Index καθώς και τα μεγέθη τους και την τιμή του METRIC.
 
-    * `createCCIndex()`
-    Δημιουργία CCIndex.
+    * `createCCIndex()` _(Δημιουργία του CCIndex με τους κόμβους του γράφου.)_
 
-    * `initUpdateIndex()`
-    Αρχικοποίηση του UpdateIndex.
+    * `initUpdateIndex()`   _(Δημιουργία και αρχικοποίηση του UpdateIndex.)_
 
     * `refreshUpdateIndex()`
     Προσθήκη αλλαγών στο `updateIndex`. Είτε σύνδεση 2 CC που ήδη υπάρχουν, είτε προσθήκη νέων. Αντίστοιχα για τους νέους κόμβους.
 
-    * `searchUpdateIndex()`
-    
+    * `searchUpdateIndex()` _(Αναζήτηση στο Update Index για την πιθανή σύνδεση μεταξύ 2 κόμβων.)_
     
     * `updateCCIndex()`
+    Αναδιάταξη και προσθήκη όσων δεν ήταν στο CC Index μέσω του Update Index όταν το χρησιμοποιηθεί το Update Index ΜΕΤRIC φορές.
     
-    
-    * `destroyCCIndex()`
-    
+    * `destroyCCIndex()`    _(Απελευθέρωση μνήμης του CC Index.)_
 
 ### Αλγόριθμοι
 
