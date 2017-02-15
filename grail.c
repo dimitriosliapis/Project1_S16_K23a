@@ -3,6 +3,7 @@
 
 extern struct timeval tv1, tv2;
 
+// Shuffle array
 void shuffle(uint32_t *array, uint32_t size) {
 
     uint32_t i = 0, t = 0, j = 0;
@@ -19,6 +20,7 @@ void shuffle(uint32_t *array, uint32_t size) {
     return;
 }
 
+// Build Grail index
 GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uint32_t version) {
 
     uint32_t i = 0, j = 0, k = 0, v = 0, w = 0,
@@ -39,7 +41,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
     grail->hyper_buffer_out = createBuffer(grail->buf_size_out);
     grail->hyper_index_out = createNodeIndex(grail->ind_size_out, 1);
 
-    // eisagwgi olwn twn SCC sto hyper_index
+    // insert all scc in hyper index
     for (i = 0; i < scc->components_count; i++)
         insertNode(&grail->hyper_index_out, i, &grail->hyper_buffer_out, &scc->components_count, &grail->buf_size_out,
                    &available_out, 1);
@@ -48,7 +50,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
     for (i = 0; i < scc->components_count; i++)
         scc_con[i] = -1;
 
-    // prosthiki akmwn metaksi tous
+    // add edges between scc
     for (i = 0; i < scc->components_count; i++) {
 
         for (j = 0; j < scc->components[i].included_nodes_count; j++) {
@@ -72,7 +74,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                     k++;
                     if (k == N) {
                         if (neighbors_out->nextListNode > 0) {
-                            neighbors_out = buffer_out + neighbors_out->nextListNode;  // an uparxei sunexizei se auton
+                            neighbors_out = buffer_out + neighbors_out->nextListNode;
                             k = 0;
                         }
                     }
@@ -98,12 +100,12 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
 
         rank = 0;
 
-        // algorithmos GRAIL
+        // grail algorithm
         for (i = 0; i < scc->components_count; i++) {
 
             a = array[i];
 
-            // an einai visited sinexise sto epomeno
+            // if visited then continue
             if (grail->hyper_index_out[a].visited[0] == version)
                 continue;
 
@@ -111,6 +113,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
 
             while (!stackisempty(dfs_stack)) {
 
+                // peek last node inserted in stack
                 v = peekfromstack(dfs_stack);
 
                 if (grail->hyper_index_out[v].visited[0] == version) {
@@ -118,7 +121,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                     continue;
                 }
 
-                // an den exei paidia tote v.rank = rank, v.min_rank = rank kai pop apo tin stoiva
+                // if no children then v.rank = rank, v.min_rank = rank and pop from stack
                 if (grail->hyper_index_out[v].num_of_children == 0) {
                     rank++;
                     grail->hyper_index_out[v].s_data->min_rank[j] = rank;
@@ -127,7 +130,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                     popfromstack(dfs_stack);
                 }
 
-                // an exoume episkeutei ola ta paidia tote ftianoume kai to rank tou patera kai ton kanoume pop
+                // if all chilren are visited then rank parent and pop from stack
                 if ((grail->hyper_index_out[v].num_of_children != 0) &&
                     (grail->hyper_index_out[v].s_data->all_children_in_scc[j] ==
                      grail->hyper_index_out[v].num_of_children)) {
@@ -137,7 +140,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
                     popfromstack(dfs_stack);
                 }
 
-                else if (grail->hyper_index_out[v].num_of_children != 0) {  // an exei paidia
+                else if (grail->hyper_index_out[v].num_of_children != 0) {  // if children
 
                     offset_out = getListHead(grail->hyper_index_out, v);
                     neighbors_out = grail->hyper_buffer_out + offset_out;
@@ -148,16 +151,15 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
 
                         w = neighbors_out->neighbor[k];
 
-                        // den exei allo paidi
+                        // no more children
                         if (w == DEFAULT) break;
 
-                        // an den einai visited to paidi push kai break gia na ginei DFS sta paidia tou
+                        // if child not visited push in stack
                         if (grail->hyper_index_out[w].visited[0] != version) {
                             pushinstack(dfs_stack, w);
                             all_visited = 0;
-                        } else { // alliws an einai visited
 
-                            // pairnei to min_rank apo kathe paidi pou exei termatisei
+                        } else {    // min rank parent depending on each visited child
                             if (grail->hyper_index_out[v].s_data->min_rank[j] >
                                 grail->hyper_index_out[w].s_data->min_rank[j])
                                 grail->hyper_index_out[v].s_data->min_rank[j] = grail->hyper_index_out[w].s_data->min_rank[j];
@@ -193,7 +195,7 @@ GrailIndex *buildGrailIndex(ind *index_out, list_node *buffer_out, SCC *scc, uin
     return grail;
 }
 
-// sinartisi pou epistrefei tin pithanotita na uparxei monopati ap ton source ston target
+// Check if there is a chance of finding a path between two nodes
 int isReachableGrailIndex(GrailIndex *index, uint32_t source_node, uint32_t target_node, SCC *scc) {
 
     uint32_t j = 0,
@@ -208,7 +210,6 @@ int isReachableGrailIndex(GrailIndex *index, uint32_t source_node, uint32_t targ
         return YES;
 
     for (j = 0; j < NUM_GRAIL; j++) {
-
         if ((index->hyper_index_out[scc_source].s_data->min_rank[j] >
              index->hyper_index_out[scc_target].s_data->min_rank[j]) ||
             (index->hyper_index_out[scc_source].s_data->rank[j] < index->hyper_index_out[scc_target].s_data->rank[j]))
