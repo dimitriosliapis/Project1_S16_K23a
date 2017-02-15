@@ -1,4 +1,4 @@
-# [Project_S16_K23a](https://github.com/dimitriosliapis/Project1_S16_K23a/tree/thread_v2)
+# [Project_S16_K23a](https://github.com/dimitriosliapis/Project1_S16_K23a)
 
 * __Γαβαλάς Αλέξης__ @AlexGavalas
     ΑΜ 1115201000004
