@@ -349,15 +349,13 @@ int main(int argc, char *argv[]) {
 
     fclose(Graph);
 
-    //if(stat == 1) {
-        for (i = 0; i < index_size_out; i++) {
-            if (lookup(index_out, i, index_size_out) == ALR_EXISTS) {
-                if (index_out[i].neighbors != NULL)
-                    delete(index_out[i].neighbors, HT_SMALL);
-                index_out[i].neighbors = NULL;
-            }
+    for (i = 0; i < index_size_out; i++) {
+        if (lookup(index_out, i, index_size_out) == ALR_EXISTS) {
+            if (index_out[i].neighbors != NULL)
+                delete(index_out[i].neighbors, HT_SMALL);
+            index_out[i].neighbors = NULL;
         }
-    //}
+    }
 
     gettimeofday(&tv2, NULL);
     printf("%f sec: Graph creation\n",
