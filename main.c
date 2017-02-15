@@ -210,14 +210,11 @@ void *worker_dynamic(void *ptr) {   // dynamic graph worker
 
         } else {
             line = job->line;
-            pthread_mutex_unlock(&mtx);
         }
 
         toID(job->query, &N1, &N2);
 
         if (lookup(index_out, N1, index_size_out) == ALR_EXISTS && lookup(index_in, N2, index_size_in) == ALR_EXISTS) {
-
-            pthread_mutex_lock(&mtx);
 
             if (cc->cc_index[N1].id == cc->cc_index[N2].id) {
 
@@ -261,7 +258,10 @@ void *worker_dynamic(void *ptr) {   // dynamic graph worker
                 }
             }
 
-        } else results[line] = -1;
+        } else {
+            pthread_mutex_unlock(&mtx);
+            results[line] = -1;
+        }
 
         free(job);
         pthread_mutex_lock(&mtx);
@@ -485,10 +485,11 @@ int main(int argc, char *argv[]) {
 
                     ret = addEdge(&index_out, N1, N2, &buffer_out, &buffer_size_out, &available_out, 1, line);
 
-                    if (ret != ALR_CONNECTED)
+                    if (ret != ALR_CONNECTED) {
                         addEdge(&index_in, N2, N1, &buffer_in, &buffer_size_in, &available_in, 0, line);
 
-                    refreshUpdateIndex(cc, N1, N2);
+                        refreshUpdateIndex(cc, N1, N2);
+                    }
 
                 } else {
                     place_to_buffer(str, buffer, line);
